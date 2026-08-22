@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import {
   CheckoutError,
   getPaymentPort,
-  parseAmountUsd,
   parseListingDraft,
 } from "../../../billing/port";
+import { ListingError, parseTargetBidUsd, quoteBid } from "../../../core/listing";
+import { findPaidByListenUrl } from "../../../core/store";
 import { currentWeekUtc } from "../../../core/week";
 
 export const CHECKOUT_PATH = "/api/checkout" as const;
@@ -41,12 +42,14 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const weekId = currentWeekUtc().weekId;
-    const amountUsd = parseAmountUsd(body.amountUsd ?? body.bidUsd);
+    const targetBidUsd = parseTargetBidUsd(body.amountUsd ?? body.bidUsd);
     const listingDraft = parseListingDraft(body, weekId);
+    const existing = findPaidByListenUrl(weekId, listingDraft.listenUrl);
+    const quote = quoteBid(existing, targetBidUsd);
     const started = await getPaymentPort().createCheckout({
       listingDraft,
-      amountUsd,
-      kind: "create",
+      amountUsd: quote.chargeUsd,
+      kind: quote.kind,
     });
     if (contentType.includes("application/json")) {
       return NextResponse.json({
@@ -59,7 +62,7 @@ export async function POST(request: Request): Promise<Response> {
       : `${origin}${started.checkoutUrl}`;
     return NextResponse.redirect(location, 303);
   } catch (error) {
-    if (error instanceof CheckoutError) {
+    if (error instanceof CheckoutError || error instanceof ListingError) {
       if (contentType.includes("application/json")) {
         return jsonError(error.code, error.httpStatus);
       }

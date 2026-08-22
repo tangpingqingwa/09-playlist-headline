@@ -15,6 +15,11 @@ import {
   resetPaymentPort,
 } from "../src/billing/port";
 import { polarLiveEnabled } from "../src/config";
+import {
+  ListingError,
+  parseTargetBidUsd,
+  quoteBid,
+} from "../src/core/listing";
 import { getBoardListings, MIN_BID_USD, rankListings } from "../src/core/rank";
 import { applyPaidEvent, resetListings } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
@@ -250,6 +255,12 @@ test("bids below $5 and cents are rejected and never charged", async () => {
     assert.equal(err.code, "bid_below_min");
     return true;
   });
+  assert.equal(parseTargetBidUsd("4"), 4);
+  assert.throws(() => quoteBid(undefined, 4), (err: unknown) => {
+    assert.ok(err instanceof ListingError);
+    assert.equal(err.code, "bid_below_min");
+    return true;
+  });
 });
 
 test("http listen URL is rejected", async () => {
@@ -459,4 +470,212 @@ test("/return markup shows paid or pending and never trusts query alone", async 
   assert.match(paidHtml, /data-return="paid"/);
   assert.match(paidHtml, /on the board/i);
   assert.equal(rankListings(getBoardListings(weekId()))[0]?.rank, 1);
+});
+
+test("quoteBid charges the full first bid and only the raise difference", () => {
+  assert.deepEqual(quoteBid(undefined, 5), {
+    kind: "create",
+    targetBidUsd: 5,
+    chargeUsd: 5,
+  });
+  assert.deepEqual(quoteBid({ bidUsd: 5 }, 12), {
+    kind: "raise",
+    targetBidUsd: 12,
+    chargeUsd: 7,
+  });
+  assert.throws(() => quoteBid({ bidUsd: 5 }, 5), (err: unknown) => {
+    assert.ok(err instanceof ListingError);
+    assert.equal(err.code, "bid_not_higher");
+    return true;
+  });
+  assert.throws(() => quoteBid({ bidUsd: 12 }, 7), (err: unknown) => {
+    assert.ok(err instanceof ListingError);
+    assert.equal(err.code, "bid_not_higher");
+    return true;
+  });
+});
+
+test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", async () => {
+  const port = getPaymentPort();
+  const firstPaidAt = "2026-08-17T09:00:00.000Z";
+  const incumbent = applyPaidEvent({
+    sessionId: "chk_incumbent_12",
+    weekId: weekId(),
+    track: "Twelve Dollar",
+    artist: "Bea",
+    listenUrl: "https://example.com/twelve",
+    amountUsd: 12,
+    paidAt: "2026-08-17T10:00:00.000Z",
+    kind: "create",
+  });
+  const opener = applyPaidEvent({
+    sessionId: "chk_opener_5",
+    weekId: weekId(),
+    track: "Cold Open",
+    artist: "Ada",
+    listenUrl: "https://example.com/cold-open",
+    amountUsd: 5,
+    paidAt: firstPaidAt,
+    kind: "create",
+  });
+  const before = rankListings(getBoardListings(weekId()));
+  assert.equal(before[0]?.id, incumbent.id);
+  assert.equal(before[1]?.id, opener.id);
+  assert.equal(before[1]?.bidUsd, 5);
+
+  const raiseJson = await postJson({
+    track: "Cold Open",
+    artist: "Ada",
+    listenUrl: "https://example.com/cold-open",
+    amountUsd: 12,
+  });
+  assert.equal(raiseJson.status, 200);
+  const raiseBody = (await raiseJson.json()) as {
+    checkoutUrl: string;
+    sessionId: string;
+  };
+  const raiseSession = port.getCheckout(raiseBody.sessionId);
+  assert.equal(raiseSession?.kind, "raise");
+  assert.equal(raiseSession?.amountUsd, 7);
+  assert.equal(getBoardListings(weekId()).length, 2);
+  assert.equal(getBoardListings(weekId()).find((row) => row.id === opener.id)?.bidUsd, 5);
+
+  const paid = await port.completeCheckout(raiseBody.sessionId);
+  assert.equal(paid.kind, "raise");
+  assert.equal(paid.amountUsd, 7);
+  const raised = applyPaidEvent({
+    sessionId: paid.sessionId,
+    weekId: paid.listingDraft.weekId,
+    track: paid.listingDraft.track,
+    artist: paid.listingDraft.artist,
+    listenUrl: paid.listingDraft.listenUrl,
+    amountUsd: paid.amountUsd,
+    paidAt: paid.paidAt,
+    kind: paid.kind,
+  });
+  assert.equal(raised.id, opener.id);
+  assert.equal(raised.bidUsd, 12);
+  assert.equal(raised.firstPaidAt, firstPaidAt);
+  assert.notEqual(raised.lastPaidAt, firstPaidAt);
+
+  const ranked = rankListings(getBoardListings(weekId()));
+  assert.equal(ranked.length, 2);
+  assert.equal(ranked[0]?.id, opener.id);
+  assert.equal(ranked[0]?.rank, 1);
+  assert.equal(ranked[0]?.bidUsd, 12);
+  assert.equal(ranked[0]?.firstPaidAt, firstPaidAt);
+  assert.equal(ranked[1]?.id, incumbent.id);
+  assert.equal(ranked[1]?.bidUsd, 12);
+});
+
+test("different listing pays the full amount and cannot steal a raise difference", async () => {
+  applyPaidEvent({
+    sessionId: "chk_cover_12",
+    weekId: weekId(),
+    track: "Cover",
+    artist: "Bea",
+    listenUrl: "https://example.com/cover",
+    amountUsd: 12,
+    paidAt: "2026-08-17T09:00:00.000Z",
+    kind: "create",
+  });
+
+  const steal = await postJson({
+    track: "Rival",
+    artist: "Cid",
+    listenUrl: "https://example.com/rival",
+    amountUsd: 7,
+  });
+  assert.equal(steal.status, 200);
+  const stealBody = (await steal.json()) as { sessionId: string };
+  const stealSession = getPaymentPort().getCheckout(stealBody.sessionId);
+  assert.equal(stealSession?.kind, "create");
+  assert.equal(stealSession?.amountUsd, 7);
+
+  const paid = await getPaymentPort().completeCheckout(stealBody.sessionId);
+  applyPaidEvent({
+    sessionId: paid.sessionId,
+    weekId: paid.listingDraft.weekId,
+    track: paid.listingDraft.track,
+    artist: paid.listingDraft.artist,
+    listenUrl: paid.listingDraft.listenUrl,
+    amountUsd: paid.amountUsd,
+    paidAt: paid.paidAt,
+    kind: paid.kind,
+  });
+
+  const ranked = rankListings(getBoardListings(weekId()));
+  assert.equal(ranked.length, 2);
+  assert.equal(ranked[0]?.listenUrl, "https://example.com/cover");
+  assert.equal(ranked[0]?.bidUsd, 12);
+  assert.equal(ranked[0]?.rank, 1);
+  assert.equal(ranked[1]?.listenUrl, "https://example.com/rival");
+  assert.equal(ranked[1]?.bidUsd, 7);
+  assert.equal(ranked[1]?.rank, 2);
+});
+
+test("bid_not_higher when raise is not above the current bid", async () => {
+  applyPaidEvent({
+    sessionId: "chk_stay_8",
+    weekId: weekId(),
+    track: "Stay",
+    artist: "Ada",
+    listenUrl: "https://example.com/stay",
+    amountUsd: 8,
+    paidAt: "2026-08-17T09:00:00.000Z",
+    kind: "create",
+  });
+
+  const same = await postJson({
+    track: "Stay",
+    artist: "Ada",
+    listenUrl: "https://example.com/stay",
+    amountUsd: 8,
+  });
+  assert.equal(same.status, 400);
+  assert.deepEqual(await same.json(), { error: "bid_not_higher" });
+
+  const lower = await postJson({
+    track: "Stay",
+    artist: "Ada",
+    listenUrl: "https://example.com/stay",
+    amountUsd: 5,
+  });
+  assert.equal(lower.status, 400);
+  assert.deepEqual(await lower.json(), { error: "bid_not_higher" });
+
+  const ranked = rankListings(getBoardListings(weekId()));
+  assert.equal(ranked.length, 1);
+  assert.equal(ranked[0]?.bidUsd, 8);
+  assert.equal(getPaymentPort().getCheckout("unused"), undefined);
+});
+
+test("same listen URL next UTC week is a new full-bid listing", () => {
+  applyPaidEvent({
+    sessionId: "chk_last_week",
+    weekId: "2026-W33",
+    track: "Cold Open",
+    artist: "Ada",
+    listenUrl: "https://example.com/cold-open",
+    amountUsd: 20,
+    paidAt: "2026-08-10T09:00:00.000Z",
+    kind: "create",
+  });
+  const quote = quoteBid(undefined, 5);
+  assert.equal(quote.kind, "create");
+  assert.equal(quote.chargeUsd, 5);
+  const next = applyPaidEvent({
+    sessionId: "chk_this_week",
+    weekId: weekId(),
+    track: "Cold Open",
+    artist: "Ada",
+    listenUrl: "https://example.com/cold-open",
+    amountUsd: 5,
+    paidAt: "2026-08-17T09:00:00.000Z",
+    kind: "create",
+  });
+  assert.equal(next.bidUsd, 5);
+  assert.equal(next.weekId, weekId());
+  assert.equal(getBoardListings(weekId()).length, 1);
+  assert.equal(getBoardListings("2026-W33")[0]?.bidUsd, 20);
 });

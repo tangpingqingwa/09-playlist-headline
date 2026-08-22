@@ -52,6 +52,7 @@ export async function resolveReturn(params: {
       listenUrl: paid.listingDraft.listenUrl,
       amountUsd: paid.amountUsd,
       paidAt: paid.paidAt,
+      kind: paid.kind,
     });
     return { status: "paid", listingId: listing.id };
   } catch {
