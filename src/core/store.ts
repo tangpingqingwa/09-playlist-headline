@@ -24,6 +24,14 @@ export function getListingById(id: string): Listing | undefined {
   return listings.find((listing) => listing.id === id);
 }
 
+/** Public listen-URL hops. Never a platform play count. */
+export function incrementListingClicks(id: string): Listing | undefined {
+  const listing = getListingById(id);
+  if (!listing) return undefined;
+  listing.clicks += 1;
+  return listing;
+}
+
 /** Same canonical listen URL in this UTC week is one listing. */
 export function findPaidByListenUrl(
   weekId: string,

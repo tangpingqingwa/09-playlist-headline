@@ -1,5 +1,6 @@
 import React from "react";
 import { BidForm } from "./outbid-form";
+import { listenClickPath, playbackForListing } from "../core/playback";
 import {
   getBoardListings,
   MIN_BID_USD,
@@ -42,7 +43,7 @@ export function ListingCard({ listing }: { listing: RankedListing }) {
           </span>
           <a
             className="listen"
-            href={listing.listenUrl}
+            href={listenClickPath(listing.id)}
             data-listen-url={listing.listenUrl}
           >
             Listen
@@ -85,6 +86,7 @@ export function Board({
   const opening = listings[0];
   const topBid = opening?.bidUsd ?? 0;
   const defaultAmount = topBid > 0 ? topBid + 1 : MIN_BID_USD;
+  const playback = playbackForListing(opening);
 
   return (
     <main className="board" data-board="" data-week={weekId}>
@@ -105,11 +107,21 @@ export function Board({
           </p>
           <a
             className="listen"
-            href={opening.listenUrl}
+            href={listenClickPath(opening.id)}
             data-listen-url={opening.listenUrl}
           >
             Listen
           </a>
+          {playback.kind === "embed" ? (
+            <iframe
+              className="player"
+              title={`${opening.track} official embed`}
+              src={playback.embedUrl}
+              data-listen-url={playback.listenUrl}
+              data-playback="embed"
+              allow="encrypted-media"
+            />
+          ) : null}
         </section>
       ) : (
         <p className="empty" data-empty-week="true" data-opening-song="false">

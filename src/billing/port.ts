@@ -4,6 +4,7 @@ import {
   type PolarEnv,
 } from "../config";
 import { MIN_BID_USD } from "../core/rank";
+import { canonicalizeListenUrl, isNsfwCopy, UrlError } from "../core/url";
 import { FixturePayment, getFixturePayment } from "./fixture";
 import { PolarPayment } from "./polar";
 
@@ -128,6 +129,9 @@ export function parseListingDraft(
   rejectPlayCounts(input);
   const track = readText(input.track, "track");
   const artist = readText(input.artist, "artist");
+  if (isNsfwCopy(track) || isNsfwCopy(artist)) {
+    throw new CheckoutError("url_forbidden", 400);
+  }
   const listenUrl = parseListenUrl(input.listenUrl);
   return { track, artist, listenUrl, weekId };
 }
@@ -147,23 +151,14 @@ function parseListenUrl(raw: unknown): string {
   if (typeof raw !== "string" || raw.trim() === "") {
     throw new CheckoutError("url_insecure", 400);
   }
-  let parsed: URL;
   try {
-    parsed = new URL(raw.trim());
-  } catch {
-    throw new CheckoutError("url_insecure", 400);
+    return canonicalizeListenUrl(raw);
+  } catch (error) {
+    if (error instanceof UrlError) {
+      throw new CheckoutError(error.code, error.httpStatus);
+    }
+    throw error;
   }
-  if (parsed.protocol !== "https:") {
-    throw new CheckoutError("url_insecure", 400);
-  }
-  if (parsed.username || parsed.password) {
-    throw new CheckoutError("url_forbidden", 400);
-  }
-  const host = parsed.hostname.toLowerCase();
-  if (host === "localhost" || host.endsWith(".localhost") || host === "127.0.0.1") {
-    throw new CheckoutError("url_forbidden", 400);
-  }
-  return parsed.toString();
 }
 
 export function createPaymentPort(env: PolarEnv = process.env): PaymentPort {
