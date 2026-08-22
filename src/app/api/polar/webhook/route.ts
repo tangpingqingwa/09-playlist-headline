@@ -22,6 +22,7 @@ function applyIfPaid(result: WebhookResult): boolean {
     listenUrl: result.listingDraft.listenUrl,
     amountUsd: result.amountUsd,
     paidAt: result.paidAt,
+    kind: result.kind,
   });
   return true;
 }

@@ -151,6 +151,7 @@ for f in \
   src/billing/polar.ts \
   src/config.ts \
   src/core/store.ts \
+  src/core/listing.ts \
   src/app/api/checkout/route.ts \
   src/app/api/polar/webhook/route.ts \
   src/app/return/page.tsx \
@@ -177,6 +178,22 @@ grep -q 'POLAR_LIVE=1' src/billing/polar.ts \
   || fail "polar.ts must stay env-gated"
 grep -q 'applyPaidEvent' src/core/store.ts \
   || fail "store.ts must apply paid events only"
+grep -q 'export function quoteBid' src/core/listing.ts \
+  || fail "listing.ts must quote create vs raise"
+grep -q 'bid_not_higher' src/core/listing.ts \
+  || fail "listing.ts must reject a non-increasing raise"
+grep -q 'canonicalListenUrl' src/core/listing.ts \
+  || fail "listing.ts must key raises on the canonical listen URL"
+grep -q 'findPaidByListenUrl' src/core/store.ts \
+  || fail "store.ts must look up the same listen URL this week"
+grep -q 'kind: quote.kind' src/app/api/checkout/route.ts \
+  || fail "checkout raise path must pass create or raise"
+grep -q 'quoteBid' src/app/api/checkout/route.ts \
+  || fail "checkout must charge the raise difference"
+grep -q 'bid_not_higher' tests/checkout.test.ts \
+  || fail "checkout tests must cover bid_not_higher"
+grep -q 'pays \$7' tests/checkout.test.ts \
+  || fail "checkout tests must cover SPEC acceptance 5"
 grep -q 'data-return="paid"' src/app/return/page.tsx \
   || fail "return page must show paid copy"
 grep -q 'data-return="pending"' src/app/return/page.tsx \
@@ -225,6 +242,10 @@ if [[ -f package.json ]]; then
     || fail "abandoned checkout test did not run"
   grep -q 'underbid' "$test_log" \
     || fail "checkout underbid test did not run"
+  grep -q 'raises' "$test_log" \
+    || fail "raise-bid test did not run"
+  grep -q 'bid_not_higher' "$test_log" \
+    || fail "bid_not_higher test did not run"
 fi
 
 echo "OK: buildable and testable"
