@@ -92,8 +92,51 @@ fi
 if grep -E '"@polar-sh/sdk"|"@polar-sh/' package.json >/dev/null 2>&1; then
   fail "do not add a live Polar SDK in this unit"
 fi
-if [[ -d src/core ]] || [[ -d src/billing ]] || [[ -f src/app/page.tsx ]]; then
-  fail "skeleton must not add board, core, or billing"
+if [[ -d src/billing ]] || [[ -f src/app/api/checkout/route.ts ]]; then
+  fail "PR 2 must not add checkout or billing"
+fi
+
+echo "== board UI files =="
+for f in \
+  src/app/page.tsx \
+  src/app/layout.tsx \
+  src/app/board.css \
+  src/app/outbid-form.tsx \
+  src/core/week.ts \
+  src/core/rank.ts \
+  tests/rank.test.ts
+do
+  [[ -f "$f" ]] || fail "missing $f"
+  [[ -s "$f" ]] || fail "empty $f"
+done
+grep -q 'export function rankListings' src/core/rank.ts \
+  || fail "rank.ts must export rankListings"
+grep -q 'firstPaidAt' src/core/rank.ts \
+  || fail "rank.ts must tie-break on firstPaidAt"
+grep -q 'getBoardListings' src/core/rank.ts \
+  || fail "rank.ts must expose getBoardListings"
+grep -q 'return \[\]' src/core/rank.ts \
+  || fail "live board must invent no listings"
+grep -q 'isoWeekId' src/core/week.ts || fail "week.ts missing isoWeekId"
+grep -q 'Monday' src/core/week.ts || fail "week.ts must document Monday UTC reset"
+grep -q 'Outbid' src/app/outbid-form.tsx || fail "form missing Outbid button"
+grep -q 'name="track"' src/app/outbid-form.tsx || fail "form missing track"
+grep -q 'name="artist"' src/app/outbid-form.tsx || fail "form missing artist"
+grep -q 'name="listenUrl"' src/app/outbid-form.tsx || fail "form missing listen URL"
+grep -q 'name="amountUsd"' src/app/outbid-form.tsx || fail "form missing amount"
+grep -q 'data-empty-week' src/app/page.tsx || fail "board missing honest empty week"
+grep -q 'No opening song' src/app/page.tsx || fail "empty week must say there is no opening song"
+grep -q 'clicks' src/app/page.tsx || fail "cards missing clicks"
+grep -q 'formatUsd' src/app/page.tsx || fail "cards must show money"
+grep -q 'getBoardListings' src/app/page.tsx || fail "page.tsx must load listings through getBoardListings"
+grep -q 'rankListings' src/app/page.tsx || fail "page.tsx must rank through rankListings"
+grep -q 'currentWeekUtc' src/app/page.tsx || fail "page.tsx must use currentWeekUtc"
+grep -q 'board.css' src/app/layout.tsx || fail "root layout must load board styles"
+grep -q 'older' tests/rank.test.ts || fail "rank tests missing older-wins-ties"
+if grep -RInEi 'play count|monthly listeners|1\.2M streams|<audio|waveform' \
+  src/app/page.tsx src/app/outbid-form.tsx src/core/rank.ts src/app/board.css
+then
+  fail "board UI must not render play counts or a fake stream"
 fi
 
 if [[ -f package.json ]]; then
@@ -125,6 +168,8 @@ if [[ -f package.json ]]; then
     || fail "test runner reported 0 tests"
   grep -q '/healthz' "$test_log" \
     || fail "healthz test did not run"
+  grep -q 'empty week' "$test_log" \
+    || fail "rank/board empty-week test did not run"
 fi
 
 echo "OK: buildable and testable"
