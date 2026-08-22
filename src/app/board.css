@@ -350,6 +350,26 @@ a:hover {
   color: var(--fg);
 }
 
+.return-page {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.return-page h1 {
+  margin: 0 0 0.75rem;
+}
+
+.return-page p {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+}
+
+.return-page a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .fields {
     grid-template-columns: 1fr;

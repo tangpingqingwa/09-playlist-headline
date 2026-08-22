@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, type FormEvent } from "react";
+import React, { useState } from "react";
 import { MIN_BID_USD } from "../core/rank";
 
 type BidFormProps = {
@@ -19,18 +19,12 @@ export function BidForm({ defaultAmount }: BidFormProps) {
     setAmount((current) => clampAmount(current + delta));
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    // Unpaid: checkout is not live. Submitting must not invent a listing.
-    event.preventDefault();
-  }
-
   return (
     <section className="claim" id="claim">
       <form
         className="outbid-form"
         method="post"
         action="/checkout"
-        onSubmit={onSubmit}
         data-bid-form=""
       >
         <h2>
@@ -113,9 +107,6 @@ export function BidForm({ defaultAmount }: BidFormProps) {
         <p className="raise-hint">
           Already on this week? Enter the same listen URL and raise. You pay
           only the difference.
-        </p>
-        <p className="stub-note" data-checkout-stub="">
-          Checkout is not live. No charge and no rank claimed.
         </p>
       </form>
     </section>

@@ -86,14 +86,19 @@ done
 grep -q '/healthz' src/app/healthz/route.ts || grep -q 'HealthzOk' src/app/healthz/route.ts \
   || fail "src/app/healthz/route.ts missing healthz contract"
 grep -q 'ok: true' src/app/healthz/route.ts || fail "healthz route missing { ok: true }"
-if grep -RInE 'https?://([^/]*\.)?polar\.sh' src tests >/dev/null 2>&1; then
-  fail "src/tests must not hard-code polar.sh HTTP"
-fi
 if grep -E '"@polar-sh/sdk"|"@polar-sh/' package.json >/dev/null 2>&1; then
   fail "do not add a live Polar SDK in this unit"
 fi
-if [[ -d src/billing ]] || [[ -f src/app/api/checkout/route.ts ]]; then
-  fail "PR 2 must not add checkout or billing"
+if grep -R --include='*.ts' --include='*.tsx' -E "from ['\"]@polar-sh" src tests >/dev/null 2>&1; then
+  fail "src/tests must not import a Polar SDK"
+fi
+if grep -RInE 'https?://([^/]*\.)?polar\.sh' src tests \
+  | grep -v 'src/billing/polar.ts' >/dev/null 2>&1; then
+  fail "only src/billing/polar.ts may mention the Polar HTTP host"
+fi
+if grep -RInE 'from ["'\'']\.\./.*billing/polar|from ["'\'']\.\./\.\./.*billing/polar' \
+  src/app >/dev/null 2>&1; then
+  fail "HTTP / pages must not import billing/polar.ts directly"
 fi
 
 echo "== board UI files =="
@@ -115,8 +120,8 @@ grep -q 'firstPaidAt' src/core/rank.ts \
   || fail "rank.ts must tie-break on firstPaidAt"
 grep -q 'getBoardListings' src/core/rank.ts \
   || fail "rank.ts must expose getBoardListings"
-grep -q 'return \[\]' src/core/rank.ts \
-  || fail "live board must invent no listings"
+grep -q 'listPaidForWeek' src/core/rank.ts \
+  || fail "live board must read paid listings only"
 grep -q 'isoWeekId' src/core/week.ts || fail "week.ts missing isoWeekId"
 grep -q 'Monday' src/core/week.ts || fail "week.ts must document Monday UTC reset"
 grep -q 'Outbid' src/app/outbid-form.tsx || fail "form missing Outbid button"
@@ -137,6 +142,50 @@ if grep -RInEi 'play count|monthly listeners|1\.2M streams|<audio|waveform' \
   src/app/page.tsx src/app/outbid-form.tsx src/core/rank.ts src/app/board.css
 then
   fail "board UI must not render play counts or a fake stream"
+fi
+
+echo "== checkout files =="
+for f in \
+  src/billing/port.ts \
+  src/billing/fixture.ts \
+  src/billing/polar.ts \
+  src/config.ts \
+  src/core/store.ts \
+  src/app/api/checkout/route.ts \
+  src/app/api/polar/webhook/route.ts \
+  src/app/return/page.tsx \
+  tests/checkout.test.ts
+do
+  [[ -f "$f" ]] || fail "missing $f"
+  [[ -s "$f" ]] || fail "empty $f"
+done
+grep -q 'createCheckout' src/billing/port.ts \
+  || fail "port.ts must define createCheckout"
+grep -q 'handleWebhook' src/billing/port.ts \
+  || fail "port.ts must define handleWebhook"
+grep -q 'export type PaymentPort' src/billing/port.ts \
+  || fail "port.ts must export PaymentPort"
+grep -q 'POLAR_FIXTURE_ONLY' src/config.ts \
+  || fail "config.ts must honor POLAR_FIXTURE_ONLY"
+grep -q 'polarLiveEnabled' src/config.ts \
+  || fail "live Polar client is not env-gated"
+grep -q 'export class FixturePayment' src/billing/fixture.ts \
+  || fail "fixture.ts must export FixturePayment"
+grep -q 'export class PolarPayment' src/billing/polar.ts \
+  || fail "polar.ts must export PolarPayment"
+grep -q 'POLAR_LIVE=1' src/billing/polar.ts \
+  || fail "polar.ts must stay env-gated"
+grep -q 'applyPaidEvent' src/core/store.ts \
+  || fail "store.ts must apply paid events only"
+grep -q 'data-return="paid"' src/app/return/page.tsx \
+  || fail "return page must show paid copy"
+grep -q 'data-return="pending"' src/app/return/page.tsx \
+  || fail "return page must show pending copy"
+grep -q 'never trust query' src/app/return/page.tsx \
+  || grep -q 'not yet paid' src/app/return/page.tsx \
+  || fail "return page must not trust the query string alone"
+if grep -nE 'fetch\(|polar\.sh|api\.polar' src/billing/fixture.ts src/billing/port.ts >/dev/null; then
+  fail "fixture/port must not call Polar over the network"
 fi
 
 if [[ -f package.json ]]; then
@@ -160,7 +209,7 @@ if [[ -f package.json ]]; then
   test_log="$(mktemp)"
   trap 'rm -f "$test_log"' EXIT
   set +e
-  npx tsx --test --test-reporter spec 'tests/**/*.test.ts' | tee "$test_log"
+  npx tsx --test --test-concurrency=1 --test-reporter spec 'tests/**/*.test.ts' | tee "$test_log"
   test_status=${PIPESTATUS[0]}
   set -e
   [[ $test_status -eq 0 ]] || fail "unit tests failed"
@@ -170,6 +219,12 @@ if [[ -f package.json ]]; then
     || fail "healthz test did not run"
   grep -q 'empty week' "$test_log" \
     || fail "rank/board empty-week test did not run"
+  grep -q 'fixture create' "$test_log" \
+    || fail "checkout fixture test did not run"
+  grep -q 'abandoned checkout' "$test_log" \
+    || fail "abandoned checkout test did not run"
+  grep -q 'underbid' "$test_log" \
+    || fail "checkout underbid test did not run"
 fi
 
 echo "OK: buildable and testable"
