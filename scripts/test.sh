@@ -78,6 +78,24 @@ echo "== markdown is UTF-8 text =="
 file -b --mime-encoding README.md SPEC.md BUILD.md CONTRIBUTING.md | grep -qiE 'utf-8|us-ascii' \
   || fail "docs are not UTF-8/ASCII"
 
+echo "== skeleton files =="
+for f in package.json tsconfig.json src/app/healthz/route.ts tests/healthz.test.ts; do
+  [[ -f "$f" ]] || fail "missing $f"
+  [[ -s "$f" ]] || fail "empty $f"
+done
+grep -q '/healthz' src/app/healthz/route.ts || grep -q 'HealthzOk' src/app/healthz/route.ts \
+  || fail "src/app/healthz/route.ts missing healthz contract"
+grep -q 'ok: true' src/app/healthz/route.ts || fail "healthz route missing { ok: true }"
+if grep -RInE 'https?://([^/]*\.)?polar\.sh' src tests >/dev/null 2>&1; then
+  fail "src/tests must not hard-code polar.sh HTTP"
+fi
+if grep -E '"@polar-sh/sdk"|"@polar-sh/' package.json >/dev/null 2>&1; then
+  fail "do not add a live Polar SDK in this unit"
+fi
+if [[ -d src/core ]] || [[ -d src/billing ]] || [[ -f src/app/page.tsx ]]; then
+  fail "skeleton must not add board, core, or billing"
+fi
+
 if [[ -f package.json ]]; then
   echo "== install =="
   if [[ ! -d node_modules ]]; then
@@ -105,6 +123,8 @@ if [[ -f package.json ]]; then
   [[ $test_status -eq 0 ]] || fail "unit tests failed"
   grep -Eq 'tests[[:space:]]+[1-9][0-9]*' "$test_log" \
     || fail "test runner reported 0 tests"
+  grep -q '/healthz' "$test_log" \
+    || fail "healthz test did not run"
 fi
 
 echo "OK: buildable and testable"
