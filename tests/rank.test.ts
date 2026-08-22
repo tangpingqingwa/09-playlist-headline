@@ -11,6 +11,7 @@ import {
   rankListings,
   type Listing,
 } from "../src/core/rank";
+import { resetListings } from "../src/core/store";
 import { currentWeekUtc, isoWeekId, nextMondayUtc } from "../src/core/week";
 
 const WEEK = "2026-W34";
@@ -166,6 +167,7 @@ test("only the current UTC week is ranked on the live board", () => {
 });
 
 test("live board loader invents no tracks", () => {
+  resetListings();
   assert.deepEqual(getBoardListings(WEEK), []);
   assert.deepEqual(getBoardListings("2026-W33"), []);
 });

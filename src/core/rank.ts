@@ -1,5 +1,7 @@
 /** ORDER BY bid_usd DESC, first_paid_at ASC, id ASC. Rank is the bid. */
 
+import { listPaidForWeek } from "./store";
+
 export const MIN_BID_USD = 5;
 
 export type Listing = {
@@ -16,9 +18,9 @@ export type Listing = {
 
 export type RankedListing = Listing & { rank: number };
 
-/** Live board has no paid rows until checkout lands. Never invent a track. */
-export function getBoardListings(_weekId: string): Listing[] {
-  return [];
+/** Paid listings for the current week only. Unpaid checkout never appears. */
+export function getBoardListings(weekId: string): Listing[] {
+  return listPaidForWeek(weekId);
 }
 
 export function listingsForWeek(
