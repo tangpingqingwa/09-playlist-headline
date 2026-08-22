@@ -67,6 +67,27 @@ if grep -q 'scripts/live-smoke.sh' .github/workflows/ci.yml; then
   fail "live-smoke.sh must not be called from Actions"
 fi
 
+echo "== live-smoke stays operator-only =="
+[[ -f scripts/live-smoke.sh ]] || fail "missing scripts/live-smoke.sh"
+[[ -x scripts/live-smoke.sh ]] || fail "scripts/live-smoke.sh must be executable"
+[[ -f docs/live-smoke.md ]] || fail "missing docs/live-smoke.md"
+[[ -s docs/live-smoke.md ]] || fail "empty docs/live-smoke.md"
+[[ -f tests/live-smoke.test.ts ]] || fail "missing tests/live-smoke.test.ts"
+[[ -f scripts/live-smoke-server.ts ]] || fail "missing scripts/live-smoke-server.ts"
+if grep -Eq '^\s*(bash )?(\./)?scripts/live-smoke\.sh' scripts/test.sh; then
+  fail "test.sh must not invoke live-smoke.sh"
+fi
+if grep -E '^[[:space:]]*(export[[:space:]]+)?POLAR_LIVE=1' scripts/test.sh >/dev/null; then
+  fail "test.sh must not set POLAR_LIVE=1"
+fi
+grep -q 'BLOCKED-SECRET: POLAR_ACCESS_TOKEN' scripts/live-smoke.sh \
+  || fail "live-smoke.sh must name BLOCKED-SECRET: POLAR_ACCESS_TOKEN"
+grep -q 'POLAR_LIVE' scripts/live-smoke.sh \
+  || fail "live-smoke.sh must gate live Polar on POLAR_LIVE"
+grep -q 'PASS' docs/live-smoke.md || fail "docs/live-smoke.md missing PASS"
+grep -q 'PASS-ERROR' docs/live-smoke.md || fail "docs/live-smoke.md missing PASS-ERROR"
+grep -q 'BLOCKED-SECRET' docs/live-smoke.md || fail "docs/live-smoke.md missing BLOCKED-SECRET"
+
 echo "== no committed secrets =="
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   if git ls-files | grep -E '(^|/)\.env$|(^|/)id_rsa$|\.pem$|credentials\.json$' >/dev/null; then
@@ -311,6 +332,8 @@ if [[ -f package.json ]]; then
     || fail "playback empty-week test did not run"
   grep -q 'about and rules' "$test_log" \
     || fail "about/rules copy test did not run"
+  grep -q 'live-smoke is operator-only' "$test_log" \
+    || fail "live-smoke offline guard test did not run"
 fi
 
 echo "OK: buildable and testable"
