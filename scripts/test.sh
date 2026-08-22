@@ -205,6 +205,61 @@ if grep -nE 'fetch\(|polar\.sh|api\.polar' src/billing/fixture.ts src/billing/po
   fail "fixture/port must not call Polar over the network"
 fi
 
+echo "== rules / about / url / playback / click =="
+for f in \
+  src/app/about/page.tsx \
+  src/app/rules/page.tsx \
+  src/core/url.ts \
+  src/core/playback.ts \
+  src/app/click/[id]/route.ts \
+  tests/listing.test.ts \
+  tests/click.test.ts \
+  tests/playback.test.ts
+do
+  [[ -f "$f" ]] || fail "missing $f"
+  [[ -s "$f" ]] || fail "empty $f"
+done
+grep -q 'href="/about"' src/app/layout.tsx || fail "nav must link to /about"
+grep -q 'href="/rules"' src/app/layout.tsx || fail "nav must link to /rules"
+grep -q 'Rank is the bid' src/app/about/page.tsx || fail "about must state rank is the bid"
+grep -q 'Playback is real' src/app/about/page.tsx || fail "about must state real playback"
+grep -q 'no invented play counts' src/app/about/page.tsx || fail "about must forbid invented play counts"
+grep -q 'no fake streams' src/app/about/page.tsx || fail "about must forbid fake streams"
+grep -q 'playlist-headline' src/app/about/page.tsx || fail "about must name the playlist-headline vertical"
+grep -q '\$5' src/app/rules/page.tsx || fail "rules must state min \$5"
+grep -q 'Older wins ties' src/app/rules/page.tsx || fail "rules must state older wins ties"
+grep -q 'Raise pays difference' src/app/rules/page.tsx || fail "rules must state raise pays difference"
+grep -q 'Monday 00:00:00.000 UTC' src/app/rules/page.tsx || fail "rules must state weekly UTC reset"
+grep -q 'No fake streams' src/app/rules/page.tsx || fail "rules must forbid fake streams"
+grep -q 'No invented play counts' src/app/rules/page.tsx || fail "rules must forbid invented play counts"
+grep -q 'utm_' src/core/url.ts || fail "url.ts must strip utm_ tracking keys"
+grep -q 'url_forbidden' src/core/url.ts || fail "url.ts must reject forbidden URLs"
+grep -q 't.me' src/core/url.ts || fail "url.ts must reject telegram invites"
+grep -q 'export function canonicalizeListenUrl' src/core/url.ts \
+  || fail "url.ts must export canonicalizeListenUrl"
+grep -q 'export function playbackForListing' src/core/playback.ts \
+  || fail "playback.ts must export playbackForListing"
+grep -q 'kind: "empty"' src/core/playback.ts || fail "empty week must have no playback"
+grep -q 'incrementListingClicks' 'src/app/click/[id]/route.ts' \
+  || fail "click route must increment public clicks"
+grep -q 'NextResponse.redirect' 'src/app/click/[id]/route.ts' \
+  || fail "click route must 302 to the listen URL"
+grep -q 'listenClickPath' src/app/page.tsx || fail "board listen CTA must use the click route"
+grep -q 'playbackForListing' src/app/page.tsx || fail "board must use real playback"
+grep -q 'utm_source' tests/listing.test.ts || fail "listing tests must cover tracking strip"
+grep -q 't.me' tests/listing.test.ts || fail "listing tests must reject telegram"
+grep -q 'play_count_forbidden' tests/listing.test.ts \
+  || fail "listing tests must reject invented play counts"
+grep -q '302' tests/click.test.ts || fail "click tests must assert 302"
+grep -q 'plays' tests/click.test.ts || fail "click tests must refuse play labels"
+grep -q 'empty week has no player' tests/playback.test.ts \
+  || fail "playback tests must cover empty week"
+if grep -RInE '1\.2M streams' \
+  src/app/about/page.tsx src/app/rules/page.tsx src/core/playback.ts
+then
+  fail "about/rules/playback must not invent play counts"
+fi
+
 if [[ -f package.json ]]; then
   echo "== install =="
   if [[ ! -d node_modules ]]; then
@@ -246,6 +301,16 @@ if [[ -f package.json ]]; then
     || fail "raise-bid test did not run"
   grep -q 'bid_not_higher' "$test_log" \
     || fail "bid_not_higher test did not run"
+  grep -q 'utm_source' "$test_log" \
+    || fail "url tracking-strip test did not run"
+  grep -q 'telegram' "$test_log" \
+    || fail "chat-ban test did not run"
+  grep -q 'GET /click' "$test_log" \
+    || fail "click route test did not run"
+  grep -q 'empty week has no player' "$test_log" \
+    || fail "playback empty-week test did not run"
+  grep -q 'about and rules' "$test_log" \
+    || fail "about/rules copy test did not run"
 fi
 
 echo "OK: buildable and testable"

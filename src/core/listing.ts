@@ -1,4 +1,5 @@
 import { MIN_BID_USD, type Listing } from "./rank";
+import { canonicalizeListenUrl, UrlError } from "./url";
 
 export type CheckoutKind = "create" | "raise";
 
@@ -19,21 +20,16 @@ export type BidQuote = {
   chargeUsd: number;
 };
 
-/** Identity key: canonical listen URL + UTC week. Same key raises. */
+/** Identity key: stripped listen URL + UTC week. Same key raises. */
 export function canonicalListenUrl(raw: string): string {
-  const trimmed = raw.trim();
-  let parsed: URL;
   try {
-    parsed = new URL(trimmed);
-  } catch {
-    throw new ListingError("url_insecure", 400);
+    return canonicalizeListenUrl(raw);
+  } catch (error) {
+    if (error instanceof UrlError) {
+      throw new ListingError(error.code, error.httpStatus);
+    }
+    throw error;
   }
-  if (parsed.protocol !== "https:") {
-    throw new ListingError("url_insecure", 400);
-  }
-  parsed.hash = "";
-  parsed.hostname = parsed.hostname.toLowerCase();
-  return parsed.toString();
 }
 
 export function listingListenKey(weekId: string, listenUrl: string): string {
