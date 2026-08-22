@@ -38,7 +38,7 @@ POLAR_LIVE=1 POLAR_ACCESS_TOKEN=… bash scripts/live-smoke.sh
 
 ## This session
 
-Ran `bash scripts/live-smoke.sh` on **2026-08-22** from `feat/live-smoke` (parent `3c3a065`, about/rules on `origin/main`). Local process started by the script on `http://127.0.0.1:54883`. `POLAR_LIVE` unset. `POLAR_ACCESS_TOKEN` unset. Fixture path for click/playback only. No invented paid rank: empty board first; `$4` stayed off the board; unpaid Polar checkout was not attempted. Official YouTube embed of the stored listen URL. No generated file.
+Ran `bash scripts/live-smoke.sh` on **2026-08-22** from `feat/live-smoke` (parent `3c3a065`, about/rules on `origin/main`). Local process started by the script on `http://127.0.0.1:54861` via `scripts/live-smoke-server.ts`. `POLAR_LIVE` unset. `POLAR_ACCESS_TOKEN` unset. Fixture path for click/playback only. No invented paid rank: empty board first; `$4` stayed off the board; unpaid Polar checkout was not attempted. Official YouTube embed of the stored listen URL. No generated file.
 
 | Flow | Result | Note |
 |---|---|---|
@@ -47,7 +47,7 @@ Ran `bash scripts/live-smoke.sh` on **2026-08-22** from `feat/live-smoke` (paren
 | about / rules | **PASS** | `GET /about` and `GET /rules` 200. Min $5, older wins ties, raise pays difference, weekly UTC, no fake streams, no invented play counts. |
 | bid-below-min | **PASS-ERROR** | `POST /api/checkout` $4 → 400 `bid_below_min`. Board unchanged. |
 | create checkout | **BLOCKED-SECRET** | `BLOCKED-SECRET: POLAR_ACCESS_TOKEN` |
-| click | **PASS** | `GET /click/lst_e35618f3-a113-4554-8155-1e96961b44a1` 302 to stored `https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Clicks `0→1`. Fixture listing after live pay blocked. |
+| click | **PASS** | `GET /click/lst_0f037df9-0759-4d57-a65a-b0a50a6b80a3` 302 to stored `https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Clicks `0→1`. Fixture listing after live pay blocked. |
 | playback | **PASS** | Official YouTube embed of the stored listen URL (`youtube.com/embed/dQw4w9WgXcQ`). No generated file. |
 
 Process exit 0 (`PASS=5` `PASS-ERROR=1` `BLOCKED-SECRET=1` `FAIL=0`). Re-run with `POLAR_LIVE=1` and a real token to complete Polar Checkout; missing token must stay `BLOCKED-SECRET`, never a fixture listing treated as live Polar.
