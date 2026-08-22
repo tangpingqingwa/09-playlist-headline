@@ -3,6 +3,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import AboutPage from "../src/app/about/page";
 import { POST as postCheckout } from "../src/app/api/checkout/route";
+import { POST as postWebhook } from "../src/app/api/polar/webhook/route";
 import { GET as getClick } from "../src/app/click/[id]/route";
 import { GET as getHealthz } from "../src/app/healthz/route";
 import HomePage from "../src/app/page";
@@ -93,6 +94,10 @@ const server = createServer((req, res) => {
     }
     if (request.method === "POST" && (path === "/api/checkout" || path === "/checkout")) {
       await sendWeb(res, await postCheckout(request));
+      return;
+    }
+    if (request.method === "POST" && path === "/api/polar/webhook") {
+      await sendWeb(res, await postWebhook(request));
       return;
     }
     const click = path.match(/^\/click\/([^/]+)$/);

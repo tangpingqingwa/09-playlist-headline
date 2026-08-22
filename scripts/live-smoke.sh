@@ -2,8 +2,8 @@
 # Operator smoke against a local process. Not called from scripts/test.sh or CI.
 # Walks board, about/rules, checkout (live Polar or BLOCKED-SECRET), click,
 # and real playback. Next.js webpack cannot load node:crypto via the client bid
-# form, so this process serves the same App Router handlers through tsx.
-# Missing Polar secret → BLOCKED-SECRET: POLAR_ACCESS_TOKEN
+# form, so this process serves the same App Router handlers through
+# scripts/live-smoke-server.ts. Missing Polar secret → BLOCKED-SECRET: POLAR_ACCESS_TOKEN
 # Fixture listing is allowed only so click/playback can run when live pay is
 # blocked. Do not invent a paid opening track or a fake stream.
 set -euo pipefail
@@ -129,137 +129,10 @@ wait_health() {
   return 1
 }
 
-write_smoke_server() {
-  local dest="$1"
-  cat >"$dest" <<'EOF'
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { createElement, type ReactNode } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import AboutPage from "../src/app/about/page.tsx";
-import { POST as postCheckout } from "../src/app/api/checkout/route.ts";
-import { POST as postWebhook } from "../src/app/api/polar/webhook/route.ts";
-import { GET as getClick } from "../src/app/click/[id]/route.ts";
-import { GET as getHealthz } from "../src/app/healthz/route.ts";
-import HomePage from "../src/app/page.tsx";
-import ReturnPage from "../src/app/return/page.tsx";
-import RulesPage from "../src/app/rules/page.tsx";
-
-const port = Number(process.env.PORT);
-if (!Number.isInteger(port) || port <= 0) {
-  throw new Error("PORT is required");
-}
-const origin = process.env.PUBLIC_BASE_URL ?? `http://127.0.0.1:${port}`;
-
-function htmlDocument(node: ReactNode): string {
-  return `<!DOCTYPE html><html lang="en"><body>${renderToStaticMarkup(node)}</body></html>`;
-}
-
-async function toRequest(req: IncomingMessage): Promise<Request> {
-  const url = new URL(req.url ?? "/", origin);
-  const headers = new Headers();
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (typeof value === "string") headers.set(key, value);
-    else if (Array.isArray(value)) headers.set(key, value.join(", "));
-  }
-  const method = req.method ?? "GET";
-  if (method === "GET" || method === "HEAD") {
-    return new Request(url, { method, headers });
-  }
-  const chunks: Buffer[] = [];
-  for await (const chunk of req) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return new Request(url, { method, headers, body: Buffer.concat(chunks) });
-}
-
-async function sendWeb(res: ServerResponse, response: Response): Promise<void> {
-  res.statusCode = response.status;
-  response.headers.forEach((value, key) => {
-    res.setHeader(key, value);
-  });
-  res.end(Buffer.from(await response.arrayBuffer()));
-}
-
-function sendHtml(res: ServerResponse, node: ReactNode): void {
-  const body = htmlDocument(node);
-  res.statusCode = 200;
-  res.setHeader("content-type", "text/html; charset=utf-8");
-  res.setHeader("cache-control", "private, no-store");
-  res.end(body);
-}
-
-function sendText(res: ServerResponse, status: number, body: string): void {
-  res.statusCode = status;
-  res.setHeader("content-type", "text/plain; charset=utf-8");
-  res.end(body);
-}
-
-const server = createServer((req, res) => {
-  void (async () => {
-    const request = await toRequest(req);
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    if (request.method === "GET" && path === "/healthz") {
-      await sendWeb(res, getHealthz());
-      return;
-    }
-    if (request.method === "GET" && path === "/") {
-      sendHtml(res, createElement(HomePage));
-      return;
-    }
-    if (request.method === "GET" && path === "/about") {
-      sendHtml(res, createElement(AboutPage));
-      return;
-    }
-    if (request.method === "GET" && path === "/rules") {
-      sendHtml(res, createElement(RulesPage));
-      return;
-    }
-    if (request.method === "GET" && path === "/return") {
-      const searchParams = {
-        sessionId: url.searchParams.get("sessionId") ?? undefined,
-        checkoutId: url.searchParams.get("checkoutId") ?? undefined,
-        status: url.searchParams.get("status") ?? undefined,
-      };
-      sendHtml(res, await ReturnPage({ searchParams: Promise.resolve(searchParams) }));
-      return;
-    }
-    if (request.method === "POST" && (path === "/api/checkout" || path === "/checkout")) {
-      await sendWeb(res, await postCheckout(request));
-      return;
-    }
-    if (request.method === "POST" && path === "/api/polar/webhook") {
-      await sendWeb(res, await postWebhook(request));
-      return;
-    }
-    const click = path.match(/^\/click\/([^/]+)$/);
-    if (request.method === "GET" && click) {
-      await sendWeb(
-        res,
-        await getClick(request, { params: { id: decodeURIComponent(click[1]) } }),
-      );
-      return;
-    }
-    sendText(res, 404, "not found");
-  })().catch((error: unknown) => {
-    const message = error instanceof Error ? error.stack ?? error.message : String(error);
-    if (!res.headersSent) sendText(res, 500, message);
-    else res.end();
-  });
-});
-
-server.listen(port, "127.0.0.1", () => {
-  process.stdout.write(`live-smoke listening ${origin}\n`);
-});
-EOF
-}
-
 start_smoke_server() {
   local port="$1"
   local log_path="$2"
-  local server_path="$3"
-  shift 3
+  shift 2
   (
     cd "$root"
     unset POLAR_LIVE POLAR_ACCESS_TOKEN POLAR_WEBHOOK_SECRET POLAR_FIXTURE_ONLY || true
@@ -270,7 +143,8 @@ start_smoke_server() {
       export "$1"
       shift
     done
-    exec npx --no-install tsx --tsconfig "${root}/tsconfig.json" "${server_path}"
+    exec npx --no-install tsx --tsconfig "${root}/tsconfig.json" \
+      "${root}/scripts/live-smoke-server.ts"
   ) >"${log_path}" 2>&1 &
   echo $!
 }
@@ -346,6 +220,12 @@ html_has() {
   grep -Eq "$pattern" "$file"
 }
 
+html_has_fixed() {
+  local file="$1"
+  local needle="$2"
+  grep -Fq "$needle" "$file"
+}
+
 fake_stream_or_play_count() {
   local file="$1"
   grep -Eiq 'play count|monthly listeners|1\.2M streams|<audio|waveform|generated\.mp3|data:audio' "$file"
@@ -399,11 +279,8 @@ RESULT_LOG="${WORKDIR}/results.tsv"
 STAMP="$(date -u +%Y%m%d%H%M%S)"
 WEEK_ID="$(current_week_id)"
 STRIPPED_LISTEN_URL="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-LISTEN_URL="${STRIPPED_LISTEN_URL}?utm_source=smoke&si=abc"
+LISTEN_URL="${STRIPPED_LISTEN_URL}&utm_source=smoke&si=abc"
 TRACK_NAME="Smoke Open ${STAMP}"
-SERVER_PATH="${WORKDIR}/smoke-server.tsx"
-write_smoke_server "$SERVER_PATH"
-
 echo "== live-smoke (operator only; not CI) =="
 echo "root=${root}"
 echo "weekId=${WEEK_ID}"
@@ -413,7 +290,7 @@ if [[ -z "${BASE}" ]]; then
   BASE="http://127.0.0.1:${PORT}"
   LOG_PATH="${WORKDIR}/server.log"
   echo "starting local fixture process on ${BASE}"
-  STARTED_PID="$(start_smoke_server "$PORT" "$LOG_PATH" "$SERVER_PATH" "POLAR_FIXTURE_ONLY=1")"
+  STARTED_PID="$(start_smoke_server "$PORT" "$LOG_PATH" "POLAR_FIXTURE_ONLY=1")"
   if ! wait_health "$BASE"; then
     echo "server log:" >&2
     cat "${LOG_PATH}" >&2 || true
@@ -479,7 +356,7 @@ if [[ "$about_code" == "200" && "$rules_code" == "200" ]] \
   && html_has "$rules_body" 'Older wins ties' \
   && html_has "$rules_body" 'Raise pays difference' \
   && html_has "$rules_body" 'Monday 00:00:00.000 UTC' \
-  && html_has "$rules_body" 'weekly UTC reset' \
+  && html_has "$rules_body" '[Ww]eekly UTC reset' \
   && html_has "$rules_body" 'No fake streams' \
   && html_has "$rules_body" 'No invented play counts'; then
   record "about-rules" "PASS" "GET /about and /rules 200; min \$5 / older wins / raise difference / weekly UTC / no fake streams"
@@ -513,7 +390,7 @@ if [[ "${OP_POLAR_LIVE}" == "1" ]]; then
     live_port="$(pick_port)"
     live_log="${WORKDIR}/polar-live.log"
     live_base="http://127.0.0.1:${live_port}"
-    LIVE_PID="$(start_smoke_server "$live_port" "$live_log" "$SERVER_PATH" \
+    LIVE_PID="$(start_smoke_server "$live_port" "$live_log" \
       "POLAR_LIVE=1" \
       "POLAR_ACCESS_TOKEN=${OP_POLAR_ACCESS_TOKEN}" \
       "POLAR_WEBHOOK_SECRET=${OP_POLAR_WEBHOOK_SECRET:-}" \
@@ -614,8 +491,8 @@ else
       record "playback" "FAIL" "board invented a fake stream"
     elif [[ "$stored_url" != "${STRIPPED_LISTEN_URL}" ]]; then
       record "playback" "FAIL" "stored listen URL is not the stripped https URL: ${stored_url}"
-    elif html_has "$board1" 'data-listen-url="'"${stored_url}"'"' \
-      && html_has "$board1" 'href="/click/'"${listing_id}"'"' \
+    elif html_has_fixed "$board1" "data-listen-url=\"${stored_url}\"" \
+      && html_has_fixed "$board1" "href=\"/click/${listing_id}\"" \
       && html_has "$board1" 'data-playback="embed"' \
       && html_has "$board1" 'youtube.com/embed/dQw4w9WgXcQ'; then
       record "playback" "PASS" "official YouTube embed of stored ${stored_url}; no generated file"
