@@ -632,7 +632,7 @@ test("occupied raise after Hear-first is certain above the fold", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  assert.match(cssSource, /\.raise-after-hear a \{[\s\S]*text-decoration: underline dashed/);
+  assert.match(cssSource, /\.need-after-hear \{[\s\S]*border: 2px dashed/);
   assert.doesNotMatch(hop, /class="station-desk hear-first"/);
   assert.doesNotMatch(hop, FORBIDDEN);
 
@@ -834,6 +834,128 @@ test("occupied hear is one first Hear, not a second hop after the difference", (
   assert.doesNotMatch(embed, /data-hear-opening="hop"/);
   assert.doesNotMatch(embed, FORBIDDEN);
 
+  assert.doesNotMatch(empty, /data-hear-one-first/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /Not bidding\?/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+});
+
+test("occupied Need $N after one Hear is certain", () => {
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+    }),
+  ]);
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+  const empty = renderBoard([]);
+
+  const firstRead = hop.indexOf('data-first-read="hear"');
+  const firstClick = hop.indexOf('data-first-click="hear"');
+  const hearOne = hop.indexOf('data-hear-one-first="true"');
+  const hearHop = hop.indexOf('data-hear-opening="hop"');
+  const needAfter = hop.indexOf('data-need-after-hear="true"');
+  const raiseHop = hop.indexOf('data-raise-after-hear="true"');
+  const raiseNote = hop.indexOf('data-raise-note="difference"');
+  const needCopy = hop.indexOf("Need $13 to take #1");
+  const difference = hop.indexOf("Same listen URL pays only the difference");
+  const claim = hop.indexOf('id="claim"');
+  assert.notEqual(firstRead, -1);
+  assert.notEqual(firstClick, -1);
+  assert.notEqual(hearOne, -1);
+  assert.notEqual(hearHop, -1);
+  assert.notEqual(needAfter, -1);
+  assert.notEqual(raiseHop, -1);
+  assert.notEqual(raiseNote, -1);
+  assert.notEqual(needCopy, -1);
+  assert.notEqual(difference, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(firstRead < hearOne);
+  assert.ok(firstClick < hearOne);
+  assert.ok(hearOne < needAfter);
+  assert.ok(hearHop < needAfter);
+  assert.ok(needAfter < raiseNote);
+  assert.ok(needCopy < difference);
+  assert.ok(needAfter < claim);
+  assert.ok(difference < claim);
+  assert.equal((hop.match(/data-need-after-hear="true"/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-hear-one-first="true"/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
+  assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
+  assert.equal((hop.match(/Need \$13 to take #1/g) ?? []).length, 2);
+  assert.match(hop, /data-need-after-hear="true"/);
+  assert.match(hop, /class="need-after-hear"/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /Same listen URL pays only the difference/);
+  assert.match(hop, /href="#claim"/);
+  assert.match(hop, /data-hear-one-first="true"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const hearRule = cssSource.match(/\.opening-listen \{[^}]+\}/);
+  assert.ok(needRule);
+  assert.ok(hearRule);
+  assert.match(needRule[0], /display: inline-flex/);
+  assert.match(needRule[0], /min-height: 2\.15rem/);
+  assert.match(needRule[0], /border: 2px dashed/);
+  assert.match(needRule[0], /background: transparent/);
+  assert.match(hearRule[0], /min-height: 2\.4rem/);
+  assert.match(hearRule[0], /background: var\(--ink\)/);
+  assert.doesNotMatch(needRule[0], /background: var\(--ink\)/);
+  assert.doesNotMatch(hop, /Not bidding\?/);
+  assert.doesNotMatch(hop, /data-hear-after-difference/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+
+  const embedNeed = embed.indexOf('data-need-after-hear="true"');
+  const embedOne = embed.indexOf('data-hear-one-first="true"');
+  const embedHear = embed.indexOf('data-hear-opening="embed"');
+  const embedNote = embed.indexOf('data-raise-note="difference"');
+  const embedClaim = embed.indexOf('id="claim"');
+  assert.notEqual(embedNeed, -1);
+  assert.notEqual(embedOne, -1);
+  assert.notEqual(embedHear, -1);
+  assert.notEqual(embedNote, -1);
+  assert.ok(embed.indexOf('data-first-click="hear"') < embedOne);
+  assert.ok(embedOne < embedNeed);
+  assert.ok(embedNeed < embedNote);
+  assert.ok(embedNeed < embedHear);
+  assert.ok(embedNeed < embedClaim);
+  assert.equal((embed.match(/data-need-after-hear="true"/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-hear-one-first="true"/g) ?? []).length, 1);
+  assert.equal((embed.match(/href="#hear-opening"/g) ?? []).length, 1);
+  assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.match(embed, /Same listen URL pays only the difference/);
+  assert.doesNotMatch(embed, /Not bidding\?/);
+  assert.doesNotMatch(embed, /data-hear-after-difference/);
+  assert.doesNotMatch(embed, /data-hear-opening="hop"/);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  assert.doesNotMatch(empty, /data-need-after-hear/);
+  assert.doesNotMatch(empty, /need-after-hear/);
   assert.doesNotMatch(empty, /data-hear-one-first/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
