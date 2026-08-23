@@ -1,0 +1,147 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { Board } from "../src/app/page";
+import { rankListings, type Listing } from "../src/core/rank";
+
+const WEEK = "2026-W34";
+const NEXT_RESET = "2026-08-24T00:00:00.000Z";
+const root = process.cwd();
+const pageSource = readFileSync(join(root, "src", "app", "page.tsx"), "utf8");
+const cssSource = readFileSync(join(root, "src", "app", "board.css"), "utf8");
+const formSource = readFileSync(join(root, "src", "app", "outbid-form.tsx"), "utf8");
+const layoutSource = readFileSync(join(root, "src", "app", "layout.tsx"), "utf8");
+
+const FORBIDDEN =
+  /play count|stream count|monthly listeners|1\.2M streams|fake stream|<audio|waveform/i;
+
+function listing(
+  partial: Partial<Listing> & Pick<Listing, "id" | "listenUrl">,
+): Listing {
+  return {
+    weekId: WEEK,
+    track: partial.track ?? "Cold Open",
+    artist: partial.artist ?? "Ada",
+    bidUsd: partial.bidUsd ?? 5,
+    firstPaidAt: partial.firstPaidAt ?? "2026-08-17T00:00:00.000Z",
+    lastPaidAt: partial.lastPaidAt ?? "2026-08-17T00:00:00.000Z",
+    clicks: partial.clicks ?? 0,
+    ...partial,
+  };
+}
+
+function renderBoard(listings: Listing[]): string {
+  return renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: rankListings(listings),
+    }),
+  );
+}
+
+test("station desk is a unique opening-song surface, not a centered form theme", () => {
+  const empty = renderBoard([]);
+
+  assert.match(empty, /class="board station"/);
+  assert.match(empty, /station-desk/);
+  assert.match(empty, /studio-deck/);
+  assert.match(empty, /claim-rail/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /Outbid/);
+  assert.match(layoutSource, /Leaderboard/);
+  assert.match(layoutSource, /href="\/about"/);
+  assert.match(layoutSource, /href="\/rules"/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /−/);
+  assert.match(formSource, /\+/);
+  assert.match(formSource, /Outbid/);
+  assert.match(cssSource, /text-decoration: underline dashed/);
+  assert.match(cssSource, /grid-template-columns: minmax\(0, 1\.45fr\)/);
+  assert.doesNotMatch(cssSource, /nightclub|#12081a|#f472b6/i);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.doesNotMatch(pageSource, FORBIDDEN);
+});
+
+test("empty week has no player and no invented opening song", () => {
+  const html = renderBoard([]);
+  assert.match(html, /data-empty-week="true"/);
+  assert.match(html, /data-opening-song="false"/);
+  assert.match(html, /No opening song/);
+  assert.match(html, /Nobody has paid yet/);
+  assert.doesNotMatch(html, /<iframe/);
+  assert.doesNotMatch(html, /<audio/);
+  assert.doesNotMatch(html, /data-playback=/);
+  assert.doesNotMatch(html, /data-listen-url/);
+  assert.doesNotMatch(html, /data-listing-card/);
+  assert.doesNotMatch(html, /data-leaderboard/);
+  assert.doesNotMatch(html, FORBIDDEN);
+});
+
+test("player exists only for paid #1 and only for the stored listen URL", () => {
+  const youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const html = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: youtube,
+      bidUsd: 12,
+      clicks: 4,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+
+  assert.match(html, /data-opening-song="true"/);
+  assert.match(html, /data-playback="embed"/);
+  assert.match(html, /src="https:\/\/www.youtube.com\/embed\/dQw4w9WgXcQ"/);
+  assert.match(html, /data-listen-url="https:\/\/www.youtube.com\/watch\?v=dQw4w9WgXcQ"/);
+  assert.match(html, /href="\/click\/lst_open"/);
+  assert.match(html, /On air/);
+  assert.match(html, /\$12/);
+  assert.match(html, /4 clicks/);
+  assert.equal((html.match(/data-playback="embed"/g) ?? []).length, 1);
+  assert.equal((html.match(/<iframe/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /data-empty-week/);
+  assert.doesNotMatch(html, /generated\.mp3/);
+  assert.doesNotMatch(html, /<audio/);
+  assert.doesNotMatch(html, FORBIDDEN);
+});
+
+test("generic listen URL has no embed player and cards stay track — artist — listen", () => {
+  const listenUrl = "https://example.com/cold-open";
+  const html = renderBoard([
+    listing({
+      id: "lst_generic",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl,
+      clicks: 1,
+    }),
+  ]);
+
+  assert.match(html, /data-opening-song="true"/);
+  assert.match(html, /<h1 class="opening-track">Cold Open<\/h1>/);
+  assert.match(html, /<p class="opening-artist">Ada<\/p>/);
+  assert.match(html, /href="\/click\/lst_generic"/);
+  assert.match(html, /data-listen-url="https:\/\/example.com\/cold-open"/);
+  assert.match(html, /1 click</);
+  assert.match(html, /<h3 class="track">Cold Open<\/h3>/);
+  assert.match(html, /<p class="artist">Ada<\/p>/);
+  assert.match(html, />Listen</);
+  assert.doesNotMatch(html, /<iframe/);
+  assert.doesNotMatch(html, /data-playback=/);
+  assert.doesNotMatch(html, /\bplays\b/i);
+  assert.doesNotMatch(html, FORBIDDEN);
+});

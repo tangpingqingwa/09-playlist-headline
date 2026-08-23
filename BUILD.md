@@ -155,6 +155,12 @@ Each heading below is one PR. Dependencies are hard. Do not start the next PR in
 - **Dependencies:** PR 3, PR 5
 - **Acceptance:** Script is executable. `scripts/test.sh` and `.github/workflows/ci.yml` do not invoke it. Docs record PASS / PASS-ERROR / BLOCKED-SECRET. No invented paid rank. No fake stream.
 
+### PR 9: product UI — this week’s opening song
+- **Description:** Station / opening-track surface. The prize is this week’s opening song, not a centered SaaS form. Player only when a paid #1 exists, and only for the stored listen URL. Empty week has no player. Cards stay track — artist — listen, with $bid + clicks. Outbid DNA stays: Claim #1, dashed amount, ±, Outbid pill, Leaderboard/About/Rules.
+- **Files:** `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/board.css`, `src/app/outbid-form.tsx`, `tests/product-ui.test.ts`, `scripts/test.sh`
+- **Dependencies:** PR 6 (launch-path already shipped)
+- **Acceptance:** Empty week is honest and playerless. Paid #1 renders a real player/embed or listen hop to the stored URL. No invented play counts. `bash scripts/test.sh` stays offline.
+
 ---
 
 ## 6. Env

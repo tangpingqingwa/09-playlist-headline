@@ -41,13 +41,14 @@ grep -q '/about' SPEC.md || fail "SPEC.md missing /about"
 grep -q '/rules' SPEC.md || fail "SPEC.md missing /rules"
 grep -q 'public click' SPEC.md || fail "SPEC.md missing public clicks"
 
-echo "== BUILD PR sequence through live-smoke =="
+echo "== BUILD PR sequence through product UI =="
 grep -qE '^### PR 1: skeleton' BUILD.md || fail "BUILD.md missing ### PR 1: skeleton"
 grep -qE '^### PR 2: board UI like outbid.lol' BUILD.md || fail "BUILD.md missing ### PR 2: board UI like outbid.lol"
 grep -qE '^### PR 3: checkout' BUILD.md || fail "BUILD.md missing ### PR 3: checkout"
 grep -qE '^### PR 4: raise-bid' BUILD.md || fail "BUILD.md missing ### PR 4: raise-bid"
 grep -qE '^### PR 5: rules' BUILD.md || fail "BUILD.md missing ### PR 5: rules / about"
 grep -qE '^### PR 6: live-smoke' BUILD.md || fail "BUILD.md missing ### PR 6: live-smoke"
+grep -qE '^### PR 9: product UI' BUILD.md || fail "BUILD.md missing ### PR 9: product UI"
 if ! grep -E '^### PR [0-9]+:' BUILD.md >/dev/null; then
   fail "BUILD.md PR headings must be ### PR N: title"
 fi
@@ -163,6 +164,29 @@ if grep -RInEi 'play count|monthly listeners|1\.2M streams|<audio|waveform' \
   src/app/page.tsx src/app/outbid-form.tsx src/core/rank.ts src/app/board.css
 then
   fail "board UI must not render play counts or a fake stream"
+fi
+
+echo "== product UI: this week's opening song =="
+[[ -f tests/product-ui.test.ts ]] || fail "missing tests/product-ui.test.ts"
+grep -q 'station-desk' src/app/page.tsx || fail "board must be a station desk, not a lone form"
+grep -q 'studio-deck' src/app/page.tsx || fail "opening song must live on a studio deck"
+grep -q 'claim-rail' src/app/page.tsx || fail "Outbid claim must sit on a rail, not the prize"
+grep -q 'Leaderboard' src/app/layout.tsx || fail "nav must keep Leaderboard"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx || fail "form missing Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx || fail "form missing dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx || fail "form missing Outbid pill"
+grep -q 'data-opening-song' src/app/page.tsx || fail "opening-song honesty flags missing"
+grep -q 'data-empty-week' src/app/page.tsx || fail "empty week honesty flag missing"
+grep -q 'playbackForListing' src/app/page.tsx || fail "player must use stored listen URL playback"
+if grep -n 'kind === "embed"' src/app/page.tsx >/dev/null; then
+  :
+else
+  fail "player iframe must render only for official embed of the stored URL"
+fi
+if grep -RInEi '1\.2M streams|monthly listeners|waveform|<audio' \
+  src/app/page.tsx src/app/layout.tsx src/app/outbid-form.tsx src/app/board.css
+then
+  fail "product UI must not invent play counts or a fake stream"
 fi
 
 echo "== checkout files =="
@@ -342,6 +366,10 @@ if [[ -f package.json ]]; then
     || fail "about/rules copy test did not run"
   grep -q 'live-smoke is operator-only' "$test_log" \
     || fail "live-smoke offline guard test did not run"
+  grep -q 'station desk is a unique opening-song surface' "$test_log" \
+    || fail "product-ui station desk test did not run"
+  grep -q 'player exists only for paid #1' "$test_log" \
+    || fail "product-ui paid opening-song test did not run"
 fi
 
 echo "OK: buildable and testable"
