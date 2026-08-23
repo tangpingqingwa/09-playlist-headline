@@ -28,10 +28,9 @@ function listenHost(listenUrl: string): string {
 }
 
 export function ListingCard({ listing }: { listing: RankedListing }) {
-  const isOpening = listing.rank === 1;
   return (
     <article
-      className={isOpening ? "card card-on-air" : "card"}
+      className="card"
       data-listing-card=""
       data-rank={listing.rank}
       data-id={listing.id}
@@ -39,7 +38,7 @@ export function ListingCard({ listing }: { listing: RankedListing }) {
     >
       <span className="rank">#{listing.rank}</span>
       <div className="card-body">
-        <p className="card-cue">{isOpening ? "On air" : `Cue ${listing.rank}`}</p>
+        <p className="card-cue">Cue {listing.rank}</p>
         <h3 className="track">{listing.track}</h3>
         <p className="artist">{listing.artist}</p>
         <p className="card-listen-row">
@@ -70,21 +69,22 @@ export function Leaderboard({
 }: {
   listings: readonly RankedListing[];
 }) {
-  if (listings.length === 0) {
+  const rest = listings.filter((listing) => listing.rank > 1);
+  if (rest.length === 0) {
     return null;
   }
 
   return (
     <aside className="queue" aria-labelledby="queue-heading">
       <div className="queue-head">
-        <h2 id="queue-heading">This week&apos;s board</h2>
+        <h2 id="queue-heading">Also this week</h2>
         <p>
-          Rank is the bid. #1 is the opening song. Clicks are hops, not a
-          platform count.
+          Rank is the bid. These tracks are not the opening song. Clicks are
+          hops, not a platform count.
         </p>
       </div>
       <ol className="leaderboard" data-leaderboard="">
-        {listings.map((listing) => (
+        {rest.map((listing) => (
           <li key={listing.id}>
             <ListingCard listing={listing} />
           </li>
@@ -123,7 +123,14 @@ export function OpeningDeck({
   const playback = playbackForListing(listing);
 
   return (
-    <section className="studio-deck" data-opening-song="true">
+    <section
+      className="studio-deck"
+      data-opening-song="true"
+      data-listing-card=""
+      data-rank={listing.rank}
+      data-id={listing.id}
+      data-bid={listing.bidUsd}
+    >
       <p className="deck-kicker">On air · opening song</p>
       <p className="on-air-flag">LIVE OPEN</p>
       <h1 className="opening-track">{listing.track}</h1>

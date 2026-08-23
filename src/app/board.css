@@ -465,12 +465,6 @@ a:hover {
   min-height: 8.5rem;
 }
 
-.card-on-air,
-.card[data-rank="1"] {
-  border-color: var(--primary);
-  background: color-mix(in oklab, var(--primary) 8%, var(--card));
-}
-
 .rank {
   min-width: 2.2rem;
   font-family: var(--mono);
@@ -478,7 +472,6 @@ a:hover {
   color: var(--muted);
 }
 
-.card[data-rank="1"] .rank,
 .card[data-rank="2"] .rank,
 .card[data-rank="3"] .rank {
   color: var(--primary-fg);

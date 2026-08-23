@@ -119,6 +119,60 @@ test("player exists only for paid #1 and only for the stored listen URL", () => 
   assert.doesNotMatch(html, FORBIDDEN);
 });
 
+test("opening song lives once on the studio deck, not again as the first queue card", () => {
+  const html = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+
+  assert.match(html, /data-opening-song="true"/);
+  assert.match(html, /<h1 class="opening-track">Cold Open<\/h1>/);
+  assert.match(html, /data-id="lst_open"/);
+  assert.match(html, /data-id="lst_two"/);
+  assert.match(html, /Also this week/);
+  assert.match(html, /These tracks are not the opening song/);
+  assert.equal((html.match(/data-id="lst_open"/g) ?? []).length, 1);
+  assert.equal((html.match(/Cold Open/g) ?? []).length, 1);
+  assert.doesNotMatch(html, /This week&apos;s board/);
+  assert.doesNotMatch(html, /<h3 class="track">Cold Open<\/h3>/);
+  assert.match(html, /<h3 class="track">Second Slot<\/h3>/);
+  assert.doesNotMatch(html, FORBIDDEN);
+});
+
+test("solo #1 has no queue; empty week still has no cards", () => {
+  const solo = renderBoard([
+    listing({
+      id: "lst_only",
+      track: "Only Open",
+      listenUrl: "https://example.com/only-open",
+    }),
+  ]);
+  assert.match(solo, /data-opening-song="true"/);
+  assert.match(solo, /<h1 class="opening-track">Only Open<\/h1>/);
+  assert.match(solo, /data-id="lst_only"/);
+  assert.doesNotMatch(solo, /data-leaderboard/);
+  assert.doesNotMatch(solo, /<h3 class="track">Only Open<\/h3>/);
+  assert.doesNotMatch(solo, FORBIDDEN);
+
+  const empty = renderBoard([]);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.doesNotMatch(empty, /data-listing-card/);
+  assert.doesNotMatch(empty, /data-leaderboard/);
+});
+
 test("generic listen URL has no embed player and cards stay track — artist — listen", () => {
   const listenUrl = "https://example.com/cold-open";
   const html = renderBoard([
@@ -137,8 +191,8 @@ test("generic listen URL has no embed player and cards stay track — artist —
   assert.match(html, /href="\/click\/lst_generic"/);
   assert.match(html, /data-listen-url="https:\/\/example.com\/cold-open"/);
   assert.match(html, /1 click</);
-  assert.match(html, /<h3 class="track">Cold Open<\/h3>/);
-  assert.match(html, /<p class="artist">Ada<\/p>/);
+  assert.doesNotMatch(html, /data-leaderboard/);
+  assert.doesNotMatch(html, /<h3 class="track">Cold Open<\/h3>/);
   assert.match(html, />Listen</);
   assert.doesNotMatch(html, /<iframe/);
   assert.doesNotMatch(html, /data-playback=/);
