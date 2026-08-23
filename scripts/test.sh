@@ -418,57 +418,117 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
 fi
 
 echo "== UX: first-time listener hearing after Need \$N names the difference =="
-grep -q 'data-hear-after-difference' src/app/page.tsx \
-  || fail "occupied week must mark hear after the named raise difference"
-grep -q 'Not bidding? Hear the opening song' src/app/page.tsx \
-  || fail "after the difference, a listener who is not bidding must still hear"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "occupied week must still name the raise difference after Need \$N"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "occupied raise hop must keep same listen URL pays only the difference"
 grep -q 'occupied hear after the named raise' tests/product-ui.test.ts \
   || fail "product-ui tests must cover hear after the named raise difference"
-grep -q 'data-raise-note' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep the named raise difference"
-grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep same listen URL pays only the difference"
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "do not add a second Hear hop after the named raise difference"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "do not add a second Hear hop after the named raise difference"
+fi
 grep -q 'data-raise-after-hear-first' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep raise after Hear-first"
+  || fail "hear-after-difference leftover must keep raise after Hear-first"
 grep -q 'data-first-click="hear"' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep Hear as the first click"
+  || fail "hear-after-difference leftover must keep Hear as the first click"
 grep -q 'data-hear-after-raise' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep the Hear hop above Need \$N"
+  || fail "hear-after-difference leftover must keep the Hear hop above Need \$N"
 grep -q 'data-raise-after-hear' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep the Need \$N hop"
+  || fail "hear-after-difference leftover must keep the Need \$N hop"
 grep -q 'href="#claim"' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep the raise hop to #claim"
+  || fail "hear-after-difference leftover must keep the raise hop to #claim"
 grep -q 'Need ' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep Need \$N to take #1"
+  || fail "hear-after-difference leftover must keep Need \$N to take #1"
 grep -q 'data-first-read="hear"' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep occupied listen as the first read"
+  || fail "hear-after-difference leftover must keep occupied listen as the first read"
 grep -q "opening song is on" src/app/page.tsx \
-  || fail "hear-after-difference cut must keep the occupied hear lede"
+  || fail "hear-after-difference leftover must keep the occupied hear lede"
 grep -q 'data-hear-opening' src/app/page.tsx \
-  || fail "hear-after-difference cut must keep one hear path"
+  || fail "hear-after-difference leftover must keep one hear path"
 grep -q 'listenClickPath' src/app/page.tsx \
-  || fail "hear after the difference must still use the click route"
+  || fail "occupied hear must still use the click route"
 grep -q 'data-claim-opening' src/app/page.tsx \
-  || fail "hear-after-difference cut must not undo the artist claim rail"
+  || fail "hear-after-difference leftover must not undo the artist claim rail"
 grep -q 'pays only the difference' src/app/outbid-form.tsx \
-  || fail "hear-after-difference cut must leave the same-listen-URL difference on the rail"
+  || fail "hear-after-difference leftover must leave the same-listen-URL difference on the rail"
 grep -q 'Claim #1 for' src/app/outbid-form.tsx \
-  || fail "hear-after-difference cut must leave Claim #1 on the rail"
+  || fail "hear-after-difference leftover must leave Claim #1 on the rail"
 grep -q 'amount-field' src/app/outbid-form.tsx \
-  || fail "hear-after-difference cut must keep the dashed amount"
+  || fail "hear-after-difference leftover must keep the dashed amount"
 grep -q 'Outbid' src/app/outbid-form.tsx \
-  || fail "hear-after-difference cut must keep Outbid"
+  || fail "hear-after-difference leftover must keep Outbid"
 grep -q 'station-desk' src/app/page.tsx \
-  || fail "hear-after-difference cut must not rebuild the station desk"
+  || fail "hear-after-difference leftover must not rebuild the station desk"
 grep -q 'claim-rail' src/app/page.tsx \
-  || fail "hear-after-difference cut must leave the claim rail in place"
+  || fail "hear-after-difference leftover must leave the claim rail in place"
 grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
-  || fail "hear-after-difference cut must keep the station-desk columns"
+  || fail "hear-after-difference leftover must keep the station-desk columns"
 if grep -q 'station-desk hear-first' src/app/page.tsx; then
-  fail "hear-after-difference cut must not rebuild the station desk into a stacked layout"
+  fail "hear-after-difference leftover must not rebuild the station desk into a stacked layout"
 fi
 if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
-  fail "hear-after-difference cut must not revive the stays-dark empty week"
+  fail "hear-after-difference leftover must not revive the stays-dark empty week"
+fi
+
+echo "== UX: first-time listener hearing is one first Hear =="
+grep -q 'data-hear-one-first' src/app/page.tsx \
+  || fail "occupied week must mark one first Hear so two Hear cues do not split attention"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "one-first Hear must concentrate the existing first Hear hop"
+grep -q 'occupied hear is one first Hear' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover one first Hear without a second hop"
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "one-first Hear must not add a second Hear hop after the difference"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "one-first Hear must not add a second Hear hop after the difference"
+fi
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "one-first Hear cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "one-first Hear cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "one-first Hear cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "one-first Hear cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "one-first Hear cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "one-first Hear cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "one-first Hear cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "one-first Hear cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "one-first Hear cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "one-first Hear cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "one-first Hear hop must still use the click route"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "one-first Hear cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "one-first Hear cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "one-first Hear cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "one-first Hear cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "one-first Hear cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "one-first Hear cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "one-first Hear cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "one-first Hear cut must keep the station-desk columns"
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "one-first Hear cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "one-first Hear cut must not revive the stays-dark empty week"
 fi
 
 echo "== checkout files =="
@@ -670,6 +730,8 @@ if [[ -f package.json ]]; then
     || fail "first-time artist raise-after-hear-first test did not run"
   grep -q 'occupied hear after the named raise' "$test_log" \
     || fail "first-time listener hear-after-difference test did not run"
+  grep -q 'occupied hear is one first Hear' "$test_log" \
+    || fail "first-time listener one-first Hear test did not run"
 fi
 
 echo "OK: buildable and testable"

@@ -206,6 +206,7 @@ export function Board({
               data-listen-url={hearIsHop ? opening.listenUrl : undefined}
               data-first-click="hear"
               data-hear-after-raise="true"
+              data-hear-one-first="true"
               data-hear-opening={hearIsHop ? "hop" : undefined}
             >
               Hear this week&apos;s opening song
@@ -225,15 +226,6 @@ export function Board({
             <span className="raise-after-note" data-raise-note="difference">
               Same listen URL pays only the difference
             </span>
-          </p>
-          <p className="hear-after-difference">
-            <a
-              href={hearIsHop ? listenClickPath(opening.id) : "#hear-opening"}
-              data-listen-url={hearIsHop ? opening.listenUrl : undefined}
-              data-hear-after-difference="true"
-            >
-              Not bidding? Hear the opening song
-            </a>
           </p>
         </>
       ) : (
