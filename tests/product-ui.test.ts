@@ -311,3 +311,82 @@ test("first-time artist claiming the opening song is certain on the claim rail",
   assert.match(pageSource, /claim-rail/);
   assert.match(pageSource, /data-hear-opening/);
 });
+
+test("occupied listen is the first read, not Claim #1 / raise copy", () => {
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+    }),
+  ]);
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+  const empty = renderBoard([]);
+
+  const firstRead = hop.indexOf('data-first-read="hear"');
+  const hearFirst = hop.indexOf('data-hear-first="true"');
+  const hearCopy = hop.indexOf("opening song is on");
+  const openingTrack = hop.indexOf('<h1 class="opening-track">Cold Open</h1>');
+  const hearHop = hop.indexOf('data-hear-opening="hop"');
+  const claim = hop.indexOf('id="claim"');
+  const bidUsd = hop.indexOf("Bid USD");
+  assert.notEqual(firstRead, -1);
+  assert.notEqual(hearFirst, -1);
+  assert.notEqual(hearCopy, -1);
+  assert.notEqual(openingTrack, -1);
+  assert.notEqual(hearHop, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(firstRead < claim);
+  assert.ok(hearFirst < claim);
+  assert.ok(hearCopy < claim);
+  assert.ok(openingTrack < claim);
+  assert.ok(hearHop < claim);
+  assert.equal(bidUsd, -1);
+  assert.match(hop, /data-first-read="hear"/);
+  assert.match(hop, /data-hear-first="true"/);
+  assert.match(hop, /data-opening-song="true"[^>]*data-hear-first="true"/);
+  assert.match(hop, /opening song is on/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /Same listen URL pays only the difference/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+
+  const embedRead = embed.indexOf('data-first-read="hear"');
+  const embedHear = embed.indexOf('data-hear-opening="embed"');
+  const embedClaim = embed.indexOf('id="claim"');
+  assert.notEqual(embedRead, -1);
+  assert.notEqual(embedHear, -1);
+  assert.notEqual(embedClaim, -1);
+  assert.ok(embedRead < embedHear);
+  assert.ok(embedHear < embedClaim);
+  assert.match(embed, /data-hear-first="true"/);
+  assert.doesNotMatch(embed, /Bid USD/);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  const emptyOpening = empty.indexOf("No opening song");
+  const emptyClaim = empty.indexOf('id="claim"');
+  assert.notEqual(emptyOpening, -1);
+  assert.notEqual(emptyClaim, -1);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /data-hear-first="false"/);
+  assert.doesNotMatch(empty, /data-hear-first="true"/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /No opening song/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+});
