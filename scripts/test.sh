@@ -534,7 +534,7 @@ fi
 echo "== UX: first-time artist Need \$N after one Hear is certain =="
 grep -q 'data-need-after-hear' src/app/page.tsx \
   || fail "occupied week must concentrate the existing Need \$N hop after one Hear"
-grep -q 'className="need-after-hear"' src/app/page.tsx \
+grep -q 'className="need-after-hear' src/app/page.tsx \
   || fail "Need \$N after Hear must stay the existing #claim hop, not a second Hear"
 grep -q 'occupied Need $N after one Hear is certain' tests/product-ui.test.ts \
   || fail "product-ui tests must cover Need \$N after one Hear"
@@ -617,7 +617,7 @@ if grep -q 'data-hear-after-difference' src/app/page.tsx; then
 fi
 grep -q 'data-need-after-hear' src/app/page.tsx \
   || fail "hear-after-need cut must keep Need \$N as the raise control"
-grep -q 'className="need-after-hear"' src/app/page.tsx \
+grep -q 'className="need-after-hear' src/app/page.tsx \
   || fail "hear-after-need cut must keep the existing Need \$N #claim hop"
 grep -q 'data-hear-one-first' src/app/page.tsx \
   || fail "hear-after-need cut must keep one first Hear"
@@ -683,6 +683,102 @@ if grep -q 'station-desk hear-first' src/app/page.tsx; then
 fi
 if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
   fail "hear-after-need cut must not revive the stays-dark empty week"
+fi
+
+echo "== UX: first-time artist Need \$N after Hear is re-concentrated =="
+grep -q 'data-need-after-hear-two' src/app/page.tsx \
+  || fail "occupied week must concentrate the existing Need \$N hop after Hear is taller"
+grep -q 'className="need-after-hear need-after-hear-two"' src/app/page.tsx \
+  || fail "Need \$N after Hear is re-concentrated must stay the existing #claim hop, not a second Hear"
+grep -q 'occupied Need $N after Hear is re-concentrated is certain' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover Need \$N after Hear is re-concentrated"
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "Need-after-Hear-two must not add a second Hear hop after the difference"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "Need-after-Hear-two must not add a second Hear hop after the difference"
+fi
+grep -q 'data-hear-after-need' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep Hear after Need \$N"
+grep -q 'className="listen opening-listen hear-after-need"' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep Need \$N as the raise control"
+grep -q 'data-hear-one-first' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep one first Hear"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep Hear as the first click"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "Need-after-Hear-two hop must still use the click route"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "Need-after-Hear-two cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "Need-after-Hear-two cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "Need-after-Hear-two cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "Need-after-Hear-two cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "Need-after-Hear-two cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "Need-after-Hear-two cut must keep the station-desk columns"
+grep -q '.need-after-hear' src/app/board.css \
+  || fail "Need-after-Hear-two cut must keep hop-local Need \$N weight"
+grep -q 'min-height: 2.15rem' src/app/board.css \
+  || fail "Need \$N must stay a dashed raise control after Hear is re-concentrated"
+grep -q 'border: 2px dashed' src/app/board.css \
+  || fail "Need \$N must stay the dashed raise control, not a recolor"
+grep -q '.need-after-hear.need-after-hear-two' src/app/board.css \
+  || fail "Need-after-Hear-two cut must keep hop-local Need \$N size after Hear is taller"
+grep -q '.opening-listen.hear-after-need' src/app/board.css \
+  || fail "Need-after-Hear-two cut must keep hop-local Hear size after Need \$N"
+if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+  fail "Need \$N must stay the raise hop, not a second filled Hear pill"
+fi
+if grep -A20 '.need-after-hear.need-after-hear-two {' src/app/board.css | grep -q 'background:'; then
+  fail "Need-after-Hear-two must concentrate Need \$N by size, not a recolor"
+fi
+if grep -A20 '.need-after-hear.need-after-hear-two {' src/app/board.css | grep -q 'border:'; then
+  fail "Need-after-Hear-two must keep the existing dashed raise box, not restyle the border"
+fi
+need_after_hear_two_rule="$(awk '/\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css)"
+echo "$need_after_hear_two_rule" | grep -q 'min-height: 2.45rem' \
+  || fail "Need-after-Hear-two must make Need \$N taller than the quieter dashed box"
+hear_after_need_two_rule="$(awk '/\.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
+echo "$hear_after_need_two_rule" | grep -q 'min-height: 2.75rem' \
+  || fail "Need-after-Hear-two must keep Hear taller than the concentrated Need \$N box"
+if echo "$hear_after_need_two_rule" | grep -q 'background:'; then
+  fail "Need-after-Hear-two must not recolor Hear"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "Need-after-Hear-two cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "Need-after-Hear-two cut must not revive the stays-dark empty week"
 fi
 
 echo "== checkout files =="
@@ -890,6 +986,8 @@ if [[ -f package.json ]]; then
     || fail "first-time artist Need-after-Hear test did not run"
   grep -q 'occupied hear after Need $N is certain' "$test_log" \
     || fail "first-time listener hear-after-need test did not run"
+  grep -q 'occupied Need $N after Hear is re-concentrated is certain' "$test_log" \
+    || fail "first-time artist Need-after-Hear-two test did not run"
 fi
 
 echo "OK: buildable and testable"
