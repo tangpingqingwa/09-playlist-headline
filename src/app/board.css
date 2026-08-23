@@ -256,6 +256,30 @@ a:hover {
   color: var(--primary-fg);
 }
 
+.hear-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  align-items: baseline;
+  margin: 0 0 0.45rem;
+}
+
+.opening-source {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+}
+
+.studio-deck .opening-facts {
+  margin-top: 0.9rem;
+  margin-bottom: 0;
+}
+
 .opening .player,
 .studio-deck .player {
   display: block;

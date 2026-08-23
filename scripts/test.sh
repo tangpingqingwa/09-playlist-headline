@@ -208,6 +208,25 @@ grep -q 'claim-rail' src/app/page.tsx \
 grep -q 'empty week does not claim the studio stays dark' tests/product-ui.test.ts \
   || fail "product-ui tests must cover the empty-week stays-dark contradiction"
 
+echo "== UX: first-time listener hears paid #1 one way =="
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "paid #1 must mark one hear control"
+grep -q 'Hear this week' src/app/page.tsx \
+  || fail "hop-only #1 must offer one hear hop"
+if grep -q 'Official embed is not available' src/app/page.tsx; then
+  fail "do not apologize for a missing embed next to the hop"
+fi
+grep -q 'data-hear-opening="embed"' src/app/page.tsx \
+  || fail "official embed must be the hear path when it exists"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "hear hop must still use the click route"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "hear-#1 cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "hear-#1 cut must leave the claim rail in place"
+grep -q 'one certain way to hear' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover one hear path for paid #1"
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -393,6 +412,8 @@ if [[ -f package.json ]]; then
     || fail "product-ui first-artist no-duplicate-#1 test did not run"
   grep -q 'empty week does not claim the studio stays dark' "$test_log" \
     || fail "first-time listener empty-week honesty test did not run"
+  grep -q 'one certain way to hear' "$test_log" \
+    || fail "first-time listener hear-#1 test did not run"
 fi
 
 echo "OK: buildable and testable"

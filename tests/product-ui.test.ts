@@ -126,7 +126,11 @@ test("player exists only for paid #1 and only for the stored listen URL", () => 
   assert.match(html, /On air/);
   assert.match(html, /\$12/);
   assert.match(html, /4 clicks/);
+  assert.match(html, /data-hear-opening="embed"/);
+  assert.match(html, /Open on youtube.com/);
+  assert.doesNotMatch(html, /Hear this week/);
   assert.equal((html.match(/data-playback="embed"/g) ?? []).length, 1);
+  assert.equal((html.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.equal((html.match(/<iframe/g) ?? []).length, 1);
   assert.doesNotMatch(html, /data-empty-week/);
   assert.doesNotMatch(html, /generated\.mp3/);
@@ -208,9 +212,52 @@ test("generic listen URL has no embed player and cards stay track — artist —
   assert.match(html, /1 click</);
   assert.doesNotMatch(html, /data-leaderboard/);
   assert.doesNotMatch(html, /<h3 class="track">Cold Open<\/h3>/);
-  assert.match(html, />Listen</);
+  assert.match(html, /Hear this week/);
+  assert.match(html, /data-hear-opening="hop"/);
+  assert.doesNotMatch(html, /Official embed is not available/);
   assert.doesNotMatch(html, /<iframe/);
   assert.doesNotMatch(html, /data-playback=/);
   assert.doesNotMatch(html, /\bplays\b/i);
   assert.doesNotMatch(html, FORBIDDEN);
+});
+
+test("paid #1 has one certain way to hear the opening song", () => {
+  const embed = renderBoard([
+    listing({
+      id: "lst_open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    }),
+  ]);
+  assert.match(embed, /data-hear-opening="embed"/);
+  assert.match(embed, /data-playback="embed"/);
+  assert.match(embed, /src="https:\/\/www.youtube.com\/embed\/dQw4w9WgXcQ"/);
+  assert.match(embed, /href="\/click\/lst_open"/);
+  assert.match(embed, /Open on youtube.com/);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.equal((embed.match(/<iframe/g) ?? []).length, 1);
+  assert.doesNotMatch(embed, /Hear this week/);
+  assert.doesNotMatch(embed, /Official embed is not available/);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  const hop = renderBoard([
+    listing({
+      id: "lst_hop",
+      listenUrl: "https://example.com/cold-open",
+    }),
+  ]);
+  assert.match(hop, /data-hear-opening="hop"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /href="\/click\/lst_hop"/);
+  assert.match(hop, /example.com/);
+  assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.doesNotMatch(hop, /<iframe/);
+  assert.doesNotMatch(hop, /data-playback=/);
+  assert.doesNotMatch(hop, /Official embed is not available/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+
+  const empty = renderBoard([]);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /<iframe/);
+  assert.doesNotMatch(empty, FORBIDDEN);
 });
