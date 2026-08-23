@@ -556,8 +556,8 @@ test("occupied hear is the first click after the Need $N hop", () => {
   assert.ok(embed.indexOf('data-first-read="hear"') < embedHearAfter);
   assert.ok(embedHearAfter < embedRaise);
   assert.ok(embedFirstClick < embedRaise);
-  assert.match(embed, /href="#opening"/);
-  assert.match(embed, /id="opening"/);
+  assert.match(embed, /href="#hear-opening"/);
+  assert.match(embed, /id="hear-opening"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
@@ -566,7 +566,7 @@ test("occupied hear is the first click after the Need $N hop", () => {
 
   assert.doesNotMatch(empty, /data-hear-after-raise/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
-  assert.doesNotMatch(empty, /href="#opening"/);
+  assert.doesNotMatch(empty, /href="#hear-opening"/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /Claim #1 for/);
