@@ -138,6 +138,7 @@ export function OpeningDeck({
       <p className="opening-artist">{listing.artist}</p>
       {playback.kind === "embed" ? (
         <iframe
+          id="hear-opening"
           className="player"
           title={`${listing.track} official embed`}
           src={playback.embedUrl}
@@ -147,15 +148,7 @@ export function OpeningDeck({
           allow="encrypted-media"
         />
       ) : (
-        <p className="hear-row">
-          <a
-            className="listen opening-listen"
-            href={listenClickPath(listing.id)}
-            data-listen-url={listing.listenUrl}
-            data-hear-opening="hop"
-          >
-            Hear this week&apos;s opening song
-          </a>
+        <p className="hear-row" id="hear-opening">
           <span className="listen-host">{listenHost(listing.listenUrl)}</span>
         </p>
       )}
@@ -192,6 +185,8 @@ export function Board({
   const opening = listings[0];
   const topBid = opening?.bidUsd ?? 0;
   const defaultAmount = topBid > 0 ? topBid + 1 : MIN_BID_USD;
+  const openingPlayback = opening ? playbackForListing(opening) : undefined;
+  const hearIsHop = openingPlayback?.kind === "redirect";
 
   return (
     <main className="board station" data-board="" data-week={weekId}>
@@ -203,6 +198,21 @@ export function Board({
           <p className="lede" data-hear-first="true" data-first-read="hear">
             This week&apos;s opening song is on. Rank is the bid. Playback is
             real.
+          </p>
+          <p className="hear-after-raise">
+            <a
+              className="listen opening-listen"
+              href={hearIsHop ? listenClickPath(opening.id) : "#hear-opening"}
+              data-listen-url={hearIsHop ? opening.listenUrl : undefined}
+              data-first-click="hear"
+              data-hear-after-raise="true"
+              data-hear-opening={hearIsHop ? "hop" : undefined}
+            >
+              Hear this week&apos;s opening song
+            </a>
+            {hearIsHop ? (
+              <span className="listen-host">{listenHost(opening.listenUrl)}</span>
+            ) : null}
           </p>
           <p className="raise-after-hear">
             <a href="#claim" data-raise-after-hear="true">

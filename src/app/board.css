@@ -131,12 +131,26 @@ a:hover {
   line-height: 1.45;
 }
 
+.hear-after-raise {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  align-items: baseline;
+  margin: 0 0 0.45rem;
+}
+
 .raise-after-hear {
   margin: 0 0 0.55rem;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .raise-after-hear a {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.raise-after-hear a:hover {
   color: var(--primary);
 }
 
