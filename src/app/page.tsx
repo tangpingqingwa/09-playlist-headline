@@ -135,6 +135,38 @@ export function OpeningDeck({
       <p className="on-air-flag">LIVE OPEN</p>
       <h1 className="opening-track">{listing.track}</h1>
       <p className="opening-artist">{listing.artist}</p>
+      {playback.kind === "embed" ? (
+        <iframe
+          className="player"
+          title={`${listing.track} official embed`}
+          src={playback.embedUrl}
+          data-listen-url={playback.listenUrl}
+          data-playback="embed"
+          data-hear-opening="embed"
+          allow="encrypted-media"
+        />
+      ) : (
+        <p className="hear-row">
+          <a
+            className="listen opening-listen"
+            href={listenClickPath(listing.id)}
+            data-listen-url={listing.listenUrl}
+            data-hear-opening="hop"
+          >
+            Hear this week&apos;s opening song
+          </a>
+          <span className="listen-host">{listenHost(listing.listenUrl)}</span>
+        </p>
+      )}
+      {playback.kind === "embed" ? (
+        <a
+          className="listen opening-source"
+          href={listenClickPath(listing.id)}
+          data-listen-url={listing.listenUrl}
+        >
+          Open on {listenHost(listing.listenUrl)}
+        </a>
+      ) : null}
       <p className="opening-facts">
         <span className="bid" data-bid="">
           {formatUsd(listing.bidUsd)}
@@ -143,28 +175,6 @@ export function OpeningDeck({
           {formatClicks(listing.clicks)}
         </span>
       </p>
-      <a
-        className="listen opening-listen"
-        href={listenClickPath(listing.id)}
-        data-listen-url={listing.listenUrl}
-      >
-        Listen
-      </a>
-      {playback.kind === "embed" ? (
-        <iframe
-          className="player"
-          title={`${listing.track} official embed`}
-          src={playback.embedUrl}
-          data-listen-url={playback.listenUrl}
-          data-playback="embed"
-          allow="encrypted-media"
-        />
-      ) : (
-        <p className="redirect-note">
-          Official embed is not available for this host. Listen hops to the
-          stored URL.
-        </p>
-      )}
     </section>
   );
 }
