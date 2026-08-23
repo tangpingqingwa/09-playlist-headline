@@ -5,6 +5,7 @@ import { MIN_BID_USD } from "../core/rank";
 
 type BidFormProps = {
   defaultAmount: number;
+  topBidUsd?: number;
 };
 
 function clampAmount(value: number): number {
@@ -12,8 +13,10 @@ function clampAmount(value: number): number {
   return Math.max(MIN_BID_USD, Math.trunc(value));
 }
 
-export function BidForm({ defaultAmount }: BidFormProps) {
+export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
   const [amount, setAmount] = useState(() => clampAmount(defaultAmount));
+  const occupied = topBidUsd !== undefined && topBidUsd >= MIN_BID_USD;
+  const takeUsd = clampAmount(defaultAmount);
 
   function bump(delta: number) {
     setAmount((current) => clampAmount(current + delta));
@@ -62,9 +65,13 @@ export function BidForm({ defaultAmount }: BidFormProps) {
             </button>
           </span>
         </h2>
-        <p className="claim-note">
-          New spots start at ${MIN_BID_USD}. Paying less than #1 still lists at
-          the rank that bid can take.
+        <p
+          className="claim-note"
+          data-claim-note={occupied ? "take" : "empty"}
+        >
+          {occupied
+            ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference.`
+            : `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1.`}
         </p>
         <div className="fields">
           <label>
@@ -104,10 +111,6 @@ export function BidForm({ defaultAmount }: BidFormProps) {
             Outbid
           </button>
         </div>
-        <p className="raise-hint">
-          Already on this week? Enter the same listen URL and raise. You pay
-          only the difference.
-        </p>
       </form>
     </section>
   );

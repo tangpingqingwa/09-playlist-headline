@@ -227,6 +227,32 @@ grep -q 'claim-rail' src/app/page.tsx \
 grep -q 'one certain way to hear' tests/product-ui.test.ts \
   || fail "product-ui tests must cover one hear path for paid #1"
 
+echo "== UX: first-time artist claiming the opening song =="
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "claim rail must mark empty vs take for the opening song"
+grep -q 'data-claim-note' src/app/outbid-form.tsx \
+  || fail "claim note must mark empty vs take"
+grep -q 'claims this week' src/app/outbid-form.tsx \
+  || fail "empty claim must say \$5 claims this week's opening song"
+grep -q 'Need \$' src/app/outbid-form.tsx \
+  || fail "occupied claim must name the dollar amount to take #1"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "occupied claim must surface raise-pays-difference next to Claim #1"
+grep -q 'first-time artist claiming the opening song' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover first-time artist claim certainty"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx || fail "artist claim cut must keep Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx || fail "artist claim cut must keep dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx || fail "artist claim cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "artist claim cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "artist claim cut must leave the claim rail in place"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "artist claim cut must not redo the hear path"
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "artist claim cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -414,6 +440,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener empty-week honesty test did not run"
   grep -q 'one certain way to hear' "$test_log" \
     || fail "first-time listener hear-#1 test did not run"
+  grep -q 'first-time artist claiming the opening song' "$test_log" \
+    || fail "first-time artist claim-opening test did not run"
 fi
 
 echo "OK: buildable and testable"

@@ -261,3 +261,53 @@ test("paid #1 has one certain way to hear the opening song", () => {
   assert.doesNotMatch(empty, /<iframe/);
   assert.doesNotMatch(empty, FORBIDDEN);
 });
+
+test("first-time artist claiming the opening song is certain on the claim rail", () => {
+  const empty = renderBoard([]);
+  assert.match(empty, /data-claim-opening="empty"/);
+  assert.match(empty, /data-claim-note="empty"/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /A completed payment takes #1/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, />Outbid</);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /Nobody has paid yet/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /pays only the difference/);
+  assert.doesNotMatch(empty, /New spots start/);
+  assert.doesNotMatch(empty, /Already on this week/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+    }),
+  ]);
+  assert.match(occupied, /data-claim-opening="take"/);
+  assert.match(occupied, /data-claim-note="take"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /A new listing pays that full amount/);
+  assert.match(occupied, /Same listen URL pays only the difference/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.match(occupied, />Outbid</);
+  assert.match(occupied, /data-hear-opening="hop"/);
+  assert.match(occupied, /\$12/);
+  assert.doesNotMatch(occupied, /data-claim-opening="empty"/);
+  assert.doesNotMatch(occupied, /\$5 claims this week/);
+  assert.doesNotMatch(occupied, /New spots start/);
+  assert.doesNotMatch(occupied, /Already on this week/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /−/);
+  assert.match(formSource, /\+/);
+  assert.match(formSource, /Outbid/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(pageSource, /claim-rail/);
+  assert.match(pageSource, /data-hear-opening/);
+});
