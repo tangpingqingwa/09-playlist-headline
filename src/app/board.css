@@ -140,18 +140,28 @@ a:hover {
 }
 
 .raise-after-hear {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.7rem;
+  align-items: baseline;
   margin: 0 0 0.55rem;
-  font-weight: 600;
-  color: var(--muted);
 }
 
 .raise-after-hear a {
-  color: var(--muted);
-  font-weight: 600;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline dashed;
+  text-underline-offset: 0.28em;
 }
 
 .raise-after-hear a:hover {
   color: var(--primary);
+}
+
+.raise-after-note {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.88rem;
 }
 
 .period-meta {

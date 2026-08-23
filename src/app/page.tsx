@@ -215,9 +215,16 @@ export function Board({
             ) : null}
           </p>
           <p className="raise-after-hear">
-            <a href="#claim" data-raise-after-hear="true">
+            <a
+              href="#claim"
+              data-raise-after-hear="true"
+              data-raise-after-hear-first="true"
+            >
               Need {formatUsd(defaultAmount)} to take #1
             </a>
+            <span className="raise-after-note" data-raise-note="difference">
+              Same listen URL pays only the difference
+            </span>
           </p>
         </>
       ) : (
