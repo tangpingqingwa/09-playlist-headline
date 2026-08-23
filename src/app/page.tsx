@@ -113,8 +113,8 @@ export function OpeningDeck({
           track or a stream.
         </p>
         <p className="deck-note">
-          The studio stays dark until a completed payment claims #1. There is
-          no player on an empty week.
+          There is no player this week. A completed payment claims #1. Until
+          then this week stays empty.
         </p>
       </section>
     );

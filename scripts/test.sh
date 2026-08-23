@@ -189,6 +189,25 @@ then
   fail "product UI must not invent play counts or a fake stream"
 fi
 
+echo "== UX: first-time listener empty week is honest =="
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty week must not claim the studio stays dark on a lit cream card"
+fi
+grep -q 'There is no player this week' src/app/page.tsx \
+  || fail "empty week must tell a first-time listener there is no player"
+grep -q 'No opening song' src/app/page.tsx \
+  || fail "empty week must still say there is no opening song"
+grep -q 'Nobody has paid yet' src/app/page.tsx \
+  || fail "empty week must stay honest about unpaid #1"
+grep -q 'empty-deck' src/app/page.tsx \
+  || fail "empty week must stay on the studio deck"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "first-time listener cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "first-time listener cut must leave the claim rail in place"
+grep -q 'empty week does not claim the studio stays dark' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover the empty-week stays-dark contradiction"
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -372,6 +391,8 @@ if [[ -f package.json ]]; then
     || fail "product-ui paid opening-song test did not run"
   grep -q 'opening song lives once on the studio deck' "$test_log" \
     || fail "product-ui first-artist no-duplicate-#1 test did not run"
+  grep -q 'empty week does not claim the studio stays dark' "$test_log" \
+    || fail "first-time listener empty-week honesty test did not run"
 fi
 
 echo "OK: buildable and testable"
