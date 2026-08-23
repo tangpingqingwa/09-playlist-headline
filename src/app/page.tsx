@@ -226,6 +226,15 @@ export function Board({
               Same listen URL pays only the difference
             </span>
           </p>
+          <p className="hear-after-difference">
+            <a
+              href={hearIsHop ? listenClickPath(opening.id) : "#hear-opening"}
+              data-listen-url={hearIsHop ? opening.listenUrl : undefined}
+              data-hear-after-difference="true"
+            >
+              Not bidding? Hear the opening song
+            </a>
+          </p>
         </>
       ) : (
         <p className="lede">
