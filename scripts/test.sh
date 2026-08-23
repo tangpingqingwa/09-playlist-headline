@@ -370,6 +370,8 @@ if [[ -f package.json ]]; then
     || fail "product-ui station desk test did not run"
   grep -q 'player exists only for paid #1' "$test_log" \
     || fail "product-ui paid opening-song test did not run"
+  grep -q 'opening song lives once on the studio deck' "$test_log" \
+    || fail "product-ui first-artist no-duplicate-#1 test did not run"
 fi
 
 echo "OK: buildable and testable"
