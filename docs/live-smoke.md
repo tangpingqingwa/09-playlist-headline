@@ -21,11 +21,20 @@ The script:
 
 Overrides: `LIVE_SMOKE_BASE`, `LIVE_SMOKE_PORT`.
 
-Live Polar (operator machine with a real token):
+Live Polar sandbox (operator machine; token is sandbox-only — production `https://api.polar.sh` returns 401). Source `~/.polar/sandbox.env`, set `POLAR_LIVE=1`, unset `POLAR_FIXTURE_ONLY`, and point the client at the sandbox API:
 
 ```bash
-POLAR_LIVE=1 POLAR_ACCESS_TOKEN=… bash scripts/live-smoke.sh
+set -a
+# shellcheck disable=SC1091
+source "$HOME/.polar/sandbox.env"
+set +a
+unset POLAR_FIXTURE_ONLY
+export POLAR_LIVE=1
+export POLAR_API_BASE=https://sandbox-api.polar.sh
+bash scripts/live-smoke.sh
 ```
+
+The live process must return a real `https://sandbox.polar.sh/…` Checkout URL. A fixture `/return?sessionId=` listing is a FAIL. Missing secret stays `BLOCKED-SECRET`; do not invent a paid row. `POLAR_API_BASE` defaults to production Polar; the live client honors the override. Never set `POLAR_LIVE` in `scripts/test.sh` or Actions.
 
 ## Verdicts
 
@@ -38,7 +47,7 @@ POLAR_LIVE=1 POLAR_ACCESS_TOKEN=… bash scripts/live-smoke.sh
 
 ## This session
 
-Ran `bash scripts/live-smoke.sh` on **2026-08-22** from `feat/live-smoke` (parent `3c3a065`, about/rules on `origin/main`). Local process started by the script on `http://127.0.0.1:54861` via `scripts/live-smoke-server.ts`. `POLAR_LIVE` unset. `POLAR_ACCESS_TOKEN` unset. Fixture path for click/playback only. No invented paid rank: empty board first; `$4` stayed off the board; unpaid Polar checkout was not attempted. Official YouTube embed of the stored listen URL. No generated file.
+Ran `bash scripts/test.sh` (offline, Polar env unset, `POLAR_FIXTURE_ONLY=1`, 49 tests) then `bash scripts/live-smoke.sh` on **2026-08-23** from `feat/live-polar-sandbox-smoke` (parent `0670b4d` / `origin/main`). Operator sourced `/Users/yann/.polar/sandbox.env` (mode 600; token length 53, webhook length 49, product id length 36 — values never printed or committed). `POLAR_LIVE=1`. `POLAR_FIXTURE_ONLY` unset. `POLAR_API_BASE=https://sandbox-api.polar.sh`. Sandbox token against production `https://api.polar.sh` is `401`. Fixture walk on script-started `http://127.0.0.1:58952` via `scripts/live-smoke-server.ts`. Live Polar walk on a second live-flagged local process. Week `2026-W34` UTC. No invented paid rank: empty board first; `$4` stayed off the board; unpaid live Polar session not listed. Official YouTube embed of the stored listen URL. No generated file.
 
 | Flow | Result | Note |
 |---|---|---|
@@ -46,15 +55,17 @@ Ran `bash scripts/live-smoke.sh` on **2026-08-22** from `feat/live-smoke` (paren
 | board | **PASS** | `GET /` 200 week `2026-W34` empty + bid form. No opening song. No invented play counts. No fake stream. |
 | about / rules | **PASS** | `GET /about` and `GET /rules` 200. Min $5, older wins ties, raise pays difference, weekly UTC, no fake streams, no invented play counts. |
 | bid-below-min | **PASS-ERROR** | `POST /api/checkout` $4 → 400 `bid_below_min`. Board unchanged. |
-| create checkout | **BLOCKED-SECRET** | `BLOCKED-SECRET: POLAR_ACCESS_TOKEN` |
-| click | **PASS** | `GET /click/lst_0f037df9-0759-4d57-a65a-b0a50a6b80a3` 302 to stored `https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Clicks `0→1`. Fixture listing after live pay blocked. |
+| create checkout | **PASS** | Real Polar sandbox Checkout URL `https://sandbox.polar.sh/checkout/polar_c_0SYuFqVdgsPJrKBa8HDGCfWEU7tXNbToRoVq32Rf8E7`. Not a fixture `/return` listing. Unpaid session not listed. |
+| click | **PASS** | `GET /click/lst_904c9456-803b-4053-bbf8-b26bae6f4845` 302 to stored `https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Clicks `0→1`. Fixture listing after live pay for the hop only. |
 | playback | **PASS** | Official YouTube embed of the stored listen URL (`youtube.com/embed/dQw4w9WgXcQ`). No generated file. |
 
-Process exit 0 (`PASS=5` `PASS-ERROR=1` `BLOCKED-SECRET=1` `FAIL=0`). Re-run with `POLAR_LIVE=1` and a real token to complete Polar Checkout; missing token must stay `BLOCKED-SECRET`, never a fixture listing treated as live Polar.
+Process exit 0 (`PASS=6` `PASS-ERROR=1` `BLOCKED-SECRET=0` `FAIL=0`). Missing Polar secret still records `BLOCKED-SECRET` and must not invent a paid opening track. `scripts/test.sh` still unsets `POLAR_LIVE` and never invokes this script.
 
 ## What this does not do
 
 - Does not call `scripts/live-smoke.sh` from `scripts/test.sh` or Actions.
-- Does not set `POLAR_LIVE=1` in CI.
+- Does not set `POLAR_LIVE=1` in CI or `scripts/test.sh`.
 - Does not invent a paid opening track when Polar is blocked.
 - Does not invent play counts or a fake stream.
+- Does not send the sandbox token to production `https://api.polar.sh`.
+- Does not treat a fixture `/return?sessionId=` URL as live Polar checkout.

@@ -30,6 +30,8 @@ test("live-smoke is operator-only and stays off the offline gate", () => {
   assert.match(script, /youtube.com\/embed/);
   assert.match(script, /generated\\.mp3/);
   assert.match(script, /scripts\/live-smoke-server\.ts/);
+  assert.match(script, /sandbox\.polar\.sh/);
+  assert.match(script, /POLAR_API_BASE/);
   assert.doesNotMatch(script, /invented paid opening song/);
 });
 
@@ -53,7 +55,7 @@ test("scripts/test.sh and CI stay offline and do not invoke live-smoke", () => {
   assert.doesNotMatch(testSh, /^\s*(bash )?(\.\/)?scripts\/live-smoke\.sh/m);
   assert.doesNotMatch(testSh, /^[[:space:]]*(export[[:space:]]+)?POLAR_LIVE=1/m);
   assert.match(testSh, /must not invoke live-smoke/);
-  assert.match(testSh, /unset POLAR_LIVE POLAR_ACCESS_TOKEN POLAR_WEBHOOK_SECRET/);
+  assert.match(testSh, /unset POLAR_LIVE POLAR_ACCESS_TOKEN POLAR_WEBHOOK_SECRET POLAR_API_BASE POLAR_PRODUCT_ID/);
   assert.match(testSh, /POLAR_FIXTURE_ONLY=1/);
 
   assert.doesNotMatch(ci, /live-smoke/);

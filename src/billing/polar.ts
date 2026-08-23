@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import {
   polarAccessToken,
   polarLiveEnabled,
+  polarProductId,
   polarWebhookSecret,
   publicBaseUrl,
   type PolarEnv,
@@ -17,8 +18,15 @@ import type {
   WebhookResult,
 } from "./port";
 
-/** Only used when POLAR_LIVE=1. tests/ never fetch this host. */
+/** Production Polar API. Override with POLAR_API_BASE (sandbox-api for operator smoke). */
 export const POLAR_API_BASE = "https://api.polar.sh";
+
+/** Default stays production. Empty / unset POLAR_API_BASE does not change that. */
+export function polarApiBase(env: PolarEnv = process.env): string {
+  const fromEnv = env.POLAR_API_BASE?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  return POLAR_API_BASE;
+}
 
 export type PolarPaymentOptions = {
   env?: PolarEnv;
@@ -49,26 +57,14 @@ export class PolarPayment implements PaymentPort {
     const token = this.requireToken();
     let response: Response;
     try {
-      response = await this.fetchFn(`${POLAR_API_BASE}/v1/checkouts/`, {
+      response = await this.fetchFn(`${polarApiBase(this.env)}/v1/checkouts/`, {
         method: "POST",
         headers: {
           authorization: `Bearer ${token}`,
           "content-type": "application/json",
           accept: "application/json",
         },
-        body: JSON.stringify({
-          amount: input.amountUsd * 100,
-          currency: "usd",
-          success_url: `${publicBaseUrl(this.env)}/return?sessionId={CHECKOUT_ID}`,
-          metadata: {
-            track: input.listingDraft.track,
-            artist: input.listingDraft.artist,
-            listenUrl: input.listingDraft.listenUrl,
-            weekId: input.listingDraft.weekId,
-            amountUsd: String(input.amountUsd),
-            kind: input.kind,
-          },
-        }),
+        body: JSON.stringify(checkoutBody(this.env, input)),
       });
     } catch {
       throw new Error("polar_unavailable");
@@ -187,6 +183,28 @@ export function verifyPolarSignature(
     }
   }
   return false;
+}
+
+function checkoutBody(
+  env: PolarEnv,
+  input: CreateCheckoutInput,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    amount: input.amountUsd * 100,
+    currency: "usd",
+    success_url: `${publicBaseUrl(env)}/return?sessionId={CHECKOUT_ID}`,
+    metadata: {
+      track: input.listingDraft.track,
+      artist: input.listingDraft.artist,
+      listenUrl: input.listingDraft.listenUrl,
+      weekId: input.listingDraft.weekId,
+      amountUsd: String(input.amountUsd),
+      kind: input.kind,
+    },
+  };
+  const productId = polarProductId(env);
+  if (productId) body.product_id = productId;
+  return body;
 }
 
 function header(headers: Record<string, string>, name: string): string | undefined {
