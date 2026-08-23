@@ -206,11 +206,15 @@ export function Board({
       </p>
       <div className="station-desk">
         <OpeningDeck listing={opening} />
-        <aside className="claim-rail" aria-labelledby="claim-heading">
+        <aside
+          className="claim-rail"
+          aria-labelledby="claim-heading"
+          data-claim-opening={opening ? "take" : "empty"}
+        >
           <p id="claim-heading" className="rail-kicker">
             Claim the open
           </p>
-          <BidForm defaultAmount={defaultAmount} />
+          <BidForm defaultAmount={defaultAmount} topBidUsd={opening?.bidUsd} />
         </aside>
       </div>
       <Leaderboard listings={listings} />
