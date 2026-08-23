@@ -199,10 +199,17 @@ export function Board({
         PH <span>09</span> · Playlist Headline
       </p>
       {opening ? (
-        <p className="lede" data-hear-first="true" data-first-read="hear">
-          This week&apos;s opening song is on. Rank is the bid. Playback is
-          real.
-        </p>
+        <>
+          <p className="lede" data-hear-first="true" data-first-read="hear">
+            This week&apos;s opening song is on. Rank is the bid. Playback is
+            real.
+          </p>
+          <p className="raise-after-hear">
+            <a href="#claim" data-raise-after-hear="true">
+              Need {formatUsd(defaultAmount)} to take #1
+            </a>
+          </p>
+        </>
       ) : (
         <p className="lede">
           Bid USD. Open the week. Listeners hear you first. Rank is the bid.
