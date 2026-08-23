@@ -126,6 +126,7 @@ export function OpeningDeck({
     <section
       className="studio-deck"
       data-opening-song="true"
+      data-hear-first="true"
       data-listing-card=""
       data-rank={listing.rank}
       data-id={listing.id}
@@ -197,14 +198,24 @@ export function Board({
       <p className="station-call">
         PH <span>09</span> · Playlist Headline
       </p>
-      <p className="lede">
-        Bid USD. Open the week. Listeners hear you first. Rank is the bid.
-        Playback is real.
-      </p>
+      {opening ? (
+        <p className="lede" data-hear-first="true" data-first-read="hear">
+          This week&apos;s opening song is on. Rank is the bid. Playback is
+          real.
+        </p>
+      ) : (
+        <p className="lede">
+          Bid USD. Open the week. Listeners hear you first. Rank is the bid.
+          Playback is real.
+        </p>
+      )}
       <p className="period-meta" data-week-id={weekId} data-next-reset={nextResetAt}>
         Week {weekId}. Next reset {nextResetAt}.
       </p>
-      <div className="station-desk">
+      <div
+        className="station-desk"
+        data-hear-first={opening ? "true" : "false"}
+      >
         <OpeningDeck listing={opening} />
         <aside
           className="claim-rail"
