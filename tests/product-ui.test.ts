@@ -82,6 +82,21 @@ test("empty week has no player and no invented opening song", () => {
   assert.doesNotMatch(html, FORBIDDEN);
 });
 
+test("empty week does not claim the studio stays dark on a lit cream card", () => {
+  const html = renderBoard([]);
+  assert.match(html, /data-empty-week="true"/);
+  assert.match(html, /data-opening-song="false"/);
+  assert.match(html, /No opening song/);
+  assert.match(html, /Nobody has paid yet/);
+  assert.match(html, /There is no player this week/);
+  assert.doesNotMatch(html, /stays dark/i);
+  assert.doesNotMatch(pageSource, /stays dark/i);
+  assert.doesNotMatch(html, /<iframe/);
+  assert.doesNotMatch(html, /<audio/);
+  assert.doesNotMatch(html, /data-playback=/);
+  assert.doesNotMatch(html, FORBIDDEN);
+});
+
 test("player exists only for paid #1 and only for the stored listen URL", () => {
   const youtube = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
   const html = renderBoard([
