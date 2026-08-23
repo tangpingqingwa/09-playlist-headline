@@ -588,6 +588,13 @@ grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
   || fail "Need-after-Hear cut must keep the station-desk columns"
 grep -q '.need-after-hear' src/app/board.css \
   || fail "Need-after-Hear cut must keep hop-local Need \$N weight"
+grep -q 'min-height: 2.15rem' src/app/board.css \
+  || fail "Need \$N must be a dashed raise control, not quieter text under Hear"
+grep -q 'border: 2px dashed' src/app/board.css \
+  || fail "Need \$N must win the raise click as a dashed control, not a recolor"
+if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+  fail "Need \$N must stay the raise hop, not a second filled Hear pill"
+fi
 if grep -q 'station-desk hear-first' src/app/page.tsx; then
   fail "Need-after-Hear cut must not rebuild the station desk into a stacked layout"
 fi

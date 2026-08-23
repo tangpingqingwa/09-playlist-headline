@@ -148,26 +148,29 @@ a:hover {
 }
 
 .raise-after-hear a {
-  color: var(--primary);
-  font-weight: 700;
-  text-decoration: underline dashed;
-  text-underline-offset: 0.28em;
-}
-
-.raise-after-hear a:hover {
   color: var(--ink);
+  font-weight: 700;
 }
 
 .need-after-hear {
-  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.15rem;
+  padding: 0 0.85rem;
+  border: 2px dashed var(--ink);
+  background: transparent;
+  color: var(--ink);
   font-weight: 700;
-  text-decoration: underline dashed;
-  text-underline-offset: 0.28em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
   font-variant-numeric: tabular-nums;
 }
 
 .need-after-hear:hover {
-  color: var(--ink);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .raise-after-note {

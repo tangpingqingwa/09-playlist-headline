@@ -632,7 +632,7 @@ test("occupied raise after Hear-first is certain above the fold", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  assert.match(cssSource, /\.raise-after-hear a \{[\s\S]*text-decoration: underline dashed/);
+  assert.match(cssSource, /\.need-after-hear \{[\s\S]*border: 2px dashed/);
   assert.doesNotMatch(hop, /class="station-desk hear-first"/);
   assert.doesNotMatch(hop, FORBIDDEN);
 
@@ -912,9 +912,17 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  assert.match(cssSource, /\.need-after-hear \{[\s\S]*color: var\(--primary\)/);
-  assert.match(cssSource, /\.need-after-hear \{[\s\S]*text-decoration: underline dashed/);
-  assert.match(cssSource, /\.raise-after-hear a \{[\s\S]*text-decoration: underline dashed/);
+  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const hearRule = cssSource.match(/\.opening-listen \{[^}]+\}/);
+  assert.ok(needRule);
+  assert.ok(hearRule);
+  assert.match(needRule[0], /display: inline-flex/);
+  assert.match(needRule[0], /min-height: 2\.15rem/);
+  assert.match(needRule[0], /border: 2px dashed/);
+  assert.match(needRule[0], /background: transparent/);
+  assert.match(hearRule[0], /min-height: 2\.4rem/);
+  assert.match(hearRule[0], /background: var\(--ink\)/);
+  assert.doesNotMatch(needRule[0], /background: var\(--ink\)/);
   assert.doesNotMatch(hop, /Not bidding\?/);
   assert.doesNotMatch(hop, /data-hear-after-difference/);
   assert.doesNotMatch(hop, /class="station-desk hear-first"/);
