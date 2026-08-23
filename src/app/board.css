@@ -148,14 +148,26 @@ a:hover {
 }
 
 .raise-after-hear a {
-  color: var(--ink);
+  color: var(--primary);
   font-weight: 700;
   text-decoration: underline dashed;
   text-underline-offset: 0.28em;
 }
 
 .raise-after-hear a:hover {
+  color: var(--ink);
+}
+
+.need-after-hear {
   color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline dashed;
+  text-underline-offset: 0.28em;
+  font-variant-numeric: tabular-nums;
+}
+
+.need-after-hear:hover {
+  color: var(--ink);
 }
 
 .raise-after-note {
