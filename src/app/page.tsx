@@ -19,10 +19,19 @@ export function formatClicks(clicks: number): string {
   return `${clicks} ${clicks === 1 ? "click" : "clicks"}`;
 }
 
+function listenHost(listenUrl: string): string {
+  try {
+    return new URL(listenUrl).hostname.replace(/^www\./, "");
+  } catch {
+    return "listen";
+  }
+}
+
 export function ListingCard({ listing }: { listing: RankedListing }) {
+  const isOpening = listing.rank === 1;
   return (
     <article
-      className="card"
+      className={isOpening ? "card card-on-air" : "card"}
       data-listing-card=""
       data-rank={listing.rank}
       data-id={listing.id}
@@ -30,17 +39,10 @@ export function ListingCard({ listing }: { listing: RankedListing }) {
     >
       <span className="rank">#{listing.rank}</span>
       <div className="card-body">
-        <div className="card-top">
-          <h3 className="track">{listing.track}</h3>
-          <p className="bid" data-bid="">
-            {formatUsd(listing.bidUsd)}
-          </p>
-        </div>
+        <p className="card-cue">{isOpening ? "On air" : `Cue ${listing.rank}`}</p>
+        <h3 className="track">{listing.track}</h3>
         <p className="artist">{listing.artist}</p>
-        <p className="meta">
-          <span className="clicks" data-clicks="">
-            {formatClicks(listing.clicks)}
-          </span>
+        <p className="card-listen-row">
           <a
             className="listen"
             href={listenClickPath(listing.id)}
@@ -48,6 +50,15 @@ export function ListingCard({ listing }: { listing: RankedListing }) {
           >
             Listen
           </a>
+          <span className="listen-host">{listenHost(listing.listenUrl)}</span>
+        </p>
+        <p className="meta">
+          <span className="bid" data-bid="">
+            {formatUsd(listing.bidUsd)}
+          </span>
+          <span className="clicks" data-clicks="">
+            {formatClicks(listing.clicks)}
+          </span>
         </p>
       </div>
     </article>
@@ -64,13 +75,90 @@ export function Leaderboard({
   }
 
   return (
-    <ol className="leaderboard" data-leaderboard="">
-      {listings.map((listing) => (
-        <li key={listing.id}>
-          <ListingCard listing={listing} />
-        </li>
-      ))}
-    </ol>
+    <aside className="queue" aria-labelledby="queue-heading">
+      <div className="queue-head">
+        <h2 id="queue-heading">This week&apos;s board</h2>
+        <p>
+          Rank is the bid. #1 is the opening song. Clicks are hops, not a
+          platform count.
+        </p>
+      </div>
+      <ol className="leaderboard" data-leaderboard="">
+        {listings.map((listing) => (
+          <li key={listing.id}>
+            <ListingCard listing={listing} />
+          </li>
+        ))}
+      </ol>
+    </aside>
+  );
+}
+
+export function OpeningDeck({
+  listing,
+}: {
+  listing: RankedListing | undefined;
+}) {
+  if (!listing) {
+    return (
+      <section
+        className="studio-deck empty-deck"
+        data-empty-week="true"
+        data-opening-song="false"
+      >
+        <p className="deck-kicker">This week&apos;s open</p>
+        <h1>No opening song</h1>
+        <p className="empty">
+          No opening song this week. Nobody has paid yet. We do not invent a
+          track or a stream.
+        </p>
+        <p className="deck-note">
+          The studio stays dark until a completed payment claims #1. There is
+          no player on an empty week.
+        </p>
+      </section>
+    );
+  }
+
+  const playback = playbackForListing(listing);
+
+  return (
+    <section className="studio-deck" data-opening-song="true">
+      <p className="deck-kicker">On air · opening song</p>
+      <p className="on-air-flag">LIVE OPEN</p>
+      <h1 className="opening-track">{listing.track}</h1>
+      <p className="opening-artist">{listing.artist}</p>
+      <p className="opening-facts">
+        <span className="bid" data-bid="">
+          {formatUsd(listing.bidUsd)}
+        </span>
+        <span className="clicks" data-clicks="">
+          {formatClicks(listing.clicks)}
+        </span>
+      </p>
+      <a
+        className="listen opening-listen"
+        href={listenClickPath(listing.id)}
+        data-listen-url={listing.listenUrl}
+      >
+        Listen
+      </a>
+      {playback.kind === "embed" ? (
+        <iframe
+          className="player"
+          title={`${listing.track} official embed`}
+          src={playback.embedUrl}
+          data-listen-url={playback.listenUrl}
+          data-playback="embed"
+          allow="encrypted-media"
+        />
+      ) : (
+        <p className="redirect-note">
+          Official embed is not available for this host. Listen hops to the
+          stored URL.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -86,11 +174,12 @@ export function Board({
   const opening = listings[0];
   const topBid = opening?.bidUsd ?? 0;
   const defaultAmount = topBid > 0 ? topBid + 1 : MIN_BID_USD;
-  const playback = playbackForListing(opening);
 
   return (
-    <main className="board" data-board="" data-week={weekId}>
-      <h1>Playlist Headline</h1>
+    <main className="board station" data-board="" data-week={weekId}>
+      <p className="station-call">
+        PH <span>09</span> · Playlist Headline
+      </p>
       <p className="lede">
         Bid USD. Open the week. Listeners hear you first. Rank is the bid.
         Playback is real.
@@ -98,37 +187,15 @@ export function Board({
       <p className="period-meta" data-week-id={weekId} data-next-reset={nextResetAt}>
         Week {weekId}. Next reset {nextResetAt}.
       </p>
-      <BidForm defaultAmount={defaultAmount} />
-      {opening ? (
-        <section className="opening" data-opening-song="true">
-          <h2>Opening song</h2>
-          <p>
-            {opening.track} — {opening.artist}
+      <div className="station-desk">
+        <OpeningDeck listing={opening} />
+        <aside className="claim-rail" aria-labelledby="claim-heading">
+          <p id="claim-heading" className="rail-kicker">
+            Claim the open
           </p>
-          <a
-            className="listen"
-            href={listenClickPath(opening.id)}
-            data-listen-url={opening.listenUrl}
-          >
-            Listen
-          </a>
-          {playback.kind === "embed" ? (
-            <iframe
-              className="player"
-              title={`${opening.track} official embed`}
-              src={playback.embedUrl}
-              data-listen-url={playback.listenUrl}
-              data-playback="embed"
-              allow="encrypted-media"
-            />
-          ) : null}
-        </section>
-      ) : (
-        <p className="empty" data-empty-week="true" data-opening-song="false">
-          No opening song this week. Nobody has paid yet. We do not invent a
-          track or a stream.
-        </p>
-      )}
+          <BidForm defaultAmount={defaultAmount} />
+        </aside>
+      </div>
       <Leaderboard listings={listings} />
     </main>
   );
