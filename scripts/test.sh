@@ -197,6 +197,14 @@ grep -q 'export class PolarPayment' src/billing/polar.ts \
   || fail "polar.ts must export PolarPayment"
 grep -q 'POLAR_LIVE=1' src/billing/polar.ts \
   || fail "polar.ts must stay env-gated"
+grep -q 'export function polarApiBase' src/billing/polar.ts \
+  || fail "polar.ts must honor POLAR_API_BASE"
+grep -q 'POLAR_API_BASE' src/billing/polar.ts \
+  || fail "polar.ts must mention POLAR_API_BASE"
+grep -q 'POLAR_API_BASE' scripts/live-smoke.sh \
+  || fail "live-smoke.sh must pass POLAR_API_BASE to the live process"
+grep -q 'sandbox.polar.sh' scripts/live-smoke.sh \
+  || fail "live-smoke.sh must require a sandbox.polar.sh Checkout URL"
 grep -q 'applyPaidEvent' src/core/store.ts \
   || fail "store.ts must apply paid events only"
 grep -q 'export function quoteBid' src/core/listing.ts \
@@ -291,7 +299,7 @@ if [[ -f package.json ]]; then
     fi
   fi
 
-  unset POLAR_LIVE POLAR_ACCESS_TOKEN POLAR_WEBHOOK_SECRET
+  unset POLAR_LIVE POLAR_ACCESS_TOKEN POLAR_WEBHOOK_SECRET POLAR_API_BASE POLAR_PRODUCT_ID
   export POLAR_FIXTURE_ONLY=1
   [[ "${POLAR_LIVE:-}" != "1" ]] || fail "POLAR_LIVE must stay unset in test.sh"
 

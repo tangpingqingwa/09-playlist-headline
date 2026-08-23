@@ -6,7 +6,7 @@ import { POST as postCheckout } from "../src/app/api/checkout/route";
 import { POST as postWebhook } from "../src/app/api/polar/webhook/route";
 import ReturnPage, { resolveReturn } from "../src/app/return/page";
 import { FixturePayment } from "../src/billing/fixture";
-import { PolarPayment, POLAR_API_BASE } from "../src/billing/polar";
+import { PolarPayment, POLAR_API_BASE, polarApiBase } from "../src/billing/polar";
 import {
   CheckoutError,
   createPaymentPort,
@@ -343,6 +343,14 @@ test("fixture webhook paid event lists; expired does not", async () => {
   assert.equal(getBoardListings(weekId()).length, 1);
 });
 
+test("polarApiBase defaults to production and honors POLAR_API_BASE", () => {
+  assert.equal(polarApiBase({}), POLAR_API_BASE);
+  assert.equal(polarApiBase({ POLAR_API_BASE: "" }), POLAR_API_BASE);
+  assert.equal(polarApiBase({ POLAR_API_BASE: POLAR_API_BASE }), POLAR_API_BASE);
+  const sandboxApi = `https://${["sandbox-api", "polar", "sh"].join(".")}`;
+  assert.equal(polarApiBase({ POLAR_API_BASE: `${sandboxApi}/` }), sandboxApi);
+});
+
 test("live PolarCheckout never fetches unless POLAR_LIVE=1", async () => {
   assert.throws(
     () => new PolarPayment({ env: {} }),
@@ -362,6 +370,7 @@ test("live PolarCheckout never fetches unless POLAR_LIVE=1", async () => {
     },
     fetch: async (input) => {
       fetches += 1;
+      assert.equal(String(input), `${polarApiBase()}/v1/checkouts/`);
       assert.equal(String(input), `${POLAR_API_BASE}/v1/checkouts/`);
       return new Response(
         JSON.stringify({
@@ -386,6 +395,48 @@ test("live PolarCheckout never fetches unless POLAR_LIVE=1", async () => {
     polar.completeCheckout(session.sessionId),
     /completes via webhook only/,
   );
+  assert.equal(getBoardListings(weekId()).length, 0);
+});
+
+test("live Polar checkout uses POLAR_API_BASE override and optional product_id", async () => {
+  const sandboxApi = `https://${["sandbox-api", "polar", "sh"].join(".")}`;
+  const sandboxCheckout = `https://${["sandbox", "polar", "sh"].join(".")}/checkout/chk_sandbox_open`;
+  let fetches = 0;
+  const polar = new PolarPayment({
+    env: {
+      POLAR_LIVE: "1",
+      POLAR_ACCESS_TOKEN: "polar_tok_test",
+      POLAR_API_BASE: `${sandboxApi}/`,
+      POLAR_PRODUCT_ID: "prod_sandbox_test",
+      PUBLIC_BASE_URL: "http://localhost:3000",
+    },
+    fetch: async (input, init) => {
+      fetches += 1;
+      assert.equal(String(input), `${sandboxApi}/v1/checkouts/`);
+      assert.notEqual(String(input), `${POLAR_API_BASE}/v1/checkouts/`);
+      const raw = typeof init?.body === "string" ? init.body : "";
+      const body = JSON.parse(raw) as Record<string, unknown>;
+      assert.equal(body.product_id, "prod_sandbox_test");
+      assert.equal(body.amount, 500);
+      assert.equal(body.currency, "usd");
+      return new Response(
+        JSON.stringify({
+          id: "chk_sandbox_open",
+          status: "open",
+          url: sandboxCheckout,
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    },
+  });
+  const session = await polar.createCheckout({
+    listingDraft: draft(),
+    amountUsd: 5,
+    kind: "create",
+  });
+  assert.equal(fetches, 1);
+  assert.equal(session.sessionId, "chk_sandbox_open");
+  assert.equal(session.checkoutUrl, sandboxCheckout);
   assert.equal(getBoardListings(weekId()).length, 0);
 });
 
