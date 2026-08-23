@@ -173,6 +173,13 @@ a:hover {
   color: var(--primary);
 }
 
+.need-after-hear.need-after-hear-two {
+  min-height: 2.45rem;
+  padding: 0 1.05rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+}
+
 .raise-after-note {
   color: var(--muted);
   font-weight: 600;
