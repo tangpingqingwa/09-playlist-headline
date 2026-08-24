@@ -147,6 +147,11 @@ a:hover {
   margin: 0 0 0.55rem;
 }
 
+/* Occupied: Need $N is grouped with Claim. It is not a Hear twin. */
+.week-occupied .claim-rail .raise-after-hear {
+  margin: 0 0 0.85rem;
+}
+
 .week-occupied .raise-after-hear a {
   color: var(--ink);
   font-weight: 700;
@@ -236,6 +241,7 @@ a:hover {
 /* Empty week stays Bid USD / $5. Occupied Hear / Need / prize stay off this week. */
 .board[data-empty-bid-five] .hear-after-raise,
 .board[data-empty-bid-five] .raise-after-hear,
+.board[data-empty-bid-five] .claim-rail .raise-after-hear,
 .board[data-empty-bid-five] .opening-listen,
 .board[data-empty-bid-five] .need-after-hear,
 .board[data-empty-bid-five] [data-hear-opening],
@@ -252,6 +258,7 @@ a:hover {
 .board[data-empty-bid-five] .click-note,
 .week-empty[data-empty-bid-five] .hear-after-raise,
 .week-empty[data-empty-bid-five] .raise-after-hear,
+.week-empty[data-empty-bid-five] .claim-rail .raise-after-hear,
 .week-empty[data-empty-bid-five] .opening-listen,
 .week-empty[data-empty-bid-five] .need-after-hear,
 .week-empty[data-empty-bid-five] [data-hear-opening],
@@ -268,6 +275,7 @@ a:hover {
 .week-empty[data-empty-bid-five] .click-note,
 .week-empty .hear-after-raise,
 .week-empty .raise-after-hear,
+.week-empty .claim-rail .raise-after-hear,
 .week-empty .opening-listen,
 .week-empty .need-after-hear,
 .week-empty [data-hear-opening],
