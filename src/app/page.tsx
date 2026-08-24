@@ -219,12 +219,13 @@ export function Board({
           </p>
           <p className="raise-after-hear">
             <a
-              className="need-after-hear need-after-hear-two"
+              className="need-after-hear need-after-hear-two need-after-hear-three"
               href="#claim"
               data-raise-after-hear="true"
               data-raise-after-hear-first="true"
               data-need-after-hear="true"
               data-need-after-hear-two="true"
+              data-need-after-hear-three="true"
             >
               Need {formatUsd(defaultAmount)} to take #1
             </a>
