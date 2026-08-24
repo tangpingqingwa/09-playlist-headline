@@ -199,6 +199,7 @@ export function Board({
   listings: readonly RankedListing[];
 }) {
   const opening = listings[0];
+  const emptyWeek = opening === undefined;
   const topBid = opening?.bidUsd ?? 0;
   const defaultAmount = topBid > 0 ? topBid + 1 : MIN_BID_USD;
   const openingPlayback = opening ? playbackForListing(opening) : undefined;
@@ -206,10 +207,14 @@ export function Board({
 
   return (
     <main
-      className="board station"
+      className={
+        emptyWeek ? "board station week-empty" : "board station week-occupied"
+      }
       data-board=""
       data-week={weekId}
-      data-empty-bid-five={opening ? undefined : ""}
+      data-week-empty={emptyWeek ? "true" : undefined}
+      data-week-occupied={emptyWeek ? undefined : "true"}
+      data-empty-bid-five={emptyWeek ? "" : undefined}
     >
       <p className="station-call">
         PH <span>09</span> · Playlist Headline

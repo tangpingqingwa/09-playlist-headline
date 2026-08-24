@@ -592,7 +592,7 @@ grep -q 'min-height: 2.15rem' src/app/board.css \
   || fail "Need \$N must be a dashed raise control, not quieter text under Hear"
 grep -q 'border: 2px dashed' src/app/board.css \
   || fail "Need \$N must win the raise click as a dashed control, not a recolor"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
 if grep -q 'station-desk hear-first' src/app/page.tsx; then
@@ -669,10 +669,10 @@ grep -q 'border: 2px dashed' src/app/board.css \
   || fail "Need \$N must stay the dashed raise control, not a recolor"
 grep -q '.opening-listen.hear-after-need' src/app/board.css \
   || fail "hear-after-need cut must keep hop-local Hear size after Need \$N"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-hear_after_need_rule="$(awk '/^\.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
+hear_after_need_rule="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
 echo "$hear_after_need_rule" | grep -q 'min-height: 2.75rem' \
   || fail "hear-after-need must make Hear taller than the Need \$N raise box"
 if echo "$hear_after_need_rule" | grep -q 'background:'; then
@@ -756,10 +756,10 @@ grep -q '.need-after-hear.need-after-hear-two' src/app/board.css \
   || fail "Need-after-Hear-two cut must keep hop-local Need \$N size after Hear is taller"
 grep -q '.opening-listen.hear-after-need' src/app/board.css \
   || fail "Need-after-Hear-two cut must keep hop-local Hear size after Need \$N"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_two_rule="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_rule="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 if echo "$need_after_hear_two_rule" | grep -q 'background:'; then
   fail "Need-after-Hear-two must concentrate Need \$N by size, not a recolor"
 fi
@@ -768,7 +768,7 @@ if echo "$need_after_hear_two_rule" | grep -q 'border:'; then
 fi
 echo "$need_after_hear_two_rule" | grep -q 'min-height: 2.45rem' \
   || fail "Need-after-Hear-two must make Need \$N taller than the quieter dashed box"
-hear_after_need_two_rule="$(awk '/^\.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
+hear_after_need_two_rule="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
 echo "$hear_after_need_two_rule" | grep -q 'min-height: 2.75rem' \
   || fail "Need-after-Hear-two must keep Hear taller than the concentrated Need \$N box"
 if echo "$hear_after_need_two_rule" | grep -q 'background:'; then
@@ -856,30 +856,30 @@ grep -q '.opening-listen.hear-after-need' src/app/board.css \
   || fail "hear-after-need-two cut must keep hop-local Hear size after Need \$N"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two' src/app/board.css \
   || fail "hear-after-need-two cut must keep hop-local Hear size after Need \$N is re-concentrated"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_two_keep_prior="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_keep_prior="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 if echo "$need_after_hear_two_keep_prior" | grep -q 'background:'; then
   fail "hear-after-need-two must not recolor Need \$N"
 fi
 if echo "$need_after_hear_two_keep_prior" | grep -q 'border:'; then
   fail "hear-after-need-two must keep the existing dashed raise box, not restyle the border"
 fi
-hear_after_need_two_block="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
+hear_after_need_two_block="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
 if echo "$hear_after_need_two_block" | grep -q 'background:'; then
   fail "hear-after-need-two must concentrate Hear by size, not a recolor"
 fi
 if echo "$hear_after_need_two_block" | grep -q 'border:'; then
   fail "hear-after-need-two must keep the existing filled Hear pill, not restyle the border"
 fi
-need_after_hear_two_keep="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 echo "$need_after_hear_two_keep" | grep -q 'min-height: 2.45rem' \
   || fail "hear-after-need-two must keep Need \$N at the re-concentrated raise size"
-hear_after_need_keep="$(awk '/^\.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
+hear_after_need_keep="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need \{/,/\}/' src/app/board.css)"
 echo "$hear_after_need_keep" | grep -q 'min-height: 2.75rem' \
   || fail "hear-after-need-two must keep the prior Hear size stamp"
-hear_after_need_two_size="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
+hear_after_need_two_size="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
 echo "$hear_after_need_two_size" | grep -q 'min-height: 3.05rem' \
   || fail "hear-after-need-two must make Hear taller than the re-concentrated Need \$N box"
 echo "$hear_after_need_two_size" | grep -q 'font-size: 1.12rem' \
@@ -976,17 +976,17 @@ grep -q '.opening-listen.hear-after-need' src/app/board.css \
   || fail "Need-after-Hear-three cut must keep hop-local Hear size after Need \$N"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two' src/app/board.css \
   || fail "Need-after-Hear-three cut must keep hop-local Hear size after Need \$N is re-concentrated"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_two_keep="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 if echo "$need_after_hear_two_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-three must not recolor the prior Need \$N stamp"
 fi
 if echo "$need_after_hear_two_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-three must keep the existing dashed raise box, not restyle the prior stamp"
 fi
-need_after_hear_three_rule="$(awk '/^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
+need_after_hear_three_rule="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
 if echo "$need_after_hear_three_rule" | grep -q 'background:'; then
   fail "Need-after-Hear-three must concentrate Need \$N by size, not a recolor"
 fi
@@ -999,7 +999,7 @@ echo "$need_after_hear_three_rule" | grep -q 'min-height: 2.75rem' \
   || fail "Need-after-Hear-three must make Need \$N taller than the quieter dashed box"
 echo "$need_after_hear_three_rule" | grep -q 'font-size: 1.02rem' \
   || fail "Need-after-Hear-three must make Need \$N type larger than the quieter dashed box"
-hear_after_need_two_keep="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
+hear_after_need_two_keep="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
 echo "$hear_after_need_two_keep" | grep -q 'min-height: 3.05rem' \
   || fail "Need-after-Hear-three must keep Hear taller than the concentrated Need \$N box"
 if echo "$hear_after_need_two_keep" | grep -q 'background:'; then
@@ -1101,24 +1101,24 @@ grep -q '.opening-listen.hear-after-need.hear-after-need-two' src/app/board.css 
   || fail "hear-after-need-three cut must keep hop-local Hear size after Need \$N is re-concentrated"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three' src/app/board.css \
   || fail "hear-after-need-three cut must keep hop-local Hear size after Need \$N is re-concentrated again"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_three_keep="$(awk '/^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
+need_after_hear_three_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
 if echo "$need_after_hear_three_keep" | grep -q 'background:'; then
   fail "hear-after-need-three must not recolor Need \$N"
 fi
 if echo "$need_after_hear_three_keep" | grep -q 'border:'; then
   fail "hear-after-need-three must keep the existing dashed raise box, not restyle the border"
 fi
-hear_after_need_two_keep_prior="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
+hear_after_need_two_keep_prior="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-three/ {print} /hear-after-need-three/ {exit}')"
 if echo "$hear_after_need_two_keep_prior" | grep -q 'background:'; then
   fail "hear-after-need-three must not recolor the prior Hear stamp"
 fi
 if echo "$hear_after_need_two_keep_prior" | grep -q 'border:'; then
   fail "hear-after-need-three must keep the existing filled Hear pill, not restyle the prior stamp"
 fi
-hear_after_need_three_rule="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
+hear_after_need_three_rule="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
 if echo "$hear_after_need_three_rule" | grep -q 'background:'; then
   fail "hear-after-need-three must concentrate Hear by size, not a recolor"
 fi
@@ -1233,24 +1233,24 @@ grep -q '.opening-listen.hear-after-need.hear-after-need-two' src/app/board.css 
   || fail "Need-after-Hear-four cut must keep hop-local Hear size after Need \$N is re-concentrated"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three' src/app/board.css \
   || fail "Need-after-Hear-four cut must keep hop-local Hear size after Need \$N is re-concentrated again"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_two_keep="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 if echo "$need_after_hear_two_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-four must not recolor the prior Need \$N stamp"
 fi
 if echo "$need_after_hear_two_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-four must keep the existing dashed raise box, not restyle the prior stamp"
 fi
-need_after_hear_three_keep="$(awk '/^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
+need_after_hear_three_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
 if echo "$need_after_hear_three_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-four must not recolor the re-concentrated-again Need \$N stamp"
 fi
 if echo "$need_after_hear_three_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-four must keep the existing dashed raise box, not restyle the re-concentrated-again stamp"
 fi
-need_after_hear_four_rule="$(awk '/\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
+need_after_hear_four_rule="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
 if echo "$need_after_hear_four_rule" | grep -q 'background:'; then
   fail "Need-after-Hear-four must concentrate Need \$N by size, not a recolor"
 fi
@@ -1265,7 +1265,7 @@ echo "$need_after_hear_four_rule" | grep -q 'min-height: 3.05rem' \
   || fail "Need-after-Hear-four must make Need \$N taller than the quieter dashed box under the louder Hear"
 echo "$need_after_hear_four_rule" | grep -q 'font-size: 1.12rem' \
   || fail "Need-after-Hear-four must make Need \$N type larger than the quieter dashed box"
-hear_after_need_three_keep="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
+hear_after_need_three_keep="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
 echo "$hear_after_need_three_keep" | grep -q 'min-height: 3.35rem' \
   || fail "Need-after-Hear-four must keep Hear taller than the concentrated Need \$N box"
 if echo "$hear_after_need_three_keep" | grep -q 'background:'; then
@@ -1381,24 +1381,24 @@ grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-thr
   || fail "hear-after-need-four cut must keep hop-local Hear size after Need \$N is re-concentrated again"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four' src/app/board.css \
   || fail "hear-after-need-four cut must keep hop-local Hear size after Need \$N is re-concentrated again after a louder Need"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_four_keep="$(awk '/\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
+need_after_hear_four_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
 if echo "$need_after_hear_four_keep" | grep -q 'background:'; then
   fail "hear-after-need-four must not recolor Need \$N"
 fi
 if echo "$need_after_hear_four_keep" | grep -q 'border:'; then
   fail "hear-after-need-four must keep the existing dashed raise box, not restyle the border"
 fi
-hear_after_need_three_keep_prior="$(awk '/^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
+hear_after_need_three_keep_prior="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-four/ {print} /hear-after-need-four/ {exit}')"
 if echo "$hear_after_need_three_keep_prior" | grep -q 'background:'; then
   fail "hear-after-need-four must not recolor the prior Hear stamp"
 fi
 if echo "$hear_after_need_three_keep_prior" | grep -q 'border:'; then
   fail "hear-after-need-four must keep the existing filled Hear pill, not restyle the prior stamp"
 fi
-hear_after_need_four_rule="$(awk '/\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
+hear_after_need_four_rule="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
 if echo "$hear_after_need_four_rule" | grep -q 'background:'; then
   fail "hear-after-need-four must concentrate Hear by size, not a recolor"
 fi
@@ -1527,31 +1527,31 @@ grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-thr
   || fail "Need-after-Hear-five cut must keep hop-local Hear size after Need \$N is re-concentrated again"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four' src/app/board.css \
   || fail "Need-after-Hear-five cut must keep hop-local Hear size after Need \$N is re-concentrated again after a louder Need"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_two_keep="$(awk '/^\.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
+need_after_hear_two_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-three/ {print} /need-after-hear-three/ {exit}')"
 if echo "$need_after_hear_two_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-five must not recolor the prior Need \$N stamp"
 fi
 if echo "$need_after_hear_two_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-five must keep the existing dashed raise box, not restyle the prior stamp"
 fi
-need_after_hear_three_keep="$(awk '/^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
+need_after_hear_three_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-four/ {print} /need-after-hear-four/ {exit}')"
 if echo "$need_after_hear_three_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-five must not recolor the re-concentrated-again Need \$N stamp"
 fi
 if echo "$need_after_hear_three_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-five must keep the existing dashed raise box, not restyle the re-concentrated-again stamp"
 fi
-need_after_hear_four_keep="$(awk '/\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
+need_after_hear_four_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/need-after-hear-five/ {print} /need-after-hear-five/ {exit}')"
 if echo "$need_after_hear_four_keep" | grep -q 'background:'; then
   fail "Need-after-Hear-five must not recolor the prior Need \$N stamp after the louder Hear"
 fi
 if echo "$need_after_hear_four_keep" | grep -q 'border:'; then
   fail "Need-after-Hear-five must keep the existing dashed raise box, not restyle the prior stamp"
 fi
-need_after_hear_five_rule="$(awk '/\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{/,/\}/' src/app/board.css)"
+need_after_hear_five_rule="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{/,/\}/' src/app/board.css)"
 if echo "$need_after_hear_five_rule" | grep -q 'background:'; then
   fail "Need-after-Hear-five must concentrate Need \$N by size, not a recolor"
 fi
@@ -1568,7 +1568,7 @@ echo "$need_after_hear_five_rule" | grep -q 'min-height: 3.35rem' \
   || fail "Need-after-Hear-five must make Need \$N taller than the quieter dashed box under the louder Hear"
 echo "$need_after_hear_five_rule" | grep -q 'font-size: 1.22rem' \
   || fail "Need-after-Hear-five must make Need \$N type larger than the quieter dashed box"
-hear_after_need_four_keep="$(awk '/\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
+hear_after_need_four_keep="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
 echo "$hear_after_need_four_keep" | grep -q 'min-height: 3.65rem' \
   || fail "Need-after-Hear-five must keep Hear taller than the concentrated Need \$N box"
 if echo "$hear_after_need_four_keep" | grep -q 'background:'; then
@@ -1692,24 +1692,24 @@ grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-thr
   || fail "hear-after-need-five cut must keep hop-local Hear size after Need \$N is re-concentrated again after a louder Need"
 grep -q '.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four.hear-after-need-five' src/app/board.css \
   || fail "hear-after-need-five cut must keep hop-local Hear size after Need \$N is re-concentrated again after a louder Need again"
-if grep -A20 '.need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
+if grep -A20 '.week-occupied .need-after-hear {' src/app/board.css | grep -q 'background: var(--ink)'; then
   fail "Need \$N must stay the raise hop, not a second filled Hear pill"
 fi
-need_after_hear_five_keep="$(awk '/\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{/,/\}/' src/app/board.css)"
+need_after_hear_five_keep="$(awk '/^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{/,/\}/' src/app/board.css)"
 if echo "$need_after_hear_five_keep" | grep -q 'background:'; then
   fail "hear-after-need-five must not recolor Need \$N"
 fi
 if echo "$need_after_hear_five_keep" | grep -q 'border:'; then
   fail "hear-after-need-five must keep the existing dashed raise box, not restyle the border"
 fi
-hear_after_need_four_keep_prior="$(awk '/\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
+hear_after_need_four_keep_prior="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{/,/\}/' src/app/board.css | awk 'NR==1 || !/hear-after-need-five/ {print} /hear-after-need-five/ {exit}')"
 if echo "$hear_after_need_four_keep_prior" | grep -q 'background:'; then
   fail "hear-after-need-five must not recolor the prior Hear stamp"
 fi
 if echo "$hear_after_need_four_keep_prior" | grep -q 'border:'; then
   fail "hear-after-need-five must keep the existing filled Hear pill, not restyle the prior stamp"
 fi
-hear_after_need_five_rule="$(awk '/\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four\.hear-after-need-five \{/,/\}/' src/app/board.css)"
+hear_after_need_five_rule="$(awk '/^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four\.hear-after-need-five \{/,/\}/' src/app/board.css)"
 if echo "$hear_after_need_five_rule" | grep -q 'background:'; then
   fail "hear-after-need-five must concentrate Hear by size, not a recolor"
 fi
@@ -1822,13 +1822,13 @@ fi
 if ! grep -n 'data-prize-before-price' -A 16 src/app/board.css | grep -q '0.78rem'; then
   fail "prize-before-price CSS must keep occupied clicks quieter than the title"
 fi
-prize_title_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
+prize_title_rule="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
 echo "$prize_title_rule" | grep -q 'font-size: clamp(2.85rem, 8vw, 4.4rem)' \
   || fail "occupied title must be larger than \$bid + clicks"
 if echo "$prize_title_rule" | grep -q 'background:'; then
   fail "prize-before-price must enlarge the title by size, not a recolor"
 fi
-prize_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid \{/,/\}/' src/app/board.css)"
+prize_bid_rule="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid \{/,/\}/' src/app/board.css)"
 echo "$prize_bid_rule" | grep -q 'font-size: 0.86rem' \
   || fail "occupied \$bid must stay a later quieter fact"
 if echo "$prize_bid_rule" | grep -q 'background:'; then
@@ -2042,19 +2042,19 @@ grep -q 'data-real-playback' src/app/board.css \
   || fail "real playback CSS must concentrate occupied stored-URL playback"
 grep -q 'data-clicks-are-hops' src/app/board.css \
   || fail "real playback CSS must hide hop-count chrome on an empty week"
-real_player_rule="$(awk '/^\.studio-deck\[data-real-playback\] \.player \{/,/\}/' src/app/board.css)"
+real_player_rule="$(awk '/^\.week-occupied \.studio-deck\[data-real-playback\] \.player \{/,/\}/' src/app/board.css)"
 echo "$real_player_rule" | grep -q 'min-height: 16.5rem' \
   || fail "real playback must make the official embed taller than the decorative player box"
 if echo "$real_player_rule" | grep -q 'background:'; then
   fail "real playback must concentrate the player by size, not a recolor"
 fi
-hop_host_rule="$(awk '/^\.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host \{/,/\}/' src/app/board.css)"
+hop_host_rule="$(awk '/^\.week-occupied \.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host \{/,/\}/' src/app/board.css)"
 echo "$hop_host_rule" | grep -q 'font-size: 0.92rem' \
   || fail "hop #1 must make the stored host larger than a decorative hostname"
 if echo "$hop_host_rule" | grep -q 'background:'; then
   fail "real playback must not recolor the hop host"
 fi
-click_note_rule="$(awk '/^\.studio-deck\[data-real-playback\] \.click-note \{/,/\}/' src/app/board.css)"
+click_note_rule="$(awk '/^\.week-occupied \.studio-deck\[data-real-playback\] \.click-note \{/,/\}/' src/app/board.css)"
 echo "$click_note_rule" | grep -q 'font-size: 0.72rem' \
   || fail "occupied clicks must stay quieter hops, not a play count"
 if echo "$click_note_rule" | grep -q 'background:'; then
@@ -2173,19 +2173,19 @@ grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
   || fail "later-fact cut must keep the station-desk columns"
 grep -q 'data-later-fact' src/app/board.css \
   || fail "later-fact CSS must mute occupied \$bid beside the title"
-grep -Fq '.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact]' src/app/board.css \
+grep -Fq '.week-occupied .studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact]' src/app/board.css \
   || fail "later-fact CSS must target occupied #1 facts as later facts"
-grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact]' src/app/board.css \
+grep -Fq '.week-occupied .studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact]' src/app/board.css \
   || fail "later-fact CSS must target occupied #1 \$bid only"
-grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact]' src/app/board.css \
+grep -Fq '.week-occupied .studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact]' src/app/board.css \
   || fail "later-fact CSS must target occupied #1 hop counts only"
-later_facts_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\] \{/,/\}/' src/app/board.css)"
+later_facts_rule="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\] \{/,/\}/' src/app/board.css)"
 echo "$later_facts_rule" | grep -q 'font-weight: 500' \
   || fail "occupied facts must recede together as later facts"
 if echo "$later_facts_rule" | grep -q 'background:'; then
   fail "later-fact facts must recede by weight, not a recolor of the desk"
 fi
-later_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],/,/\}/' src/app/board.css)"
+later_bid_rule="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],/,/\}/' src/app/board.css)"
 echo "$later_bid_rule" | grep -q 'color: var(--muted)' \
   || fail "occupied \$bid must mute to later-fact ink, not shout primary beside the title"
 echo "$later_bid_rule" | grep -q 'font-weight: 500' \
@@ -2198,7 +2198,7 @@ fi
 if echo "$later_bid_rule" | grep -q 'background:'; then
   fail "later-fact \$bid must mute by weight and ink, not a recolor of the desk"
 fi
-prize_title_keep="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
+prize_title_keep="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
 echo "$prize_title_keep" | grep -q 'font-size: clamp(2.85rem, 8vw, 4.4rem)' \
   || fail "later-fact cut must keep the occupied title larger than \$bid"
 if echo "$prize_title_keep" | grep -q 'background:'; then
@@ -2217,6 +2217,164 @@ if grep -q 'station-desk hear-first' src/app/page.tsx; then
 fi
 if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
   fail "later-fact cut must not revive the stays-dark empty week"
+fi
+
+echo "== UX: empty week stays Bid USD / \$5 — song-prize / Hear cannot leak =="
+grep -q 'board station week-empty' src/app/page.tsx \
+  || fail "empty week must wrap in week-empty so occupied Hear / song-prize cannot leak"
+grep -q 'board station week-occupied' src/app/page.tsx \
+  || fail "occupied week must wrap in week-occupied so Hear / prize CSS stay scoped"
+grep -q 'data-week-empty' src/app/page.tsx \
+  || fail "empty week must stamp data-week-empty"
+grep -q 'data-week-occupied' src/app/page.tsx \
+  || fail "occupied week must stamp data-week-occupied"
+grep -q 'empty week stays Bid USD / $5 — song-prize / Hear cannot leak' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty week isolation so song-prize / Hear cannot leak"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Need \$'; then
+  fail "empty week must not leak Need \$N"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'prize-before-price'; then
+  fail "empty week must not stamp prize before price"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-prize'; then
+  fail "empty week must not stamp a prize title"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'later-fact'; then
+  fail "empty week must not stamp later-fact \$bid"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-real-playback'; then
+  fail "empty week must not stamp real playback"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "empty isolation must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "empty isolation must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "empty isolation must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "empty isolation must not add a second Hear hop after the difference"
+fi
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty isolation must keep Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "empty isolation must keep Bid USD as the first read"
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "empty isolation must keep occupied prize before price"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "empty isolation must keep the occupied prize title"
+grep -q 'data-later-fact' src/app/page.tsx \
+  || fail "empty isolation must keep occupied later-fact \$bid"
+grep -q 'data-real-playback' src/app/page.tsx \
+  || fail "empty isolation must keep occupied real playback"
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "empty isolation must keep one first Hear on occupied weeks"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "empty isolation must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "empty isolation must keep Need \$N after Hear"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "empty isolation must keep the existing Need \$N #claim hop"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty isolation must keep Hear as the first click when occupied"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "empty isolation must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "empty isolation must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "empty isolation must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "empty isolation must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "empty isolation must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "empty isolation must keep the occupied raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "empty isolation must keep occupied Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "empty isolation must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "empty isolation must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "empty isolation must keep one hear path when occupied"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "empty isolation hop must still use the click route"
+grep -q 'playbackForListing' src/app/page.tsx \
+  || fail "empty isolation must still use stored listen URL playback"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "empty isolation must not undo the artist claim rail"
+grep -q 'claims this week' src/app/outbid-form.tsx \
+  || fail "empty isolation must keep \$5 claims this week's opening song"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "empty isolation must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty isolation must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty isolation must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty isolation must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty isolation must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty isolation must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty isolation must keep the station-desk columns"
+grep -Fq '.week-empty[data-empty-bid-five] [data-hear-opening]' src/app/board.css \
+  || fail "empty week shell must hide leaked Hear chrome"
+grep -Fq '.week-empty[data-empty-bid-five] [data-prize]' src/app/board.css \
+  || fail "empty week shell must hide leaked song-prize chrome"
+grep -Fq '.week-empty[data-empty-bid-five] [data-later-fact]' src/app/board.css \
+  || fail "empty week shell must hide leaked later-fact \$bid"
+grep -Fq '.week-empty[data-empty-bid-five] [data-real-playback]' src/app/board.css \
+  || fail "empty week shell must hide leaked real playback"
+grep -Fq '.week-empty .opening-listen' src/app/board.css \
+  || fail "empty week shell must hide leaked Hear pills"
+grep -Fq '.week-empty .need-after-hear' src/app/board.css \
+  || fail "empty week shell must hide leaked Need \$N chrome"
+grep -Fq '.week-empty .player' src/app/board.css \
+  || fail "empty week shell must hide leaked player chrome"
+grep -Fq '.week-occupied .empty-deck' src/app/board.css \
+  || fail "occupied week shell must hide empty-deck chrome"
+grep -Fq '.week-occupied .opening-listen {' src/app/board.css \
+  || fail "Hear pill CSS must be scoped to week-occupied"
+grep -Fq '.week-occupied .need-after-hear {' src/app/board.css \
+  || fail "Need \$N CSS must be scoped to week-occupied"
+grep -Fq '.week-occupied .studio-deck[data-prize-before-price] .opening-track' src/app/board.css \
+  || fail "song-prize CSS must be scoped to week-occupied"
+grep -Fq '.week-occupied .studio-deck[data-real-playback] .player' src/app/board.css \
+  || fail "real playback CSS must be scoped to week-occupied"
+if grep -E '^\.opening-listen \{' src/app/board.css; then
+  fail "Hear pill CSS must not apply outside week-occupied"
+fi
+if grep -E '^\.need-after-hear \{' src/app/board.css; then
+  fail "Need \$N CSS must not apply outside week-occupied"
+fi
+if grep -E '^\.studio-deck\[data-prize-before-price\]' src/app/board.css; then
+  fail "song-prize CSS must not apply outside week-occupied"
+fi
+if grep -E '^\.studio-deck\[data-real-playback\]' src/app/board.css; then
+  fail "real playback CSS must not apply outside week-occupied"
+fi
+empty_no_hear_rule="$(awk '/^\.board\[data-empty-bid-five\] \.hear-after-raise,/,/^\}/' src/app/board.css)"
+echo "$empty_no_hear_rule" | grep -q 'display: none' \
+  || fail "empty week CSS must hide occupied Hear / Need / prize"
+echo "$empty_no_hear_rule" | grep -q 'week-empty\[data-empty-bid-five\] \[data-hear-opening\]' \
+  || fail "empty week CSS must hide leaked Hear on the week-empty shell"
+echo "$empty_no_hear_rule" | grep -q 'week-empty \.player' \
+  || fail "empty week CSS must hide leaked player chrome on the week-empty shell"
+if echo "$empty_no_hear_rule" | grep -q 'background:'; then
+  fail "empty isolation must hide occupied chrome, not recolor the desk"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty isolation must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty isolation must not revive the stays-dark empty week"
 fi
 
 echo "== checkout files =="
@@ -2448,6 +2606,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener real-playback test did not run"
   grep -q 'occupied #1 $bid stays a later fact and does not shout beside the song title' "$test_log" \
     || fail "first-time listener later-fact \$bid test did not run"
+  grep -q 'empty week stays Bid USD / $5 — song-prize / Hear cannot leak' "$test_log" \
+    || fail "first-time listener empty isolation test did not run"
 fi
 
 echo "OK: buildable and testable"
