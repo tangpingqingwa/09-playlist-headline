@@ -172,7 +172,7 @@ export function OpeningDeck({
         </a>
       ) : null}
       <p className="opening-facts">
-        <span className="bid" data-bid="">
+        <span className="bid later-fact" data-bid="" data-later-fact="">
           {formatUsd(listing.bidUsd)}
         </span>
         <span className="clicks" data-clicks="" data-clicks-are-hops="">
