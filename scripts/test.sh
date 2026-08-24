@@ -2080,8 +2080,12 @@ grep -q 'data-later-fact' src/app/page.tsx \
   || fail "occupied #1 must stamp \$bid as a later fact so it cannot shout beside the title"
 grep -q 'later-fact' src/app/page.tsx \
   || fail "occupied #1 \$bid must use the later-fact class"
+grep -q 'className="opening-facts later-fact"' src/app/page.tsx \
+  || fail "occupied #1 \$bid + hops must recede together as later facts"
 grep -q 'className="bid later-fact"' src/app/page.tsx \
   || fail "occupied #1 \$bid must stay a later fact on the studio deck"
+grep -q 'className="clicks later-fact"' src/app/page.tsx \
+  || fail "occupied #1 hop counts must stay a later fact beside \$bid"
 grep -q 'occupied #1 $bid stays a later fact and does not shout beside the song title' tests/product-ui.test.ts \
   || fail "product-ui tests must cover occupied \$bid staying a later fact"
 if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'later-fact'; then
@@ -2169,13 +2173,25 @@ grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
   || fail "later-fact cut must keep the station-desk columns"
 grep -q 'data-later-fact' src/app/board.css \
   || fail "later-fact CSS must mute occupied \$bid beside the title"
+grep -Fq '.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact]' src/app/board.css \
+  || fail "later-fact CSS must target occupied #1 facts as later facts"
 grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact]' src/app/board.css \
   || fail "later-fact CSS must target occupied #1 \$bid only"
-later_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\] \{/,/\}/' src/app/board.css)"
+grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact]' src/app/board.css \
+  || fail "later-fact CSS must target occupied #1 hop counts only"
+later_facts_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\] \{/,/\}/' src/app/board.css)"
+echo "$later_facts_rule" | grep -q 'font-weight: 500' \
+  || fail "occupied facts must recede together as later facts"
+if echo "$later_facts_rule" | grep -q 'background:'; then
+  fail "later-fact facts must recede by weight, not a recolor of the desk"
+fi
+later_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],/,/\}/' src/app/board.css)"
 echo "$later_bid_rule" | grep -q 'color: var(--muted)' \
   || fail "occupied \$bid must mute to later-fact ink, not shout primary beside the title"
 echo "$later_bid_rule" | grep -q 'font-weight: 500' \
   || fail "occupied \$bid must stay a quieter later fact, not a bold prize"
+echo "$later_bid_rule" | grep -q 'clicks.later-fact' \
+  || fail "occupied hop counts must mute with \$bid as later facts"
 if echo "$later_bid_rule" | grep -q 'color: var(--primary)'; then
   fail "later-fact \$bid must not keep primary shout beside the title"
 fi

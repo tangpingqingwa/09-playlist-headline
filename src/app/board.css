@@ -327,12 +327,15 @@ a:hover {
 
 .studio-deck[data-prize-before-price] .opening-facts .clicks {
   font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--muted);
 }
 
-/* Occupied #1 only: $bid stays a later fact. Do not shout beside the title. */
-.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact] {
+/* Occupied #1 only: $bid + hop counts stay later facts. Do not shout beside the title. */
+.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact] {
+  font-weight: 500;
+}
+
+.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact],
+.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact] {
   font-weight: 500;
   color: var(--muted);
 }

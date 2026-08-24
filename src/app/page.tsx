@@ -171,11 +171,16 @@ export function OpeningDeck({
           Open on {listenHost(listing.listenUrl)}
         </a>
       ) : null}
-      <p className="opening-facts">
+      <p className="opening-facts later-fact" data-later-fact="">
         <span className="bid later-fact" data-bid="" data-later-fact="">
           {formatUsd(listing.bidUsd)}
         </span>
-        <span className="clicks" data-clicks="" data-clicks-are-hops="">
+        <span
+          className="clicks later-fact"
+          data-clicks=""
+          data-clicks-are-hops=""
+          data-later-fact=""
+        >
           {formatClicks(listing.clicks)}
         </span>
         <span className="click-note">hops, not a platform count</span>
