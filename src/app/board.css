@@ -187,6 +187,13 @@ a:hover {
   letter-spacing: 0.07em;
 }
 
+.need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four {
+  min-height: 3.05rem;
+  padding: 0 1.45rem;
+  font-size: 1.12rem;
+  letter-spacing: 0.08em;
+}
+
 .raise-after-note {
   color: var(--muted);
   font-weight: 600;
