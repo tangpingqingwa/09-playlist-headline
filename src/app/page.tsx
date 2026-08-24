@@ -201,7 +201,7 @@ export function Board({
           </p>
           <p className="hear-after-raise">
             <a
-              className="listen opening-listen hear-after-need hear-after-need-two"
+              className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three"
               href={hearIsHop ? listenClickPath(opening.id) : "#hear-opening"}
               data-listen-url={hearIsHop ? opening.listenUrl : undefined}
               data-first-click="hear"
@@ -209,6 +209,7 @@ export function Board({
               data-hear-one-first="true"
               data-hear-after-need="true"
               data-hear-after-need-two="true"
+              data-hear-after-need-three="true"
               data-hear-opening={hearIsHop ? "hop" : undefined}
             >
               Hear this week&apos;s opening song
