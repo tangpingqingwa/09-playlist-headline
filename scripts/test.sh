@@ -1841,6 +1841,108 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "prize-before-price cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: empty week stays Bid USD / \$5 and does not invent Hear =="
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty week must stamp Bid USD / \$5 so occupied Hear cannot leak"
+grep -q 'data-empty-bid-five' src/app/outbid-form.tsx \
+  || fail "empty claim note must stamp Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "empty week must mark Bid USD as the first read"
+grep -q 'empty week stays Bid USD / $5 and does not invent Hear' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty week staying Bid USD / \$5"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Need \$'; then
+  fail "empty week must not leak Need \$N"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'prize-before-price'; then
+  fail "empty week must not stamp prize before price"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-prize'; then
+  fail "empty week must not stamp a prize title"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "empty Bid USD / \$5 must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "empty Bid USD / \$5 must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "empty Bid USD / \$5 must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "empty Bid USD / \$5 must not add a second Hear hop after the difference"
+fi
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep occupied prize before price"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the occupied prize title"
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep one first Hear on occupied weeks"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep Need \$N after Hear"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the existing Need \$N #claim hop"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep Hear as the first click when occupied"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the occupied raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep occupied Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must keep one hear path when occupied"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 hop must still use the click route"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must not undo the artist claim rail"
+grep -q 'claims this week' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must keep \$5 claims this week's opening song"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty Bid USD / \$5 cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty Bid USD / \$5 cut must keep the station-desk columns"
+grep -Fq '.board[data-empty-bid-five]' src/app/board.css \
+  || fail "empty Bid USD / \$5 CSS must hide occupied Hear / Need / prize on an empty week"
+empty_bid_five_rule="$(awk '/^\.board\[data-empty-bid-five\] \.hear-after-raise,/,/^\}/' src/app/board.css)"
+echo "$empty_bid_five_rule" | grep -q 'display: none' \
+  || fail "empty Bid USD / \$5 CSS must hide occupied Hear / Need / prize"
+if echo "$empty_bid_five_rule" | grep -q 'background:'; then
+  fail "empty Bid USD / \$5 must hide occupied chrome, not recolor the desk"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty Bid USD / \$5 cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty Bid USD / \$5 cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2064,6 +2166,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener hear-after-need-five test did not run"
   grep -q 'occupied #1 track title reads first and larger than $bid and clicks' "$test_log" \
     || fail "first-time listener prize-before-price test did not run"
+  grep -q 'empty week stays Bid USD / $5 and does not invent Hear' "$test_log" \
+    || fail "first-time listener empty Bid USD / \$5 test did not run"
 fi
 
 echo "OK: buildable and testable"

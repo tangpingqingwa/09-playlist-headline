@@ -233,6 +233,20 @@ a:hover {
   margin-top: 1.15rem;
 }
 
+/* Empty week stays Bid USD / $5. Occupied Hear / Need / prize stay off this week. */
+.board[data-empty-bid-five] .hear-after-raise,
+.board[data-empty-bid-five] .raise-after-hear,
+.board[data-empty-bid-five] .opening-listen,
+.board[data-empty-bid-five] .need-after-hear,
+.board[data-empty-bid-five] [data-hear-opening],
+.board[data-empty-bid-five] [data-first-click="hear"],
+.board[data-empty-bid-five] [data-need-after-hear],
+.board[data-empty-bid-five] [data-raise-after-hear],
+.board[data-empty-bid-five] [data-prize],
+.board[data-empty-bid-five] [data-prize-before-price] {
+  display: none;
+}
+
 .studio-deck,
 .claim-rail,
 .queue,
