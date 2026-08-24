@@ -131,7 +131,7 @@ a:hover {
   line-height: 1.45;
 }
 
-.hear-after-raise {
+.week-occupied .hear-after-raise {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem 0.7rem;
@@ -139,7 +139,7 @@ a:hover {
   margin: 0 0 0.45rem;
 }
 
-.raise-after-hear {
+.week-occupied .raise-after-hear {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem 0.7rem;
@@ -147,12 +147,12 @@ a:hover {
   margin: 0 0 0.55rem;
 }
 
-.raise-after-hear a {
+.week-occupied .raise-after-hear a {
   color: var(--ink);
   font-weight: 700;
 }
 
-.need-after-hear {
+.week-occupied .need-after-hear {
   display: inline-flex;
   align-items: center;
   min-height: 2.15rem;
@@ -167,41 +167,41 @@ a:hover {
   font-variant-numeric: tabular-nums;
 }
 
-.need-after-hear:hover {
+.week-occupied .need-after-hear:hover {
   background: var(--primary-soft);
   border-color: var(--primary);
   color: var(--primary);
 }
 
-.need-after-hear.need-after-hear-two {
+.week-occupied .need-after-hear.need-after-hear-two {
   min-height: 2.45rem;
   padding: 0 1.05rem;
   font-size: 0.92rem;
   letter-spacing: 0.06em;
 }
 
-.need-after-hear.need-after-hear-two.need-after-hear-three {
+.week-occupied .need-after-hear.need-after-hear-two.need-after-hear-three {
   min-height: 2.75rem;
   padding: 0 1.25rem;
   font-size: 1.02rem;
   letter-spacing: 0.07em;
 }
 
-.need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four {
+.week-occupied .need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four {
   min-height: 3.05rem;
   padding: 0 1.45rem;
   font-size: 1.12rem;
   letter-spacing: 0.08em;
 }
 
-.need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four.need-after-hear-five {
+.week-occupied .need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four.need-after-hear-five {
   min-height: 3.35rem;
   padding: 0 1.65rem;
   font-size: 1.22rem;
   letter-spacing: 0.09em;
 }
 
-.raise-after-note {
+.week-occupied .raise-after-note {
   color: var(--muted);
   font-weight: 600;
   font-size: 0.88rem;
@@ -249,8 +249,54 @@ a:hover {
 .board[data-empty-bid-five] [data-real-playback],
 .board[data-empty-bid-five] [data-clicks-are-hops],
 .board[data-empty-bid-five] [data-stored-listen],
-.board[data-empty-bid-five] .click-note {
+.board[data-empty-bid-five] .click-note,
+.week-empty[data-empty-bid-five] .hear-after-raise,
+.week-empty[data-empty-bid-five] .raise-after-hear,
+.week-empty[data-empty-bid-five] .opening-listen,
+.week-empty[data-empty-bid-five] .need-after-hear,
+.week-empty[data-empty-bid-five] [data-hear-opening],
+.week-empty[data-empty-bid-five] [data-first-click="hear"],
+.week-empty[data-empty-bid-five] [data-need-after-hear],
+.week-empty[data-empty-bid-five] [data-raise-after-hear],
+.week-empty[data-empty-bid-five] [data-prize],
+.week-empty[data-empty-bid-five] [data-prize-before-price],
+.week-empty[data-empty-bid-five] [data-later-fact],
+.week-empty[data-empty-bid-five] .later-fact,
+.week-empty[data-empty-bid-five] [data-real-playback],
+.week-empty[data-empty-bid-five] [data-clicks-are-hops],
+.week-empty[data-empty-bid-five] [data-stored-listen],
+.week-empty[data-empty-bid-five] .click-note,
+.week-empty .hear-after-raise,
+.week-empty .raise-after-hear,
+.week-empty .opening-listen,
+.week-empty .need-after-hear,
+.week-empty [data-hear-opening],
+.week-empty [data-first-click="hear"],
+.week-empty [data-need-after-hear],
+.week-empty [data-raise-after-hear],
+.week-empty [data-prize],
+.week-empty [data-prize-before-price],
+.week-empty [data-later-fact],
+.week-empty .later-fact,
+.week-empty [data-real-playback],
+.week-empty [data-clicks-are-hops],
+.week-empty [data-stored-listen],
+.week-empty [data-first-read="hear"],
+.week-empty .click-note,
+.week-empty .on-air-flag,
+.week-empty .opening-track,
+.week-empty .opening-artist,
+.week-empty .opening-facts,
+.week-empty .opening-source,
+.week-empty .hear-row,
+.week-empty .player,
+.week-occupied .empty-deck,
+.week-occupied [data-empty-week] {
   display: none;
+}
+
+.week-empty .empty-deck {
+  display: block;
 }
 
 .studio-deck,
@@ -317,39 +363,39 @@ a:hover {
 }
 
 /* Occupied #1 only: the track is the prize. $bid + clicks stay a later fact. */
-.studio-deck[data-prize-before-price] .opening-track {
+.week-occupied .studio-deck[data-prize-before-price] .opening-track {
   font-size: clamp(2.85rem, 8vw, 4.4rem);
 }
 
-.studio-deck[data-prize-before-price] .opening-facts .bid {
+.week-occupied .studio-deck[data-prize-before-price] .opening-facts .bid {
   font-size: 0.86rem;
 }
 
-.studio-deck[data-prize-before-price] .opening-facts .clicks {
+.week-occupied .studio-deck[data-prize-before-price] .opening-facts .clicks {
   font-size: 0.78rem;
 }
 
 /* Occupied #1 only: $bid + hop counts stay later facts. Do not shout beside the title. */
-.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact] {
+.week-occupied .studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact] {
   font-weight: 500;
 }
 
-.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact],
-.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact] {
+.week-occupied .studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact],
+.week-occupied .studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact] {
   font-weight: 500;
   color: var(--muted);
 }
 
 /* Occupied #1 only: playback is the stored listen URL. Clicks stay hops. */
-.studio-deck[data-real-playback] .player {
+.week-occupied .studio-deck[data-real-playback] .player {
   min-height: 16.5rem;
 }
 
-.studio-deck[data-real-playback="hop"] .hear-row .listen-host {
+.week-occupied .studio-deck[data-real-playback="hop"] .hear-row .listen-host {
   font-size: 0.92rem;
 }
 
-.studio-deck[data-real-playback] .click-note {
+.week-occupied .studio-deck[data-real-playback] .click-note {
   font-size: 0.72rem;
   color: var(--muted);
   font-weight: 600;
@@ -372,7 +418,7 @@ a:hover {
   font-size: 0.86rem;
 }
 
-.opening-listen {
+.week-occupied .opening-listen {
   display: inline-flex;
   align-items: center;
   min-height: 2.4rem;
@@ -385,42 +431,42 @@ a:hover {
   text-transform: uppercase;
 }
 
-.opening-listen.hear-after-need {
+.week-occupied .opening-listen.hear-after-need {
   min-height: 2.75rem;
   padding: 0 1.15rem;
   font-size: 1.02rem;
   letter-spacing: 0.06em;
 }
 
-.opening-listen.hear-after-need.hear-after-need-two {
+.week-occupied .opening-listen.hear-after-need.hear-after-need-two {
   min-height: 3.05rem;
   padding: 0 1.35rem;
   font-size: 1.12rem;
   letter-spacing: 0.07em;
 }
 
-.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three {
+.week-occupied .opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three {
   min-height: 3.35rem;
   padding: 0 1.55rem;
   font-size: 1.22rem;
   letter-spacing: 0.08em;
 }
 
-.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four {
+.week-occupied .opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four {
   min-height: 3.65rem;
   padding: 0 1.75rem;
   font-size: 1.32rem;
   letter-spacing: 0.09em;
 }
 
-.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four.hear-after-need-five {
+.week-occupied .opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four.hear-after-need-five {
   min-height: 3.95rem;
   padding: 0 1.95rem;
   font-size: 1.42rem;
   letter-spacing: 0.1em;
 }
 
-.opening-listen:hover {
+.week-occupied .opening-listen:hover {
   background: var(--primary);
   border-color: var(--primary);
   color: var(--primary-fg);

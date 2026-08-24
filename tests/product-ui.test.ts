@@ -46,7 +46,7 @@ function renderBoard(listings: Listing[]): string {
 test("station desk is a unique opening-song surface, not a centered form theme", () => {
   const empty = renderBoard([]);
 
-  assert.match(empty, /class="board station"/);
+  assert.match(empty, /class="board station week-empty"/);
   assert.match(empty, /station-desk/);
   assert.match(empty, /studio-deck/);
   assert.match(empty, /claim-rail/);
@@ -914,8 +914,8 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
-  const hearRule = cssSource.match(/\.opening-listen \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
+  const hearRule = cssSource.match(/\.week-occupied \.opening-listen \{[^}]+\}/);
   assert.ok(needRule);
   assert.ok(hearRule);
   assert.match(needRule[0], /display: inline-flex/);
@@ -1044,10 +1044,10 @@ test("occupied hear after Need $N is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
-  const hearRule = cssSource.match(/\.opening-listen \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
+  const hearRule = cssSource.match(/\.week-occupied \.opening-listen \{[^}]+\}/);
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   assert.ok(needRule);
   assert.ok(hearRule);
@@ -1197,12 +1197,12 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -1364,15 +1364,15 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -1549,18 +1549,18 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -1752,21 +1752,21 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedThreeRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -1973,24 +1973,24 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const needFourRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedThreeRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -2212,27 +2212,27 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const needFourRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedThreeRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedFourRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -2472,30 +2472,30 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const needFourRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const needFiveRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedThreeRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedFourRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -2748,33 +2748,33 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
-  const needRule = cssSource.match(/\.need-after-hear \{[^}]+\}/);
+  const needRule = cssSource.match(/\.week-occupied \.need-after-hear \{[^}]+\}/);
   const needTwoRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two \{\n  min-height: 2\.45rem;[\s\S]*?\n\}/m,
   );
   const needThreeRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three \{\n  min-height: 2\.75rem;[\s\S]*?\n\}/m,
   );
   const needFourRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const needFiveRule = cssSource.match(
-    /^\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need \{[^}]+\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need \{[^}]+\}/m,
   );
   const hearAfterNeedTwoRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two \{\n  min-height: 3\.05rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedThreeRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three \{\n  min-height: 3\.35rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedFourRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four \{\n  min-height: 3\.65rem;[\s\S]*?\n\}/m,
   );
   const hearAfterNeedFiveRule = cssSource.match(
-    /^\.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four\.hear-after-need-five \{\n  min-height: 3\.95rem;[\s\S]*?\n\}/m,
+    /^\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four\.hear-after-need-five \{\n  min-height: 3\.95rem;[\s\S]*?\n\}/m,
   );
   assert.ok(needRule);
   assert.ok(needTwoRule);
@@ -2935,13 +2935,13 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
 
 test("occupied #1 track title reads first and larger than $bid and clicks", () => {
   const prizeSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
   );
   const bidSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   const clickSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   assert.ok(prizeSize);
   assert.ok(bidSize);
@@ -2951,7 +2951,7 @@ test("occupied #1 track title reads first and larger than $bid and clicks", () =
   assert.match(cssSource, /clamp\(2\.85rem, 8vw, 4\.4rem\)/);
   assert.doesNotMatch(
     cssSource.match(
-      /\.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]+\}/,
+      /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]+\}/,
     )?.[0] ?? "",
     /background:/,
   );
@@ -3094,6 +3094,8 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.ok(claim <= claimNote);
   assert.ok(fiveCopy > claim);
   assert.equal((empty.match(/data-empty-bid-five=""/g) ?? []).length, 2);
+  assert.match(empty, /class="board station week-empty"/);
+  assert.match(empty, /data-week-empty="true"/);
   assert.match(empty, /data-empty-week="true"/);
   assert.match(empty, /data-opening-song="false"/);
   assert.match(empty, /data-claim-opening="empty"/);
@@ -3127,6 +3129,8 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /class="station-desk hear-first"/);
+  assert.doesNotMatch(empty, /class="board station week-occupied"/);
+  assert.doesNotMatch(empty, /data-week-occupied/);
   assert.doesNotMatch(empty, FORBIDDEN);
   assert.match(
     cssSource,
@@ -3134,6 +3138,27 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   );
   assert.match(cssSource, /\.board\[data-empty-bid-five\] \.need-after-hear/);
   assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-prize\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-hear-opening\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-prize\]/);
+  assert.match(cssSource, /\.week-empty \.opening-listen/);
+  assert.match(cssSource, /\.week-empty \.need-after-hear/);
+  assert.match(cssSource, /\.week-empty \[data-later-fact\]/);
+  assert.match(cssSource, /\.week-empty \[data-real-playback\]/);
+  assert.match(cssSource, /\.week-empty \.player/);
+  assert.match(cssSource, /\.week-occupied \.empty-deck/);
+  assert.match(cssSource, /\.week-occupied \.opening-listen \{/);
+  assert.match(cssSource, /\.week-occupied \.need-after-hear \{/);
+  assert.match(
+    cssSource,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/,
+  );
+  assert.doesNotMatch(
+    cssSource.match(/^\.opening-listen \{/m)?.[0] ?? "",
+    /background:/,
+  );
+  assert.doesNotMatch(cssSource, /^\.need-after-hear \{/m);
+  assert.doesNotMatch(cssSource, /^\.opening-listen \{/m);
+  assert.doesNotMatch(cssSource, /^\.studio-deck\[data-prize-before-price\]/m);
   assert.doesNotMatch(
     cssSource.match(/\.board\[data-empty-bid-five\][\s\S]*?\n\}/)?.[0] ?? "",
     /background:/,
@@ -3151,6 +3176,10 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
+  assert.match(hop, /class="board station week-occupied"/);
+  assert.match(hop, /data-week-occupied="true"/);
+  assert.doesNotMatch(hop, /class="board station week-empty"/);
+  assert.doesNotMatch(hop, /data-week-empty/);
   assert.doesNotMatch(hop, /class="station-desk hear-first"/);
   assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(hop, FORBIDDEN);
@@ -3163,7 +3192,11 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.doesNotMatch(embed, FORBIDDEN);
 
   assert.match(formSource, /data-empty-bid-five=\{occupied \? undefined : ""\}/);
-  assert.match(pageSource, /data-empty-bid-five=\{opening \? undefined : ""\}/);
+  assert.match(pageSource, /data-empty-bid-five=\{emptyWeek \? "" : undefined\}/);
+  assert.match(pageSource, /board station week-empty/);
+  assert.match(pageSource, /board station week-occupied/);
+  assert.match(pageSource, /data-week-empty/);
+  assert.match(pageSource, /data-week-occupied/);
   assert.match(pageSource, /station-desk/);
   assert.match(pageSource, /claim-rail/);
   assert.match(pageSource, /data-hear-opening/);
@@ -3172,15 +3205,170 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.match(formSource, /Outbid/);
 });
 
+test("empty week stays Bid USD / $5 — song-prize / Hear cannot leak", () => {
+  const empty = renderBoard([]);
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      clicks: 4,
+    }),
+  ]);
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+
+  const weekAt = empty.indexOf('class="board station week-empty"');
+  const emptyWeekStamp = empty.indexOf('data-week-empty="true"');
+  const bidFive = empty.indexOf('data-empty-bid-five=""');
+  const bidRead = empty.indexOf('data-first-read="bid"');
+  const bidCopy = empty.indexOf("Bid USD");
+  const emptyDeck = empty.indexOf('data-empty-week="true"');
+  const fiveCopy = empty.indexOf("$5 claims this week");
+  const claim = empty.indexOf('id="claim"');
+  assert.notEqual(weekAt, -1);
+  assert.notEqual(emptyWeekStamp, -1);
+  assert.notEqual(bidFive, -1);
+  assert.notEqual(bidRead, -1);
+  assert.notEqual(bidCopy, -1);
+  assert.notEqual(emptyDeck, -1);
+  assert.notEqual(fiveCopy, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(weekAt < emptyWeekStamp || emptyWeekStamp - weekAt < 80);
+  assert.ok(weekAt < bidRead);
+  assert.ok(bidRead <= bidCopy);
+  assert.ok(bidCopy < claim);
+  assert.ok(emptyDeck < claim);
+  assert.ok(fiveCopy > claim);
+  assert.match(empty, /class="board station week-empty"/);
+  assert.match(empty, /data-week-empty="true"/);
+  assert.match(empty, /data-empty-bid-five=""/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, />Outbid</);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /Nobody has paid yet/);
+  assert.match(empty, /There is no player this week/);
+  assert.match(empty, /class="station-desk"/);
+  assert.match(empty, /claim-rail/);
+  assert.doesNotMatch(empty, /class="board station week-occupied"/);
+  assert.doesNotMatch(empty, /data-week-occupied/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /href="#claim"/);
+  assert.doesNotMatch(empty, /data-prize-before-price/);
+  assert.doesNotMatch(empty, /data-prize=/);
+  assert.doesNotMatch(empty, /data-later-fact/);
+  assert.doesNotMatch(empty, /later-fact/);
+  assert.doesNotMatch(empty, /data-real-playback/);
+  assert.doesNotMatch(empty, /data-stored-listen/);
+  assert.doesNotMatch(empty, /LIVE OPEN/);
+  assert.doesNotMatch(empty, /opening-track/);
+  assert.doesNotMatch(empty, /<iframe/);
+  assert.doesNotMatch(empty, /<audio/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, /Not bidding\?/);
+  assert.doesNotMatch(empty, /class="station-desk hear-first"/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-hear-opening\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-prize\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-later-fact\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-real-playback\]/);
+  assert.match(cssSource, /\.week-empty \.opening-listen/);
+  assert.match(cssSource, /\.week-empty \.need-after-hear/);
+  assert.match(cssSource, /\.week-empty \.player/);
+  assert.match(cssSource, /\.week-occupied \.empty-deck/);
+  assert.match(cssSource, /\.week-occupied \.opening-listen \{/);
+  assert.match(cssSource, /\.week-occupied \.need-after-hear \{/);
+  assert.match(
+    cssSource,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/,
+  );
+  assert.match(
+    cssSource,
+    /\.week-occupied \.studio-deck\[data-real-playback\] \.player/,
+  );
+  const emptyHide =
+    cssSource.match(
+      /\.board\[data-empty-bid-five\] \.hear-after-raise,[\s\S]*?display: none;/,
+    )?.[0] ?? "";
+  assert.match(emptyHide, /display: none/);
+  assert.match(emptyHide, /\.week-empty\[data-empty-bid-five\] \[data-hear-opening\]/);
+  assert.match(emptyHide, /\.week-empty \.player/);
+  assert.doesNotMatch(emptyHide, /background:/);
+  assert.doesNotMatch(cssSource, /^\.opening-listen \{/m);
+  assert.doesNotMatch(cssSource, /^\.need-after-hear \{/m);
+  assert.doesNotMatch(cssSource, /^\.studio-deck\[data-prize-before-price\]/m);
+  assert.doesNotMatch(cssSource, /^\.studio-deck\[data-real-playback\]/m);
+  assert.doesNotMatch(pageSource, /data-hear-after-need-six/);
+  assert.doesNotMatch(pageSource, /data-need-after-hear-six/);
+
+  assert.match(hop, /class="board station week-occupied"/);
+  assert.match(hop, /data-week-occupied="true"/);
+  assert.match(hop, /data-first-read="hear"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /data-prize-before-price=""/);
+  assert.match(hop, /data-prize=""/);
+  assert.match(hop, /data-later-fact=""/);
+  assert.match(hop, /data-real-playback="hop"/);
+  assert.match(hop, /data-hear-opening="hop"/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.doesNotMatch(hop, /class="board station week-empty"/);
+  assert.doesNotMatch(hop, /data-week-empty/);
+  assert.doesNotMatch(hop, /data-empty-bid-five/);
+  assert.doesNotMatch(hop, /data-first-read="bid"/);
+  assert.doesNotMatch(hop, /Bid USD/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+
+  assert.match(embed, /class="board station week-occupied"/);
+  assert.match(embed, /data-hear-opening="embed"/);
+  assert.match(embed, /data-real-playback="embed"/);
+  assert.match(embed, /data-prize=""/);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.doesNotMatch(embed, /class="board station week-empty"/);
+  assert.doesNotMatch(embed, /data-empty-bid-five/);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  assert.match(pageSource, /board station week-empty/);
+  assert.match(pageSource, /board station week-occupied/);
+  assert.match(pageSource, /data-week-empty=\{emptyWeek \? "true" : undefined\}/);
+  assert.match(pageSource, /data-week-occupied=\{emptyWeek \? undefined : "true"\}/);
+  assert.match(pageSource, /data-empty-bid-five=\{emptyWeek \? "" : undefined\}/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(pageSource, /claim-rail/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /Outbid/);
+});
+
 test("occupied #1 playback is real and does not invent play counts", () => {
   const playerRule = cssSource.match(
-    /\.studio-deck\[data-real-playback\] \.player\s*\{[^}]*min-height:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-real-playback\] \.player\s*\{[^}]*min-height:\s*([\d.]+)rem/,
   );
   const hopHostRule = cssSource.match(
-    /\.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   const clickNoteRule = cssSource.match(
-    /\.studio-deck\[data-real-playback\] \.click-note\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-real-playback\] \.click-note\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   assert.ok(playerRule);
   assert.ok(hopHostRule);
@@ -3189,7 +3377,7 @@ test("occupied #1 playback is real and does not invent play counts", () => {
   assert.ok(Number(hopHostRule[1]) > 0.72);
   assert.ok(Number(clickNoteRule[1]) < Number(hopHostRule[1]));
   assert.doesNotMatch(
-    cssSource.match(/\.studio-deck\[data-real-playback\] \.player\s*\{[^}]+\}/)?.[0] ??
+    cssSource.match(/\.week-occupied \.studio-deck\[data-real-playback\] \.player\s*\{[^}]+\}/)?.[0] ??
       "",
     /background:/,
   );
@@ -3350,19 +3538,19 @@ test("occupied #1 playback is real and does not invent play counts", () => {
 
 test("occupied #1 $bid stays a later fact and does not shout beside the song title", () => {
   const prizeSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
   );
   const bidSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   const clickSize = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\s*\{[^}]*font-size:\s*([\d.]+)rem/,
   );
   const laterFactsRule = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\]\s*\{[^}]+\}/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\]\s*\{[^}]+\}/,
   );
   const laterBidRule = cssSource.match(
-    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],\s*\.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\.later-fact\[data-later-fact\]\s*\{[^}]+\}/,
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],\s*\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\.later-fact\[data-later-fact\]\s*\{[^}]+\}/,
   );
   assert.ok(prizeSize);
   assert.ok(bidSize);
