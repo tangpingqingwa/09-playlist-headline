@@ -159,7 +159,7 @@ test("opening song lives once on the studio deck, not again as the first queue c
   ]);
 
   assert.match(html, /data-opening-song="true"/);
-  assert.match(html, /<h1 class="opening-track">Cold Open<\/h1>/);
+  assert.match(html, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
   assert.match(html, /data-id="lst_open"/);
   assert.match(html, /data-id="lst_two"/);
   assert.match(html, /Also this week/);
@@ -181,7 +181,7 @@ test("solo #1 has no queue; empty week still has no cards", () => {
     }),
   ]);
   assert.match(solo, /data-opening-song="true"/);
-  assert.match(solo, /<h1 class="opening-track">Only Open<\/h1>/);
+  assert.match(solo, /<h1 class="opening-track" data-prize="">Only Open<\/h1>/);
   assert.match(solo, /data-id="lst_only"/);
   assert.doesNotMatch(solo, /data-leaderboard/);
   assert.doesNotMatch(solo, /<h3 class="track">Only Open<\/h3>/);
@@ -206,7 +206,7 @@ test("generic listen URL has no embed player and cards stay track — artist —
   ]);
 
   assert.match(html, /data-opening-song="true"/);
-  assert.match(html, /<h1 class="opening-track">Cold Open<\/h1>/);
+  assert.match(html, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
   assert.match(html, /<p class="opening-artist">Ada<\/p>/);
   assert.match(html, /href="\/click\/lst_generic"/);
   assert.match(html, /data-listen-url="https:\/\/example.com\/cold-open"/);
@@ -341,7 +341,9 @@ test("occupied listen is the first read, not Claim #1 / raise copy", () => {
   const hearFirst = hop.indexOf('data-hear-first="true"');
   const hearCopy = hop.indexOf("opening song is on");
   const firstClick = hop.indexOf('data-first-click="hear"');
-  const openingTrack = hop.indexOf('<h1 class="opening-track">Cold Open</h1>');
+  const openingTrack = hop.indexOf(
+    '<h1 class="opening-track" data-prize="">Cold Open</h1>',
+  );
   const hearHop = hop.indexOf('data-hear-opening="hop"');
   const claim = hop.indexOf('id="claim"');
   const bidUsd = hop.indexOf("Bid USD");
@@ -2929,4 +2931,125 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
   assert.doesNotMatch(empty, FORBIDDEN);
+});
+
+test("occupied #1 track title reads first and larger than $bid and clicks", () => {
+  const prizeSize = cssSource.match(
+    /\.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
+  );
+  const bidSize = cssSource.match(
+    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+  );
+  const clickSize = cssSource.match(
+    /\.studio-deck\[data-prize-before-price\] \.opening-facts \.clicks\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+  );
+  assert.ok(prizeSize);
+  assert.ok(bidSize);
+  assert.ok(clickSize);
+  assert.ok(Number(prizeSize[1]) > Number(bidSize[1]));
+  assert.ok(Number(prizeSize[1]) > Number(clickSize[1]));
+  assert.match(cssSource, /clamp\(2\.85rem, 8vw, 4\.4rem\)/);
+  assert.doesNotMatch(
+    cssSource.match(
+      /\.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]+\}/,
+    )?.[0] ?? "",
+    /background:/,
+  );
+
+  const empty = renderBoard([]);
+  assert.doesNotMatch(empty, /data-prize-before-price/);
+  assert.doesNotMatch(empty, /data-prize=/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /No opening song/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      clicks: 4,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+  const prizeStamp = hop.indexOf('data-prize-before-price=""');
+  const prize = hop.indexOf('data-prize=""');
+  const title = hop.indexOf(">Cold Open<", prize);
+  const bid = hop.indexOf('data-bid=""', prize);
+  const clicks = hop.indexOf("data-clicks", prize);
+  const laterTitle = hop.indexOf('<h3 class="track">Second Slot</h3>');
+  const laterBid = hop.indexOf('data-bid=""', laterTitle);
+  const claim = hop.indexOf('id="claim"');
+  assert.notEqual(prizeStamp, -1);
+  assert.notEqual(prize, -1);
+  assert.notEqual(title, -1);
+  assert.notEqual(bid, -1);
+  assert.notEqual(clicks, -1);
+  assert.notEqual(laterTitle, -1);
+  assert.notEqual(laterBid, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(prizeStamp < prize);
+  assert.ok(prize < title);
+  assert.ok(title < bid);
+  assert.ok(bid < clicks);
+  assert.ok(clicks < laterTitle);
+  assert.ok(laterTitle < laterBid);
+  assert.ok(title < claim);
+  assert.equal((hop.match(/data-prize-before-price=""/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-prize=""/g) ?? []).length, 1);
+  assert.match(hop, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
+  assert.match(hop, /\$12/);
+  assert.match(hop, /4 clicks/);
+  assert.match(hop, /data-hear-opening="hop"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(hop, /Not bidding\?/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+  assert.doesNotMatch(hop.slice(laterTitle), /data-prize-before-price|data-prize=/);
+
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+  const embedPrize = embed.indexOf('data-prize=""');
+  const embedTitle = embed.indexOf(">Cold Open<", embedPrize);
+  const embedHear = embed.indexOf('data-hear-opening="embed"');
+  const embedBid = embed.indexOf('data-bid=""', embedPrize);
+  assert.notEqual(embedPrize, -1);
+  assert.notEqual(embedTitle, -1);
+  assert.notEqual(embedHear, -1);
+  assert.notEqual(embedBid, -1);
+  assert.ok(embed.indexOf('data-prize-before-price=""') < embedPrize);
+  assert.ok(embedPrize < embedTitle);
+  assert.ok(embedTitle < embedHear);
+  assert.ok(embedHear < embedBid);
+  assert.equal((embed.match(/data-prize-before-price=""/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-prize=""/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.doesNotMatch(embed, /data-hear-opening="hop"/);
+  assert.doesNotMatch(embed, FORBIDDEN);
 });

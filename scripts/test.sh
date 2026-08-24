@@ -1737,6 +1737,110 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "hear-after-need-five cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied #1 track title reads first and larger than \$bid =="
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "occupied #1 must mark prize before price so the track reads first"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "occupied #1 must mark the track title as the prize"
+grep -q 'className="opening-track"' src/app/page.tsx \
+  || fail "occupied #1 prize must stay the opening-track title"
+grep -q 'occupied #1 track title reads first and larger than $bid and clicks' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover prize before price on occupied #1"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'prize-before-price'; then
+  fail "empty week must not stamp prize before price"
+fi
+if grep -n 'className="card"' -A 30 src/app/page.tsx | grep -q 'prize-before-price'; then
+  fail "later ranks must not stamp prize before price"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "prize before price must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "prize before price must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "prize before price must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "prize before price must not add a second Hear hop after the difference"
+fi
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "prize-before-price cut must keep one first Hear"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "prize-before-price cut must keep Need \$N after Hear"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the existing Need \$N #claim hop"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "prize-before-price cut must keep Hear as the first click"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "prize-before-price cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "prize-before-price cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "prize-before-price cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "prize-before-price cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "prize-before-price cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "prize-before-price cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "prize-before-price cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "prize-before-price hop must still use the click route"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "prize-before-price cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "prize-before-price cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "prize-before-price cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "prize-before-price cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "prize-before-price cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "prize-before-price cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "prize-before-price cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "prize-before-price cut must keep the station-desk columns"
+grep -q 'data-prize-before-price' src/app/board.css \
+  || fail "prize-before-price CSS must enlarge occupied #1 title over \$bid"
+grep -Fq 'clamp(2.85rem, 8vw, 4.4rem)' src/app/board.css \
+  || fail "prize-before-price CSS must make the occupied title larger than \$bid"
+if ! grep -n 'data-prize-before-price' -A 12 src/app/board.css | grep -q '0.86rem'; then
+  fail "prize-before-price CSS must keep occupied \$bid quieter than the title"
+fi
+if ! grep -n 'data-prize-before-price' -A 16 src/app/board.css | grep -q '0.78rem'; then
+  fail "prize-before-price CSS must keep occupied clicks quieter than the title"
+fi
+prize_title_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
+echo "$prize_title_rule" | grep -q 'font-size: clamp(2.85rem, 8vw, 4.4rem)' \
+  || fail "occupied title must be larger than \$bid + clicks"
+if echo "$prize_title_rule" | grep -q 'background:'; then
+  fail "prize-before-price must enlarge the title by size, not a recolor"
+fi
+prize_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid \{/,/\}/' src/app/board.css)"
+echo "$prize_bid_rule" | grep -q 'font-size: 0.86rem' \
+  || fail "occupied \$bid must stay a later quieter fact"
+if echo "$prize_bid_rule" | grep -q 'background:'; then
+  fail "prize-before-price must not recolor \$bid"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "prize-before-price cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "prize-before-price cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -1958,6 +2062,8 @@ if [[ -f package.json ]]; then
     || fail "first-time artist Need-after-Hear-five test did not run"
   grep -q 'occupied hear after Need $N is re-concentrated again after a louder Need again is certain' "$test_log" \
     || fail "first-time listener hear-after-need-five test did not run"
+  grep -q 'occupied #1 track title reads first and larger than $bid and clicks' "$test_log" \
+    || fail "first-time listener prize-before-price test did not run"
 fi
 
 echo "OK: buildable and testable"

@@ -296,6 +296,19 @@ a:hover {
   line-height: 0.95;
 }
 
+/* Occupied #1 only: the track is the prize. $bid + clicks stay a later fact. */
+.studio-deck[data-prize-before-price] .opening-track {
+  font-size: clamp(2.85rem, 8vw, 4.4rem);
+}
+
+.studio-deck[data-prize-before-price] .opening-facts .bid {
+  font-size: 0.86rem;
+}
+
+.studio-deck[data-prize-before-price] .opening-facts .clicks {
+  font-size: 0.78rem;
+}
+
 .opening-artist {
   margin: 0 0 0.85rem;
   color: var(--muted);
