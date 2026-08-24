@@ -127,6 +127,7 @@ export function OpeningDeck({
       className="studio-deck"
       data-opening-song="true"
       data-hear-first="true"
+      data-prize-before-price=""
       data-listing-card=""
       data-rank={listing.rank}
       data-id={listing.id}
@@ -134,7 +135,9 @@ export function OpeningDeck({
     >
       <p className="deck-kicker">On air · opening song</p>
       <p className="on-air-flag">LIVE OPEN</p>
-      <h1 className="opening-track">{listing.track}</h1>
+      <h1 className="opening-track" data-prize="">
+        {listing.track}
+      </h1>
       <p className="opening-artist">{listing.artist}</p>
       {playback.kind === "embed" ? (
         <iframe
