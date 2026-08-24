@@ -248,7 +248,7 @@ export function Board({
           </p>
           <p className="raise-after-hear">
             <a
-              className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"
+              className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five need-later-quiet"
               href="#claim"
               data-raise-after-hear="true"
               data-raise-after-hear-first="true"
@@ -257,6 +257,7 @@ export function Board({
               data-need-after-hear-three="true"
               data-need-after-hear-four="true"
               data-need-after-hear-five="true"
+              data-need-later-quiet=""
             >
               Need {formatUsd(defaultAmount)} to take #1
             </a>

@@ -905,7 +905,7 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/Need \$13 to take #1/g) ?? []).length, 2);
   assert.match(hop, /data-need-after-hear="true"/);
-  assert.match(hop, /class="need-after-hear(?: need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?)?"/);
+  assert.match(hop, /class="need-after-hear(?: need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -1033,7 +1033,7 @@ test("occupied hear after Need $N is certain", () => {
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /class="listen opening-listen hear-after-need(?: hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?)?"/);
   assert.match(hop, /data-need-after-hear="true"/);
-  assert.match(hop, /class="need-after-hear(?: need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?)?"/);
+  assert.match(hop, /class="need-after-hear(?: need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -1184,7 +1184,7 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.match(hop, /data-need-after-hear-two="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?"/);
   assert.match(hop, /data-need-after-hear="true"/);
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /class="listen opening-listen hear-after-need(?: hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?)?"/);
@@ -1254,7 +1254,7 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.equal((embed.match(/href="#hear-opening"/g) ?? []).length, 1);
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.match(embed, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?"/);
   assert.match(embed, /class="listen opening-listen hear-after-need(?: hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
@@ -1354,7 +1354,7 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.match(hop, /class="listen opening-listen hear-after-need hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?"/);
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /data-need-after-hear-two="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -1434,7 +1434,7 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?"/);
-  assert.match(embed, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two(?: need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
   assert.doesNotMatch(embed, /Not bidding\?/);
@@ -1535,7 +1535,7 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.match(hop, /data-need-after-hear-three="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?"/);
   assert.match(hop, /data-need-after-hear-two="true"/);
   assert.match(hop, /data-need-after-hear="true"/);
   assert.match(hop, /data-hear-after-need-two="true"/);
@@ -1631,7 +1631,7 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.equal((embed.match(/href="#hear-opening"/g) ?? []).length, 1);
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?"/);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two(?: hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
@@ -1742,7 +1742,7 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.match(hop, /data-hear-after-need-two="true"/);
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /data-need-after-hear-three="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -1847,7 +1847,7 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?"/);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five)?)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three(?: need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
   assert.doesNotMatch(embed, /Not bidding\?/);
@@ -1958,7 +1958,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.match(hop, /data-need-after-hear-four="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?"/);
   assert.match(hop, /data-need-after-hear-three="true"/);
   assert.match(hop, /data-need-after-hear-two="true"/);
   assert.match(hop, /data-need-after-hear="true"/);
@@ -2080,7 +2080,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.equal((embed.match(/href="#hear-opening"/g) ?? []).length, 1);
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?"/);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three(?: hear-after-need-four(?: hear-after-need-five)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
@@ -2202,7 +2202,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.match(hop, /data-hear-after-need-two="true"/);
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /data-need-after-hear-four="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five)?"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -2333,7 +2333,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four(?: hear-after-need-five)?"/);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five)?"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four(?: need-after-hear-five(?: need-later-quiet)?)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
   assert.doesNotMatch(embed, /Not bidding\?/);
@@ -2456,7 +2456,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.match(hop, /data-need-after-hear-five="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five(?: need-later-quiet)?"/);
   assert.match(hop, /data-need-after-hear-four="true"/);
   assert.match(hop, /data-need-after-hear-three="true"/);
   assert.match(hop, /data-need-after-hear-two="true"/);
@@ -2605,7 +2605,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.equal((embed.match(/href="#hear-opening"/g) ?? []).length, 1);
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five(?: need-later-quiet)?"/);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four(?: hear-after-need-five)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
@@ -2738,7 +2738,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.match(hop, /data-hear-after-need-two="true"/);
   assert.match(hop, /data-hear-after-need="true"/);
   assert.match(hop, /data-need-after-hear-five="true"/);
-  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"/);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five(?: need-later-quiet)?"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
@@ -2895,7 +2895,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.equal((embed.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.match(embed, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"/);
-  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"/);
+  assert.match(embed, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five(?: need-later-quiet)?"/);
   assert.match(embed, /Need \$13 to take #1/);
   assert.match(embed, /Same listen URL pays only the difference/);
   assert.doesNotMatch(embed, /Not bidding\?/);
@@ -3727,6 +3727,173 @@ test("occupied #1 $bid stays a later fact and does not shout beside the song tit
   assert.match(pageSource, /claim-rail/);
   assert.match(pageSource, /data-empty-bid-five/);
   assert.match(pageSource, /data-real-playback=/);
+  assert.doesNotMatch(pageSource, /data-hear-after-need-six/);
+  assert.doesNotMatch(pageSource, /data-need-after-hear-six/);
+});
+
+test("occupied Hear stays the first listener click; Need $N recedes", () => {
+  const hearSize = cssSource.match(
+    /\.week-occupied \.opening-listen\.hear-after-need\.hear-after-need-two\.hear-after-need-three\.hear-after-need-four\.hear-after-need-five \{\n  min-height: 3\.95rem;[\s\S]*?\n  font-size: ([\d.]+)rem/,
+  );
+  const needQuietRule = cssSource.match(
+    /\.week-occupied \.raise-after-hear a\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five\[data-need-later-quiet\] \{\n[\s\S]*?\n\}/,
+  );
+  const needQuietSize = cssSource.match(
+    /\.week-occupied \.raise-after-hear a\.need-after-hear\.need-after-hear-two\.need-after-hear-three\.need-after-hear-four\.need-after-hear-five\[data-need-later-quiet\] \{\n[\s\S]*?font-size:\s*([\d.]+)rem/,
+  );
+  const laterBidSize = cssSource.match(
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+  );
+  const prizeSize = cssSource.match(
+    /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track\s*\{[^}]*font-size:\s*clamp\(([\d.]+)rem/,
+  );
+  assert.ok(hearSize);
+  assert.ok(needQuietRule);
+  assert.ok(needQuietSize);
+  assert.ok(laterBidSize);
+  assert.ok(prizeSize);
+  assert.ok(Number(hearSize[1]) > Number(needQuietSize[1]));
+  assert.ok(Number(hearSize[1]) > Number(laterBidSize[1]));
+  assert.ok(Number(prizeSize[1]) > Number(laterBidSize[1]));
+  assert.match(needQuietRule[0], /display: inline/);
+  assert.match(needQuietRule[0], /min-height: 0/);
+  assert.match(needQuietRule[0], /border: 0/);
+  assert.match(needQuietRule[0], /font-size: 0\.72rem/);
+  assert.match(needQuietRule[0], /color: var\(--muted\)/);
+  assert.doesNotMatch(needQuietRule[0], /background:/);
+  assert.doesNotMatch(needQuietRule[0], /background: var\(--ink\)/);
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-need-later-quiet\]/);
+  assert.match(cssSource, /\.week-empty\[data-empty-bid-five\] \[data-need-later-quiet\]/);
+  assert.match(cssSource, /\.week-empty \[data-need-later-quiet\]/);
+
+  const empty = renderBoard([]);
+  assert.match(empty, /class="board station week-empty"/);
+  assert.match(empty, /data-empty-bid-five=""/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /No opening song/);
+  assert.doesNotMatch(empty, /data-need-later-quiet/);
+  assert.doesNotMatch(empty, /need-later-quiet/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      clicks: 4,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+  const firstRead = hop.indexOf('data-first-read="hear"');
+  const firstClick = hop.indexOf('data-first-click="hear"');
+  const hearCopy = hop.indexOf("Hear this week");
+  const hearHop = hop.indexOf('data-hear-opening="hop"');
+  const prize = hop.indexOf('data-prize=""');
+  const title = hop.indexOf(">Cold Open<", prize);
+  const laterBid = hop.indexOf('class="bid later-fact"');
+  const needQuiet = hop.indexOf('data-need-later-quiet=""');
+  const needCopy = hop.indexOf("Need $13 to take #1");
+  const difference = hop.indexOf("Same listen URL pays only the difference");
+  const laterCard = hop.indexOf('data-id="lst_two"');
+  const claim = hop.indexOf('id="claim"');
+  assert.notEqual(firstRead, -1);
+  assert.notEqual(firstClick, -1);
+  assert.notEqual(hearCopy, -1);
+  assert.notEqual(hearHop, -1);
+  assert.notEqual(prize, -1);
+  assert.notEqual(title, -1);
+  assert.notEqual(laterBid, -1);
+  assert.notEqual(needQuiet, -1);
+  assert.notEqual(needCopy, -1);
+  assert.notEqual(difference, -1);
+  assert.notEqual(laterCard, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(firstRead < firstClick);
+  assert.ok(firstClick < hearCopy);
+  assert.ok(hearCopy < needQuiet);
+  assert.ok(needQuiet < needCopy);
+  assert.ok(needCopy < difference);
+  assert.ok(needQuiet < laterBid || laterBid < needQuiet);
+  assert.ok(title < laterBid);
+  assert.ok(needQuiet < claim);
+  assert.ok(needQuiet < laterCard);
+  assert.equal((hop.match(/data-need-later-quiet=""/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
+  assert.match(hop, /class="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five need-later-quiet"/);
+  assert.match(hop, /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"/);
+  assert.match(hop, /data-need-later-quiet=""/);
+  assert.match(hop, /data-first-click="hear"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /Same listen URL pays only the difference/);
+  assert.match(hop, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
+  assert.match(hop, /class="bid later-fact"/);
+  assert.match(hop, /\$12/);
+  assert.match(hop, /4 clicks/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.match(hop, /class="board station week-occupied"/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, /class="board station week-empty"/);
+  assert.doesNotMatch(hop, /data-empty-bid-five/);
+  assert.doesNotMatch(hop, /Not bidding\?/);
+  assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+  assert.doesNotMatch(hop.slice(laterCard), /data-need-later-quiet|need-later-quiet/);
+
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+  const embedHear = embed.indexOf('data-first-click="hear"');
+  const embedNeed = embed.indexOf('data-need-later-quiet=""');
+  const embedClaim = embed.indexOf('id="claim"');
+  assert.notEqual(embedHear, -1);
+  assert.notEqual(embedNeed, -1);
+  assert.ok(embedHear < embedNeed);
+  assert.ok(embedNeed < embedClaim);
+  assert.match(embed, /href="#hear-opening"/);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.match(embed, /data-need-later-quiet=""/);
+  assert.equal((embed.match(/data-need-later-quiet=""/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.doesNotMatch(embed, /data-hear-opening="hop"/);
+  assert.doesNotMatch(embed, /Not bidding\?/);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  assert.match(pageSource, /data-need-later-quiet=/);
+  assert.match(pageSource, /need-later-quiet/);
+  assert.match(pageSource, /data-first-click="hear"/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(pageSource, /claim-rail/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /Outbid/);
   assert.doesNotMatch(pageSource, /data-hear-after-need-six/);
   assert.doesNotMatch(pageSource, /data-need-after-hear-six/);
 });

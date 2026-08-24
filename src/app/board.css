@@ -201,6 +201,26 @@ a:hover {
   letter-spacing: 0.09em;
 }
 
+/* Occupied Need $N recedes. Hear stays the first listener click. */
+.week-occupied .raise-after-hear a.need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four.need-after-hear-five[data-need-later-quiet] {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.18em;
+}
+
+.week-occupied .raise-after-hear a.need-after-hear.need-after-hear-two.need-after-hear-three.need-after-hear-four.need-after-hear-five[data-need-later-quiet]:hover {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink);
+}
+
 .week-occupied .raise-after-note {
   color: var(--muted);
   font-weight: 600;
@@ -241,6 +261,7 @@ a:hover {
 .board[data-empty-bid-five] [data-hear-opening],
 .board[data-empty-bid-five] [data-first-click="hear"],
 .board[data-empty-bid-five] [data-need-after-hear],
+.board[data-empty-bid-five] [data-need-later-quiet],
 .board[data-empty-bid-five] [data-raise-after-hear],
 .board[data-empty-bid-five] [data-prize],
 .board[data-empty-bid-five] [data-prize-before-price],
@@ -257,6 +278,7 @@ a:hover {
 .week-empty[data-empty-bid-five] [data-hear-opening],
 .week-empty[data-empty-bid-five] [data-first-click="hear"],
 .week-empty[data-empty-bid-five] [data-need-after-hear],
+.week-empty[data-empty-bid-five] [data-need-later-quiet],
 .week-empty[data-empty-bid-five] [data-raise-after-hear],
 .week-empty[data-empty-bid-five] [data-prize],
 .week-empty[data-empty-bid-five] [data-prize-before-price],
@@ -273,6 +295,7 @@ a:hover {
 .week-empty [data-hear-opening],
 .week-empty [data-first-click="hear"],
 .week-empty [data-need-after-hear],
+.week-empty [data-need-later-quiet],
 .week-empty [data-raise-after-hear],
 .week-empty [data-prize],
 .week-empty [data-prize-before-price],
