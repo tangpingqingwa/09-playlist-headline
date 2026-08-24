@@ -244,6 +244,8 @@ a:hover {
 .board[data-empty-bid-five] [data-raise-after-hear],
 .board[data-empty-bid-five] [data-prize],
 .board[data-empty-bid-five] [data-prize-before-price],
+.board[data-empty-bid-five] [data-later-fact],
+.board[data-empty-bid-five] .later-fact,
 .board[data-empty-bid-five] [data-real-playback],
 .board[data-empty-bid-five] [data-clicks-are-hops],
 .board[data-empty-bid-five] [data-stored-listen],
@@ -325,6 +327,17 @@ a:hover {
 
 .studio-deck[data-prize-before-price] .opening-facts .clicks {
   font-size: 0.78rem;
+}
+
+/* Occupied #1 only: $bid + hop counts stay later facts. Do not shout beside the title. */
+.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact] {
+  font-weight: 500;
+}
+
+.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact],
+.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact] {
+  font-weight: 500;
+  color: var(--muted);
 }
 
 /* Occupied #1 only: playback is the stored listen URL. Clicks stay hops. */

@@ -2075,6 +2075,150 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "real playback cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied #1 \$bid stays a later fact beside the song title =="
+grep -q 'data-later-fact' src/app/page.tsx \
+  || fail "occupied #1 must stamp \$bid as a later fact so it cannot shout beside the title"
+grep -q 'later-fact' src/app/page.tsx \
+  || fail "occupied #1 \$bid must use the later-fact class"
+grep -q 'className="opening-facts later-fact"' src/app/page.tsx \
+  || fail "occupied #1 \$bid + hops must recede together as later facts"
+grep -q 'className="bid later-fact"' src/app/page.tsx \
+  || fail "occupied #1 \$bid must stay a later fact on the studio deck"
+grep -q 'className="clicks later-fact"' src/app/page.tsx \
+  || fail "occupied #1 hop counts must stay a later fact beside \$bid"
+grep -q 'occupied #1 $bid stays a later fact and does not shout beside the song title' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover occupied \$bid staying a later fact"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'later-fact'; then
+  fail "empty week must not stamp later-fact \$bid"
+fi
+if grep -n 'className="card"' -A 30 src/app/page.tsx | grep -q 'later-fact'; then
+  fail "later ranks must not stamp later-fact \$bid"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "later-fact cut must not invent a Hear hop on empty"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "later-fact \$bid must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "later-fact \$bid must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "later-fact \$bid must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "later-fact \$bid must not add a second Hear hop after the difference"
+fi
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "later-fact cut must keep occupied prize before price"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "later-fact cut must keep the occupied prize title"
+grep -q 'data-real-playback' src/app/page.tsx \
+  || fail "later-fact cut must keep occupied real playback"
+grep -q 'data-clicks-are-hops' src/app/page.tsx \
+  || fail "later-fact cut must keep occupied clicks as hops"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "later-fact cut must keep empty week as Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "later-fact cut must keep empty Bid USD as the first read"
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "later-fact cut must keep one first Hear"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "later-fact cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "later-fact cut must keep Need \$N after Hear"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "later-fact cut must keep the existing Need \$N #claim hop"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "later-fact cut must keep Hear as the first click"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "later-fact cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "later-fact cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "later-fact cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "later-fact cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "later-fact cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "later-fact cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "later-fact cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "later-fact cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "later-fact cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "later-fact cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "later-fact hop must still use the click route"
+grep -q 'playbackForListing' src/app/page.tsx \
+  || fail "later-fact cut must still use stored listen URL playback"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "later-fact cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "later-fact cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "later-fact cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "later-fact cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "later-fact cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "later-fact cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "later-fact cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "later-fact cut must keep the station-desk columns"
+grep -q 'data-later-fact' src/app/board.css \
+  || fail "later-fact CSS must mute occupied \$bid beside the title"
+grep -Fq '.studio-deck[data-prize-before-price] .opening-facts.later-fact[data-later-fact]' src/app/board.css \
+  || fail "later-fact CSS must target occupied #1 facts as later facts"
+grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .bid.later-fact[data-later-fact]' src/app/board.css \
+  || fail "later-fact CSS must target occupied #1 \$bid only"
+grep -Fq '.studio-deck[data-prize-before-price] .opening-facts .clicks.later-fact[data-later-fact]' src/app/board.css \
+  || fail "later-fact CSS must target occupied #1 hop counts only"
+later_facts_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts\.later-fact\[data-later-fact\] \{/,/\}/' src/app/board.css)"
+echo "$later_facts_rule" | grep -q 'font-weight: 500' \
+  || fail "occupied facts must recede together as later facts"
+if echo "$later_facts_rule" | grep -q 'background:'; then
+  fail "later-fact facts must recede by weight, not a recolor of the desk"
+fi
+later_bid_rule="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-facts \.bid\.later-fact\[data-later-fact\],/,/\}/' src/app/board.css)"
+echo "$later_bid_rule" | grep -q 'color: var(--muted)' \
+  || fail "occupied \$bid must mute to later-fact ink, not shout primary beside the title"
+echo "$later_bid_rule" | grep -q 'font-weight: 500' \
+  || fail "occupied \$bid must stay a quieter later fact, not a bold prize"
+echo "$later_bid_rule" | grep -q 'clicks.later-fact' \
+  || fail "occupied hop counts must mute with \$bid as later facts"
+if echo "$later_bid_rule" | grep -q 'color: var(--primary)'; then
+  fail "later-fact \$bid must not keep primary shout beside the title"
+fi
+if echo "$later_bid_rule" | grep -q 'background:'; then
+  fail "later-fact \$bid must mute by weight and ink, not a recolor of the desk"
+fi
+prize_title_keep="$(awk '/^\.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
+echo "$prize_title_keep" | grep -q 'font-size: clamp(2.85rem, 8vw, 4.4rem)' \
+  || fail "later-fact cut must keep the occupied title larger than \$bid"
+if echo "$prize_title_keep" | grep -q 'background:'; then
+  fail "later-fact cut must not recolor the occupied title"
+fi
+empty_later_rule="$(awk '/^\.board\[data-empty-bid-five\] \.hear-after-raise,/,/^\}/' src/app/board.css)"
+echo "$empty_later_rule" | grep -q 'data-later-fact' \
+  || fail "empty Bid USD / \$5 CSS must hide occupied later-fact \$bid"
+echo "$empty_later_rule" | grep -q 'display: none' \
+  || fail "empty Bid USD / \$5 CSS must keep occupied Hear / Need / prize / later-fact off empty"
+if echo "$empty_later_rule" | grep -q 'background:'; then
+  fail "later-fact cut must hide occupied chrome on empty, not recolor the desk"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "later-fact cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "later-fact cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2302,6 +2446,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener empty Bid USD / \$5 test did not run"
   grep -q 'occupied #1 playback is real and does not invent play counts' "$test_log" \
     || fail "first-time listener real-playback test did not run"
+  grep -q 'occupied #1 $bid stays a later fact and does not shout beside the song title' "$test_log" \
+    || fail "first-time listener later-fact \$bid test did not run"
 fi
 
 echo "OK: buildable and testable"
