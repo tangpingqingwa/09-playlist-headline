@@ -192,7 +192,12 @@ export function Board({
   const hearIsHop = openingPlayback?.kind === "redirect";
 
   return (
-    <main className="board station" data-board="" data-week={weekId}>
+    <main
+      className="board station"
+      data-board=""
+      data-week={weekId}
+      data-empty-bid-five={opening ? undefined : ""}
+    >
       <p className="station-call">
         PH <span>09</span> · Playlist Headline
       </p>
@@ -243,7 +248,7 @@ export function Board({
           </p>
         </>
       ) : (
-        <p className="lede">
+        <p className="lede" data-first-read="bid">
           Bid USD. Open the week. Listeners hear you first. Rank is the bid.
           Playback is real.
         </p>

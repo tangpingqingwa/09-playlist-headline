@@ -68,6 +68,7 @@ export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
         <p
           className="claim-note"
           data-claim-note={occupied ? "take" : "empty"}
+          data-empty-bid-five={occupied ? undefined : ""}
         >
           {occupied
             ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference.`

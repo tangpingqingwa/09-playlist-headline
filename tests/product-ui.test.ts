@@ -3053,3 +3053,121 @@ test("occupied #1 track title reads first and larger than $bid and clicks", () =
   assert.doesNotMatch(embed, /data-hear-opening="hop"/);
   assert.doesNotMatch(embed, FORBIDDEN);
 });
+
+test("empty week stays Bid USD / $5 and does not invent Hear", () => {
+  const empty = renderBoard([]);
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+    }),
+  ]);
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+    }),
+  ]);
+
+  const bidRead = empty.indexOf('data-first-read="bid"');
+  const bidCopy = empty.indexOf("Bid USD");
+  const fiveCopy = empty.indexOf("$5 claims this week");
+  const emptyStamp = empty.indexOf('data-empty-bid-five=""');
+  const claimNote = empty.indexOf('data-empty-bid-five=""', emptyStamp + 1);
+  const claim = empty.indexOf('id="claim"');
+  const emptyDeck = empty.indexOf('data-empty-week="true"');
+  assert.notEqual(bidRead, -1);
+  assert.notEqual(bidCopy, -1);
+  assert.notEqual(fiveCopy, -1);
+  assert.notEqual(emptyStamp, -1);
+  assert.notEqual(claimNote, -1);
+  assert.notEqual(claim, -1);
+  assert.notEqual(emptyDeck, -1);
+  assert.ok(emptyStamp < bidRead);
+  assert.ok(bidRead <= bidCopy);
+  assert.ok(bidCopy < claim);
+  assert.ok(claim <= claimNote);
+  assert.ok(fiveCopy > claim);
+  assert.equal((empty.match(/data-empty-bid-five=""/g) ?? []).length, 2);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-opening-song="false"/);
+  assert.match(empty, /data-claim-opening="empty"/);
+  assert.match(empty, /data-claim-note="empty"/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, />Outbid</);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /Nobody has paid yet/);
+  assert.match(empty, /There is no player this week/);
+  assert.match(empty, /class="station-desk"/);
+  assert.match(empty, /claim-rail/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /href="#claim"/);
+  assert.doesNotMatch(empty, /data-raise-after-hear/);
+  assert.doesNotMatch(empty, /data-need-after-hear/);
+  assert.doesNotMatch(empty, /data-hear-after-need/);
+  assert.doesNotMatch(empty, /data-prize-before-price/);
+  assert.doesNotMatch(empty, /data-prize=/);
+  assert.doesNotMatch(empty, /opening-track/);
+  assert.doesNotMatch(empty, /LIVE OPEN/);
+  assert.doesNotMatch(empty, /data-playback=/);
+  assert.doesNotMatch(empty, /<iframe/);
+  assert.doesNotMatch(empty, /<audio/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, /Not bidding\?/);
+  assert.doesNotMatch(empty, /class="station-desk hear-first"/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.match(
+    cssSource,
+    /\.board\[data-empty-bid-five\] \.hear-after-raise/,
+  );
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \.need-after-hear/);
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-prize\]/);
+  assert.doesNotMatch(
+    cssSource.match(/\.board\[data-empty-bid-five\][\s\S]*?\n\}/)?.[0] ?? "",
+    /background:/,
+  );
+
+  assert.doesNotMatch(hop, /data-empty-bid-five/);
+  assert.doesNotMatch(hop, /data-first-read="bid"/);
+  assert.doesNotMatch(hop, /Bid USD/);
+  assert.doesNotMatch(hop, /\$5 claims this week/);
+  assert.match(hop, /data-first-read="hear"/);
+  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /data-prize-before-price=""/);
+  assert.match(hop, /data-prize=""/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+
+  assert.doesNotMatch(embed, /data-empty-bid-five/);
+  assert.doesNotMatch(embed, /data-first-read="bid"/);
+  assert.match(embed, /data-hear-opening="embed"/);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.match(embed, /data-prize=""/);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  assert.match(formSource, /data-empty-bid-five=\{occupied \? undefined : ""\}/);
+  assert.match(pageSource, /data-empty-bid-five=\{opening \? undefined : ""\}/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(pageSource, /claim-rail/);
+  assert.match(pageSource, /data-hear-opening/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /Outbid/);
+});
