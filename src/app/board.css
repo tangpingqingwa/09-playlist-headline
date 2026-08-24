@@ -147,11 +147,6 @@ a:hover {
   margin: 0 0 0.55rem;
 }
 
-/* Occupied Need $N sits on the claim rail, not beside Hear. */
-.week-occupied .claim-rail .raise-after-hear {
-  margin: 0 0 0.85rem;
-}
-
 .week-occupied .raise-after-hear a {
   color: var(--ink);
   font-weight: 700;
@@ -656,6 +651,49 @@ a:hover {
 .outbid:hover {
   filter: brightness(0.95);
 }
+
+/* Occupied Need $N sits on the claim rail, not beside Hear. */
+.week-occupied .claim-rail .raise-after-hear {
+  margin: 0 0 0.85rem;
+}
+
+/* Empty week: Listen URL is a later write after Claim #1 / Outbid. */
+.week-empty .claim.empty-claim-first[data-empty-claim-first] .outbid[data-first-click="claim"] {
+  min-width: 9rem;
+  min-height: 2.75rem;
+  margin-top: 0.85rem;
+}
+
+.week-empty .claim.empty-claim-first[data-empty-claim-first] .listen-identity[data-later-write] {
+  margin-top: 0.95rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--line);
+}
+
+.week-empty .claim.empty-claim-first[data-empty-claim-first] .later-write-label {
+  margin: 0 0 0.45rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.week-empty .claim.empty-claim-first[data-empty-claim-first] .listen-identity[data-later-write] input {
+  height: 2.2rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.week-occupied .claim .listen-identity[data-later-write],
+.week-occupied .claim .later-write-label,
+.week-occupied .claim [data-first-click="claim"],
+.week-occupied .claim.empty-claim-first,
+.week-occupied .claim[data-empty-claim-first] {
+  display: none;
+}
+
+/* End empty-week later-write. Occupied Outbid stays on the claim rail. */
 
 .stub-note,
 .raise-hint {

@@ -13,6 +13,75 @@ function clampAmount(value: number): number {
   return Math.max(MIN_BID_USD, Math.trunc(value));
 }
 
+function ListingIdentityFields() {
+  return (
+    <>
+      <label>
+        Track
+        <input
+          name="track"
+          type="text"
+          required
+          maxLength={80}
+          autoComplete="off"
+          spellCheck={false}
+        />
+      </label>
+      <label>
+        Artist
+        <input
+          name="artist"
+          type="text"
+          required
+          maxLength={80}
+          autoComplete="off"
+          spellCheck={false}
+        />
+      </label>
+      <label className="url">
+        Listen URL
+        <input
+          name="listenUrl"
+          type="url"
+          required
+          placeholder="https://"
+          autoComplete="url"
+          spellCheck={false}
+        />
+      </label>
+    </>
+  );
+}
+
+function OccupiedListingWrite() {
+  return (
+    <div className="fields">
+      <ListingIdentityFields />
+      <button type="submit" className="outbid">
+        Outbid
+      </button>
+    </div>
+  );
+}
+
+function EmptyClaimFirstWrite() {
+  return (
+    <>
+      <button type="submit" className="outbid" data-first-click="claim">
+        Outbid
+      </button>
+      <div
+        className="fields listen-identity"
+        data-listen-identity=""
+        data-later-write=""
+      >
+        <p className="later-write-label">Then the listen URL</p>
+        <ListingIdentityFields />
+      </div>
+    </>
+  );
+}
+
 export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
   const [amount, setAmount] = useState(() => clampAmount(defaultAmount));
   const occupied = topBidUsd !== undefined && topBidUsd >= MIN_BID_USD;
@@ -23,7 +92,12 @@ export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
   }
 
   return (
-    <section className="claim" id="claim">
+    <section
+      className={occupied ? "claim" : "claim empty-claim-first"}
+      id="claim"
+      data-empty-claim-first={occupied ? undefined : ""}
+      aria-label={occupied ? undefined : "Claim #1"}
+    >
       <form
         className="outbid-form"
         method="post"
@@ -74,44 +148,7 @@ export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
             ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference.`
             : `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1.`}
         </p>
-        <div className="fields">
-          <label>
-            Track
-            <input
-              name="track"
-              type="text"
-              required
-              maxLength={80}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
-          <label>
-            Artist
-            <input
-              name="artist"
-              type="text"
-              required
-              maxLength={80}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
-          <label className="url">
-            Listen URL
-            <input
-              name="listenUrl"
-              type="url"
-              required
-              placeholder="https://"
-              autoComplete="url"
-              spellCheck={false}
-            />
-          </label>
-          <button type="submit" className="outbid">
-            Outbid
-          </button>
-        </div>
+        {occupied ? <OccupiedListingWrite /> : <EmptyClaimFirstWrite />}
       </form>
     </section>
   );
