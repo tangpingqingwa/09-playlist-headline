@@ -246,24 +246,6 @@ export function Board({
               <span className="listen-host">{listenHost(opening.listenUrl)}</span>
             ) : null}
           </p>
-          <p className="raise-after-hear">
-            <a
-              className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"
-              href="#claim"
-              data-raise-after-hear="true"
-              data-raise-after-hear-first="true"
-              data-need-after-hear="true"
-              data-need-after-hear-two="true"
-              data-need-after-hear-three="true"
-              data-need-after-hear-four="true"
-              data-need-after-hear-five="true"
-            >
-              Need {formatUsd(defaultAmount)} to take #1
-            </a>
-            <span className="raise-after-note" data-raise-note="difference">
-              Same listen URL pays only the difference
-            </span>
-          </p>
         </>
       ) : (
         <p className="lede" data-first-read="bid">
@@ -287,6 +269,26 @@ export function Board({
           <p id="claim-heading" className="rail-kicker">
             Claim the open
           </p>
+          {opening ? (
+            <p className="raise-after-hear">
+              <a
+                className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"
+                href="#claim"
+                data-raise-after-hear="true"
+                data-raise-after-hear-first="true"
+                data-need-after-hear="true"
+                data-need-after-hear-two="true"
+                data-need-after-hear-three="true"
+                data-need-after-hear-four="true"
+                data-need-after-hear-five="true"
+              >
+                Need {formatUsd(defaultAmount)} to take #1
+              </a>
+              <span className="raise-after-note" data-raise-note="difference">
+                Same listen URL pays only the difference
+              </span>
+            </p>
+          ) : null}
           <BidForm defaultAmount={defaultAmount} topBidUsd={opening?.bidUsd} />
         </aside>
       </div>

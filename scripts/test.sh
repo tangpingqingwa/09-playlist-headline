@@ -2377,6 +2377,162 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "empty isolation must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied Hear is the first click — Need \$N is not a muted twin =="
+grep -q 'occupied Hear is the first click — Need $N is not a muted twin' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover Need \$N receding by grouping, not a muted twin"
+grep -q 'className="claim-rail"' src/app/page.tsx \
+  || fail "Need \$N grouping must keep the existing claim rail"
+grep -q 'className="raise-after-hear"' src/app/page.tsx \
+  || fail "Need \$N must stay the existing raise hop, grouped with Claim"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "Need \$N must stay the existing #claim hop, not a second Hear"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "Hear must stay the first occupied click"
+grep -q 'data-hear-one-first' src/app/page.tsx \
+  || fail "one first Hear must stay"
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "occupied song title must stay the prize"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "occupied prize title must stay"
+grep -q 'data-later-fact' src/app/page.tsx \
+  || fail "occupied \$bid must stay a later fact"
+grep -q 'data-real-playback' src/app/page.tsx \
+  || fail "occupied playback must stay real"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty week must stay Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "empty week must keep Bid USD as the first read"
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep one first Hear hop"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep Need \$N after Hear"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the Hear hop"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "Need-not-twin cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "Need-not-twin cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "Need-not-twin hop must still use the click route"
+grep -q 'playbackForListing' src/app/page.tsx \
+  || fail "Need-not-twin cut must still use stored listen URL playback"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "Need-not-twin cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "Need-not-twin cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "Need-not-twin cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "Need-not-twin cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "Need-not-twin cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "Need-not-twin cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "Need-not-twin cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "Need-not-twin cut must keep the station-desk columns"
+grep -Fq '.week-occupied .claim-rail .raise-after-hear' src/app/board.css \
+  || fail "Need \$N grouping CSS must target the claim rail, not mute the Hear twin"
+if grep -q 'data-need-later-quiet' src/app/page.tsx src/app/board.css; then
+  fail "Need-not-twin must not restamp PR #35 mute (data-need-later-quiet)"
+fi
+if grep -q 'need-later-quiet' src/app/page.tsx src/app/board.css; then
+  fail "Need-not-twin must not restamp PR #35 mute (need-later-quiet)"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "Need-not-twin must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "Need-not-twin must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "Need-not-twin must not add a second Hear hop after the difference"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "Need-not-twin must not add a second Hear hop after the difference"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'raise-after-hear'; then
+  fail "empty week must not group Need \$N on the empty deck"
+fi
+if grep -n 'data-first-click="hear"' -A 16 src/app/page.tsx | grep -q 'className="raise-after-hear"'; then
+  fail "Hear must not keep Need \$N as a sibling hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Need \$'; then
+  fail "empty week must not leak Need \$N"
+fi
+hear_block="$(awk '/<p className="hear-after-raise">/,/<\/p>/' src/app/page.tsx)"
+echo "$hear_block" | grep -q 'data-first-click="hear"' \
+  || fail "Hear must stay the first occupied click"
+if echo "$hear_block" | grep -q 'className="raise-after-hear"'; then
+  fail "Need \$N is still a sibling of Hear"
+fi
+if echo "$hear_block" | grep -q 'Need {formatUsd'; then
+  fail "Need \$N is still a sibling of Hear"
+fi
+rail_block="$(awk '/className="claim-rail"/,/<\/aside>/' src/app/page.tsx)"
+echo "$rail_block" | grep -q 'className="raise-after-hear"' \
+  || fail "Need \$N must be grouped inside the claim rail"
+echo "$rail_block" | grep -q 'Need {formatUsd(defaultAmount)} to take #1' \
+  || fail "Need \$N copy must live in the claim-rail group"
+echo "$rail_block" | grep -q 'href="#claim"' \
+  || fail "Need \$N must still hop to #claim"
+if echo "$rail_block" | grep -q 'data-first-click="hear"'; then
+  fail "Hear must not move into the claim rail"
+fi
+if echo "$rail_block" | grep -q 'Hear this week'; then
+  fail "Hear copy must not live in the claim rail"
+fi
+empty_deck="$(awk '/if \(!listing\) \{/,/^  \}$/' src/app/page.tsx)"
+if echo "$empty_deck" | grep -q 'raise-after-hear'; then
+  fail "empty week must not group Need \$N"
+fi
+if echo "$empty_deck" | grep -q 'Need {formatUsd'; then
+  fail "empty week must not group Need \$N"
+fi
+need_group_rule="$(awk '/^\.week-occupied \.claim-rail \.raise-after-hear \{/,/\}/' src/app/board.css)"
+echo "$need_group_rule" | grep -q 'margin: 0 0 0.85rem' \
+  || fail "Need \$N grouping CSS must recede by placement in the claim rail"
+if echo "$need_group_rule" | grep -q 'background:'; then
+  fail "Need \$N grouping must not recolor the hop"
+fi
+if echo "$need_group_rule" | grep -q 'color: var(--muted)'; then
+  fail "Need \$N grouping must not mute the hop (PR #35 REJECT)"
+fi
+if echo "$need_group_rule" | grep -q 'font-size:'; then
+  fail "Need \$N grouping must not restyle type as a quieter twin"
+fi
+need_hop_keep="$(awk '/^\.week-occupied \.need-after-hear \{/,/\}/' src/app/board.css)"
+echo "$need_hop_keep" | grep -q 'border: 2px dashed' \
+  || fail "Need \$N must keep the existing dashed raise box"
+echo "$need_hop_keep" | grep -q 'background: transparent' \
+  || fail "Need \$N must stay a dashed write, not a filled Hear twin"
+if echo "$need_hop_keep" | grep -q 'color: var(--muted)'; then
+  fail "Need \$N hop must not mute to --muted (PR #35 REJECT)"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "Need-not-twin cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "Need-not-twin cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2608,6 +2764,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener later-fact \$bid test did not run"
   grep -q 'empty week stays Bid USD / $5 — song-prize / Hear cannot leak' "$test_log" \
     || fail "first-time listener empty isolation test did not run"
+  grep -q 'occupied Hear is the first click — Need $N is not a muted twin' "$test_log" \
+    || fail "first-time listener Need-not-twin composition test did not run"
 fi
 
 echo "OK: buildable and testable"
