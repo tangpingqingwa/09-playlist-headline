@@ -2698,6 +2698,175 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "empty one-first cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied later tracks stay quieter than the opening song — prize stays first =="
+grep -q 'occupied later tracks stay quieter than the opening song — prize stays first' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover later tracks quieter than the opening song"
+grep -q 'data-later-stack' src/app/page.tsx \
+  || fail "occupied later ranks must group after the opening song"
+grep -q 'data-later-rank' src/app/page.tsx \
+  || fail "occupied later ranks must stamp later-rank cards"
+grep -q 'data-later-track' src/app/page.tsx \
+  || fail "later-rank track names must sit on later-track, not the #1 prize title"
+grep -q 'className="card later-card"' src/app/page.tsx \
+  || fail "later-rank cards must use later-card anatomy, not #1 prize chrome"
+grep -q 'className="queue later-stack"' src/app/page.tsx \
+  || fail "later ranks must group in a later-stack, not share the studio deck"
+grep -q 'className="listen later-listen"' src/app/page.tsx \
+  || fail "later Listen must stay a later hop, not Hear"
+grep -q 'data-listen-later' src/app/page.tsx \
+  || fail "later Listen must stamp the later hop"
+grep -q 'These tracks are not the opening song' src/app/page.tsx \
+  || fail "later stack must name later tracks as not the opening song"
+grep -q 'later-track\[data-later-track\]' src/app/board.css \
+  || fail "later-rank CSS must style later-track, not mute opening-track"
+grep -q 'later-card\[data-later-rank\]' src/app/board.css \
+  || fail "later-rank CSS must target later-card anatomy"
+grep -q 'listen.later-listen\[data-listen-later\]' src/app/board.css \
+  || fail "later-rank CSS must keep later Listen quieter than Hear"
+grep -Fq '.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .later-track[data-later-track]' src/app/board.css \
+  || fail "later-rank CSS must target later-track on later-card, not the prize title"
+grep -Fq 'font-size: 0.92rem' src/app/board.css \
+  || fail "later-rank titles must read smaller than the occupied opening song"
+grep -Fq 'clamp(2.85rem, 8vw, 4.4rem)' src/app/board.css \
+  || fail "later-rank cut must keep the occupied title larger than later tracks"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "later-rank cut must keep the occupied prize title"
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "later-rank cut must keep occupied prize before price"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "later-rank cut must keep Hear as the first occupied click"
+grep -q 'className="raise-after-hear"' src/app/page.tsx \
+  || fail "later-rank cut must keep Need \$N grouped with Claim"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "later-rank cut must keep empty week as Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "later-rank cut must keep empty Bid USD as the first read"
+grep -q 'data-first-click="claim"' src/app/outbid-form.tsx \
+  || fail "later-rank cut must keep empty Claim #1 as the first click"
+grep -q 'data-later-write' src/app/outbid-form.tsx \
+  || fail "later-rank cut must keep empty listen URL as a later write"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "later-rank cut must keep Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "later-rank cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "later-rank cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "later-rank cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "later-rank cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "later-rank cut must keep the station-desk columns"
+grep -Fq '.week-occupied .claim-rail .raise-after-hear' src/app/board.css \
+  || fail "later-rank cut must keep Need \$N grouped on the occupied claim rail"
+grep -Fq '.board[data-empty-bid-five] [data-later-rank]' src/app/board.css \
+  || fail "empty week CSS must hide leaked later-rank chrome"
+grep -Fq '.week-empty [data-later-track]' src/app/board.css \
+  || fail "empty week shell must hide leaked later-track names"
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "later-rank quiet must not add another numbered hop stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "later-rank quiet must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "later-rank quiet must not add a second Hear hop after the difference"
+fi
+if grep -qE 'data-later-rank-quiet|data-later-quiet|data-need-later-quiet' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "stamp-only later-quiet is REJECT"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-later-rank'; then
+  fail "empty week must not stamp later-rank cards"
+fi
+if grep -n 'data-prize=' -A 8 src/app/page.tsx | grep -q 'data-later-rank'; then
+  fail "occupied #1 prize must not stamp later-rank quiet"
+fi
+if grep -n 'className="opening-track"' -A 4 src/app/page.tsx | grep -q 'later-track'; then
+  fail "later-rank titles must not mute the same opening-track node as occupied #1"
+fi
+if grep -n 'data-first-click="hear"' -A 16 src/app/page.tsx | grep -q 'data-listen-later'; then
+  fail "later Listen must not sit on the occupied Hear hop"
+fi
+if grep -q 'className="track"' src/app/page.tsx; then
+  fail "later-rank titles must not reuse the prize-weight track heading"
+fi
+if grep -q 'card-cue' src/app/page.tsx src/app/board.css; then
+  fail "later-rank cards must not keep Cue chrome that mimics the opening song"
+fi
+if grep -E '^\.track \{' src/app/board.css; then
+  fail "later-rank CSS must not keep a shared .track prize node"
+fi
+if grep -nE 'data-later-quiet\] \.opening-track|\.opening-track\[data-later' src/app/board.css >/dev/null; then
+  fail "later-rank titles must not mute the same .opening-track node as occupied #1"
+fi
+later_track_rule="$(awk '/^\.week-occupied \.later-stack\[data-later-stack\] \.later-card\[data-later-rank\] \.later-track\[data-later-track\] \{/,/\}/' src/app/board.css)"
+echo "$later_track_rule" | grep -q 'font-size: 0.92rem' \
+  || fail "later-rank titles must read smaller than the occupied opening song"
+echo "$later_track_rule" | grep -q 'font-family: var(--sans)' \
+  || fail "later-rank titles must recede by anatomy, not the prize serif"
+if echo "$later_track_rule" | grep -q 'background:'; then
+  fail "later-rank titles must recede by anatomy, not a recolor"
+fi
+if echo "$later_track_rule" | grep -q 'var(--primary)'; then
+  fail "later-rank titles must not steal prize chrome"
+fi
+if echo "$later_track_rule" | grep -q '0.78rem'; then
+  fail "later-rank titles must not stamp-mute the prize title at 0.78rem"
+fi
+prize_title_keep="$(awk '/^\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track \{/,/\}/' src/app/board.css)"
+echo "$prize_title_keep" | grep -q 'font-size: clamp(2.85rem, 8vw, 4.4rem)' \
+  || fail "later-rank cut must keep the occupied title larger than later tracks"
+if echo "$prize_title_keep" | grep -q 'background:'; then
+  fail "later-rank cut must not recolor the occupied title"
+fi
+later_listen_rule="$(awk '/^\.week-occupied \.later-stack\[data-later-stack\] \.later-card\[data-later-rank\] \.listen\.later-listen\[data-listen-later\] \{/,/\}/' src/app/board.css)"
+echo "$later_listen_rule" | grep -q 'font-size: 0.68rem' \
+  || fail "later Listen must stay quieter than occupied Hear"
+if echo "$later_listen_rule" | grep -q 'background:'; then
+  fail "later Listen must stay a later hop, not a filled Hear twin"
+fi
+hear_keep="$(awk '/^\.week-occupied \.opening-listen \{/,/\}/' src/app/board.css)"
+echo "$hear_keep" | grep -q 'background: var(--ink)' \
+  || fail "later-rank cut must keep occupied Hear as the filled first click"
+later_rank_badge="$(awk '/^\.week-occupied \.later-stack\[data-later-stack\] \.later-card\[data-later-rank\] \.rank \{/,/\}/' src/app/board.css)"
+echo "$later_rank_badge" | grep -q 'background: transparent' \
+  || fail "later-rank badges must not share #1 prize fill"
+if echo "$later_rank_badge" | grep -q 'var(--primary)'; then
+  fail "later-rank badges must not steal prize chrome"
+fi
+later_card_rule="$(awk '/^\.week-occupied \.later-stack\[data-later-stack\] \.later-card\[data-later-rank\] \{/,/\}/' src/app/board.css)"
+echo "$later_card_rule" | grep -q 'min-height: 0' \
+  || fail "later-rank cards must recede vs the studio deck"
+echo "$later_card_rule" | grep -q 'border-top: 1px dashed var(--line)' \
+  || fail "later-rank cards must recede as a roster, not prize cards"
+if echo "$later_card_rule" | grep -q 'background: var(--'; then
+  fail "later-rank cards must recede by anatomy, not a recolor"
+fi
+need_group_keep="$(awk '/^\.week-occupied \.claim-rail \.raise-after-hear \{/,/\}/' src/app/board.css)"
+echo "$need_group_keep" | grep -q 'margin: 0 0 0.85rem' \
+  || fail "later-rank cut must keep Need \$N grouped with Claim"
+if echo "$need_group_keep" | grep -q 'background:'; then
+  fail "later-rank cut must not recolor occupied Need \$N"
+fi
+if ! awk '
+  /function ListingCard/ { card=NR }
+  card && /data-later-rank/ && !later { later=NR }
+  card && /data-later-track/ && !track { track=NR }
+  card && /data-listen-later/ && !hop { hop=NR }
+  /export function OpeningDeck/ { deck=NR }
+  deck && /data-prize/ && !prize { prize=NR }
+  /data-first-click="hear"/ && !hear { hear=NR }
+  END { exit !(card && later && track && hop && deck && prize && hear && card < later && later < track && track < hop && hop < deck && prize > deck && hear > prize) }
+' src/app/page.tsx; then
+  fail "later-rank cards must recede after occupied Hear / prize, with a later Listen hop"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "later-rank cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "later-rank cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2933,6 +3102,10 @@ if [[ -f package.json ]]; then
     || fail "first-time listener Need-not-twin composition test did not run"
   grep -q 'empty week has one first click — Claim #1, then the listen URL' "$test_log" \
     || fail "first-time artist empty one-first click test did not run"
+  grep -q 'occupied later tracks stay quieter than the opening song' "$test_log" \
+    || fail "occupied later-rank quiet leftover test did not run"
+  grep -q 'prize stays first' "$test_log" \
+    || fail "later-rank prize-stays-first leftover test did not run"
 fi
 
 echo "OK: buildable and testable"

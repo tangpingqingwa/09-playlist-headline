@@ -30,22 +30,25 @@ function listenHost(listenUrl: string): string {
 export function ListingCard({ listing }: { listing: RankedListing }) {
   return (
     <article
-      className="card"
+      className="card later-card"
       data-listing-card=""
+      data-later-rank=""
       data-rank={listing.rank}
       data-id={listing.id}
       data-bid={listing.bidUsd}
     >
       <span className="rank">#{listing.rank}</span>
       <div className="card-body">
-        <p className="card-cue">Cue {listing.rank}</p>
-        <h3 className="track">{listing.track}</h3>
+        <p className="later-track" data-later-track="">
+          {listing.track}
+        </p>
         <p className="artist">{listing.artist}</p>
         <p className="card-listen-row">
           <a
-            className="listen"
+            className="listen later-listen"
             href={listenClickPath(listing.id)}
             data-listen-url={listing.listenUrl}
+            data-listen-later=""
           >
             Listen
           </a>
@@ -75,7 +78,11 @@ export function Leaderboard({
   }
 
   return (
-    <aside className="queue" aria-labelledby="queue-heading">
+    <aside
+      className="queue later-stack"
+      data-later-stack=""
+      aria-labelledby="queue-heading"
+    >
       <div className="queue-head">
         <h2 id="queue-heading">Also this week</h2>
         <p>
@@ -83,7 +90,7 @@ export function Leaderboard({
           hops, not a platform count.
         </p>
       </div>
-      <ol className="leaderboard" data-leaderboard="">
+      <ol className="leaderboard later-board" data-leaderboard="">
         {rest.map((listing) => (
           <li key={listing.id}>
             <ListingCard listing={listing} />

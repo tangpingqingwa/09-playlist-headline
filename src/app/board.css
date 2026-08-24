@@ -294,7 +294,22 @@ a:hover {
 .week-empty .hear-row,
 .week-empty .player,
 .week-occupied .empty-deck,
-.week-occupied [data-empty-week] {
+.week-occupied [data-empty-week],
+.board[data-empty-bid-five] .later-stack,
+.board[data-empty-bid-five] [data-later-stack],
+.board[data-empty-bid-five] [data-later-rank],
+.board[data-empty-bid-five] [data-later-track],
+.board[data-empty-bid-five] [data-listen-later],
+.week-empty[data-empty-bid-five] .later-stack,
+.week-empty[data-empty-bid-five] [data-later-stack],
+.week-empty[data-empty-bid-five] [data-later-rank],
+.week-empty[data-empty-bid-five] [data-later-track],
+.week-empty[data-empty-bid-five] [data-listen-later],
+.week-empty .later-stack,
+.week-empty [data-later-stack],
+.week-empty [data-later-rank],
+.week-empty [data-later-track],
+.week-empty [data-listen-later] {
   display: none;
 }
 
@@ -329,8 +344,7 @@ a:hover {
 
 .deck-kicker,
 .rail-kicker,
-.queue-head p,
-.card-cue {
+.queue-head p {
   font-family: var(--mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -695,6 +709,79 @@ a:hover {
 
 /* End empty-week later-write. Occupied Outbid stays on the claim rail. */
 
+/* Occupied #2+ recede as a later roster. Prize chrome stays on #1. */
+.week-occupied .queue.later-stack[data-later-stack] {
+  margin-top: 1.35rem;
+  padding: 0.75rem 0.85rem 0.9rem;
+  box-shadow: none;
+}
+
+.week-occupied .queue.later-stack[data-later-stack] .queue-head h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.week-occupied .later-stack[data-later-stack] .leaderboard.later-board {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] {
+  min-height: 0;
+  padding: 0.55rem 0;
+  gap: 0.55rem 0.7rem;
+  background: transparent;
+  border: 0;
+  border-top: 1px dashed var(--line);
+  box-shadow: none;
+}
+
+.week-occupied .later-stack[data-later-stack] li:first-child .later-card[data-later-rank] {
+  border-top: 0;
+  padding-top: 0.15rem;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .rank {
+  min-width: 1.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  padding: 0;
+  text-align: left;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .later-track[data-later-track] {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .artist {
+  margin: 0.1rem 0 0.25rem;
+  font-size: 0.82rem;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .listen.later-listen[data-listen-later] {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .bid {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.week-occupied .later-stack[data-later-stack] .later-card[data-later-rank] .clicks {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;
@@ -758,29 +845,8 @@ a:hover {
   color: var(--muted);
 }
 
-.card[data-rank="2"] .rank,
-.card[data-rank="3"] .rank {
-  color: var(--primary-fg);
-  background: var(--primary);
-  text-align: center;
-  padding: 0.15rem 0.35rem;
-}
-
 .card-body {
   min-width: 0;
-}
-
-.card-cue {
-  margin: 0 0 0.3rem;
-  font-size: 0.64rem;
-}
-
-.track {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
 }
 
 .artist {
