@@ -1,7 +1,7 @@
 import React from "react";
 import { getPaymentPort } from "../../billing/port";
 import { getBoardListings, rankListings } from "../../core/rank";
-import { applyPaidEvent, listingForSession } from "../../core/store";
+import { applyPaidEvent, forgetUnpaidCheckout, listingForSession } from "../../core/store";
 import { currentWeekUtc } from "../../core/week";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +34,7 @@ export async function resolveReturn(params: {
 
   if (canceled) {
     await port.abandonCheckout(sessionId);
+    forgetUnpaidCheckout(sessionId);
     return { status: "pending" };
   }
 
@@ -72,8 +73,7 @@ export default async function ReturnPage({ searchParams }: ReturnPageProps) {
       <main className="return-page" data-return="pending">
         <h1>Payment pending</h1>
         <p>
-          Checkout abandoned or not yet paid. Rank updates only after a completed
-          payment. We do not invent an opening track.
+          Checkout abandoned or not yet paid. Rank updates only after Polar reports paid. An unpaid or abandoned track stays off the station desk. We do not invent an opening track. This page does not trust the query string alone.
         </p>
         <p>
           <a href="/">Back to the board</a>

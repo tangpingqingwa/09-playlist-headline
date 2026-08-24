@@ -6,6 +6,7 @@ import { MIN_BID_USD } from "../core/rank";
 type BidFormProps = {
   defaultAmount: number;
   topBidUsd?: number;
+  unpaidOff?: boolean;
 };
 
 function clampAmount(value: number): number {
@@ -82,7 +83,11 @@ function EmptyClaimFirstWrite() {
   );
 }
 
-export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
+export function BidForm({
+  defaultAmount,
+  topBidUsd,
+  unpaidOff = false,
+}: BidFormProps) {
   const [amount, setAmount] = useState(() => clampAmount(defaultAmount));
   const occupied = topBidUsd !== undefined && topBidUsd >= MIN_BID_USD;
   const takeUsd = clampAmount(defaultAmount);
@@ -143,10 +148,13 @@ export function BidForm({ defaultAmount, topBidUsd }: BidFormProps) {
           className="claim-note"
           data-claim-note={occupied ? "take" : "empty"}
           data-empty-bid-five={occupied ? undefined : ""}
+          data-unpaid-off={unpaidOff ? "" : undefined}
         >
           {occupied
-            ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference.`
-            : `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1.`}
+            ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference. Unpaid Polar checkout stays off this desk until Polar reports paid. An abandoned track is not #1.`
+            : unpaidOff
+              ? `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1. Unpaid Polar checkout stays off this desk until Polar reports paid. An abandoned track is not #1.`
+              : `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1.`}
         </p>
         {occupied ? <OccupiedListingWrite /> : <EmptyClaimFirstWrite />}
       </form>

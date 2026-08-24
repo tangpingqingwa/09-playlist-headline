@@ -20,8 +20,14 @@ import {
   parseTargetBidUsd,
   quoteBid,
 } from "../src/core/listing";
+import { createElement } from "react";
+import { Board } from "../src/app/page";
 import { getBoardListings, MIN_BID_USD, rankListings } from "../src/core/rank";
-import { applyPaidEvent, resetListings } from "../src/core/store";
+import {
+  applyPaidEvent,
+  listUnpaid,
+  resetListings,
+} from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
 
 afterEach(() => {
@@ -156,6 +162,58 @@ test("abandoned checkout does not list", async () => {
   });
   assert.equal(result.status, "pending");
   assert.equal(getBoardListings(weekId()).length, 0);
+});
+
+test("unpaid Polar checkout stays off the station desk until Polar reports paid", async () => {
+  const started = await postForm({
+    track: "Ghost Track",
+    artist: "Vapor",
+    listenUrl: "https://example.com/ghost",
+    amountUsd: "99",
+  });
+  assert.equal(started.status, 303);
+  assert.equal(getBoardListings(weekId()).length, 0);
+  const leftover = listUnpaid(weekId());
+  assert.equal(leftover.length, 1);
+  assert.equal(leftover[0]?.track, "Ghost Track");
+  assert.equal(leftover[0]?.artist, "Vapor");
+
+  const html = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: weekId(),
+      nextResetAt: currentWeekUtc().nextResetAt.toISOString(),
+      listings: rankListings(getBoardListings(weekId())),
+      unpaid: leftover,
+    }),
+  );
+  assert.match(html, /No opening song/);
+  assert.match(html, /data-unpaid-off=""/);
+  assert.match(html, /until Polar reports paid/);
+  assert.match(html, /Claim #1 for/);
+  assert.match(html, /Bid USD/);
+  assert.doesNotMatch(html, /Ghost Track/);
+  assert.doesNotMatch(html, /Vapor/);
+  assert.doesNotMatch(html, /\$99/);
+  assert.doesNotMatch(html, /data-prize=/);
+  assert.doesNotMatch(html, /Hear this week/);
+
+  const sessionId = new URL(started.headers.get("location") ?? "", "http://localhost")
+    .searchParams.get("sessionId");
+  assert.ok(sessionId);
+  const expired = await postWebhook(
+    new Request("http://localhost/api/polar/webhook", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        type: "checkout.updated",
+        data: { id: sessionId, status: "expired" },
+      }),
+    }),
+  );
+  assert.equal(expired.status, 200);
+  assert.deepEqual(await expired.json(), { received: true, applied: false });
+  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(listUnpaid(weekId()).length, 0);
 });
 
 test("underbid still lists below #1", async () => {

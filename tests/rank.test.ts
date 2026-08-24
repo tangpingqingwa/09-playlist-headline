@@ -172,6 +172,40 @@ test("live board loader invents no tracks", () => {
   assert.deepEqual(getBoardListings("2026-W33"), []);
 });
 
+test("unpaid Polar checkout never ranks as #1", () => {
+  const unpaid = listing({
+    id: "lst_unpaid",
+    track: "Ghost Track",
+    artist: "Vapor",
+    bidUsd: 99,
+    firstPaidAt: "",
+  });
+  const abandoned = listing({
+    id: "lst_abandoned",
+    track: "Abandoned Open",
+    artist: "Ghost",
+    bidUsd: 12,
+    firstPaidAt: "not-a-date",
+  });
+  const paid = listing({
+    id: "lst_paid_only",
+    track: "Cold Open",
+    artist: "Ada",
+    bidUsd: 5,
+    firstPaidAt: "2026-08-17T00:00:00.000Z",
+  });
+  assert.deepEqual(rankListings([unpaid, abandoned]), []);
+  const ranked = rankListings([unpaid, abandoned, paid]);
+  assert.equal(ranked.length, 1);
+  assert.equal(ranked[0]?.id, "lst_paid_only");
+  assert.equal(ranked[0]?.rank, 1);
+  assert.equal(ranked[0]?.bidUsd, 5);
+  assert.doesNotMatch(
+    ranked.map((row) => row.id).join(","),
+    /lst_unpaid|lst_abandoned/,
+  );
+});
+
 test("empty week renders the form and no opening song", () => {
   const html = renderBoard([]);
   assert.match(html, /data-empty-week="true"/);

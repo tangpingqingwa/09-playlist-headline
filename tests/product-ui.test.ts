@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Board } from "../src/app/page";
+import { Board, ListingCard } from "../src/app/page";
 import { rankListings, type Listing } from "../src/core/rank";
 
 const WEEK = "2026-W34";
@@ -4450,4 +4450,218 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.doesNotMatch(pageSource, /data-need-after-hear-six/);
   assert.doesNotMatch(pageSource, /className="track"/);
   assert.doesNotMatch(pageSource, /card-cue/);
+});
+
+test("unpaid stays off the station desk — No #1 until Polar reports paid", () => {
+  assert.match(pageSource, /isPolarPaidListing/);
+  assert.match(
+    pageSource,
+    /data-unpaid-off=\{emptyWeek && leftoverUnpaid \? "" : undefined\}/,
+  );
+  assert.match(
+    pageSource,
+    /An unpaid Polar checkout stays off this desk until Polar reports paid/,
+  );
+  assert.match(formSource, /data-unpaid-off=\{unpaidOff \? "" : undefined\}/);
+  assert.match(
+    formSource,
+    /Unpaid Polar checkout stays off this desk until Polar reports paid/,
+  );
+  assert.match(formSource, /An abandoned track is not #1/);
+  assert.match(cssSource, /\.claim-note\[data-unpaid-off\]/);
+  assert.match(cssSource, /\.board\[data-unpaid-off\] \[data-prize\]/);
+  assert.match(cssSource, /\.board\[data-unpaid-off\] \.opening-listen/);
+  assert.match(cssSource, /\.board\[data-unpaid-off\] \[data-hear-opening\]/);
+  assert.match(cssSource, /\.board\[data-unpaid-off\] \.later-stack/);
+  assert.match(cssSource, /\.week-empty\[data-unpaid-off\] \[data-prize\]/);
+  assert.match(cssSource, /\.week-empty\[data-unpaid-off\] \.later-stack/);
+  const unpaidHide =
+    cssSource.match(/\.board\[data-unpaid-off\] \.hear-after-raise,[\s\S]*?display: none;/)?.[0] ??
+    "";
+  assert.match(unpaidHide, /display:\s*none/);
+  assert.match(unpaidHide, /data-prize/);
+  assert.match(unpaidHide, /opening-listen/);
+  assert.match(unpaidHide, /later-stack/);
+  assert.doesNotMatch(unpaidHide, /background:/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(pageSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(formSource, /hear-after-need-six|need-after-hear-six/);
+  assert.match(pageSource, /data-prize=/);
+  assert.match(pageSource, /data-first-click="hear"/);
+  assert.match(pageSource, /Hear this week/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(formSource, /empty-claim-first/);
+  assert.match(formSource, /data-first-click="claim"/);
+  assert.match(formSource, /Then the listen URL/);
+  assert.match(pageSource, /className="queue later-stack"/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(formSource, /className="amount-field"/);
+  assert.match(formSource, /Outbid/);
+
+  const unpaidDraft = listing({
+    id: "lst_ghost",
+    track: "Ghost Track",
+    artist: "Vapor",
+    listenUrl: "https://example.com/ghost",
+    bidUsd: 99,
+    firstPaidAt: "",
+  });
+  const rankedUnpaid = rankListings([unpaidDraft]);
+  assert.deepEqual(rankedUnpaid, []);
+  const unpaidCard = renderToStaticMarkup(
+    createElement(ListingCard, {
+      listing: { ...unpaidDraft, rank: 1 },
+    }),
+  );
+  assert.equal(unpaidCard, "");
+
+  const leftover = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: rankedUnpaid,
+      unpaid: [
+        {
+          sessionId: "fix_abandoned",
+          weekId: WEEK,
+          track: "Ghost Track",
+          artist: "Vapor",
+          listenUrl: "https://example.com/ghost",
+          bidUsd: 99,
+        },
+      ],
+    }),
+  );
+  const emptyStamp = leftover.indexOf("No opening song");
+  const claimAt = leftover.indexOf('id="claim"');
+  const unpaidNote = leftover.indexOf("Unpaid Polar checkout stays off this desk");
+  const abandonedNote = leftover.indexOf("An abandoned track is not #1");
+  const firstClickClaim = leftover.indexOf('data-first-click="claim"');
+  const laterUrl = leftover.indexOf("Then the listen URL");
+  const outbidAt = leftover.indexOf(">Outbid<");
+  assert.ok(emptyStamp >= 0 && claimAt > emptyStamp);
+  assert.ok(unpaidNote > claimAt && abandonedNote > unpaidNote);
+  assert.ok(firstClickClaim > claimAt && firstClickClaim < laterUrl);
+  assert.ok(outbidAt > firstClickClaim && laterUrl > outbidAt);
+  assert.match(leftover, /class="board station week-empty"/);
+  assert.match(leftover, /data-empty-bid-five=""/);
+  assert.match(leftover, /data-unpaid-off=""/);
+  assert.match(leftover, /data-empty-week="true"/);
+  assert.match(leftover, /data-opening-song="false"/);
+  assert.match(leftover, /No opening song/);
+  assert.match(leftover, /until Polar reports paid/);
+  assert.match(leftover, /Bid USD/);
+  assert.match(leftover, /Claim #1 for/);
+  assert.match(leftover, /data-first-click="claim"/);
+  assert.match(leftover, /Then the listen URL/);
+  assert.match(leftover, />Outbid</);
+  assert.match(leftover, /class="amount-field"/);
+  assert.match(leftover, /class="station-desk"/);
+  assert.doesNotMatch(leftover, /data-listing-card/);
+  assert.doesNotMatch(leftover, /Ghost Track/);
+  assert.doesNotMatch(leftover, /Vapor/);
+  assert.doesNotMatch(leftover, /\$99/);
+  assert.doesNotMatch(leftover, /data-prize=/);
+  assert.doesNotMatch(leftover, /prize-before-price/);
+  assert.doesNotMatch(leftover, /Hear this week/);
+  assert.doesNotMatch(leftover, /data-first-click="hear"/);
+  assert.doesNotMatch(leftover, /Need \$/);
+  assert.doesNotMatch(leftover, /data-later-stack/);
+  assert.doesNotMatch(leftover, /data-later-rank/);
+  assert.doesNotMatch(leftover, /LIVE OPEN/);
+  assert.doesNotMatch(leftover, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(leftover, /class="station-desk hear-first"/);
+  assert.doesNotMatch(leftover, FORBIDDEN);
+
+  const empty = renderBoard([]);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, /Then the listen URL/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.doesNotMatch(empty, /data-unpaid-off=/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /data-prize=/);
+  assert.doesNotMatch(empty, /data-later-stack/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      clicks: 4,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+  const occupiedClaim = occupied.indexOf('id="claim"');
+  const occupiedHear = occupied.indexOf('data-first-click="hear"');
+  const occupiedPrize = occupied.indexOf('data-prize=""');
+  const occupiedUnpaid = occupied.indexOf("Unpaid Polar checkout stays off this desk");
+  assert.ok(occupiedHear >= 0 && occupiedHear < occupiedPrize);
+  assert.ok(occupiedPrize < occupiedClaim);
+  assert.ok(occupiedUnpaid > occupiedClaim);
+  assert.match(occupied, /class="board station week-occupied"/);
+  assert.match(occupied, /data-prize=""/);
+  assert.match(occupied, /Hear this week/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /class="raise-after-hear"/);
+  assert.match(occupied, /class="queue later-stack"/);
+  assert.match(occupied, /data-later-rank=""/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.match(occupied, />Outbid</);
+  assert.match(occupied, /Unpaid Polar checkout stays off this desk/);
+  assert.match(occupied, /An abandoned track is not #1/);
+  assert.match(occupied, /data-unpaid-off=""/);
+  assert.doesNotMatch(occupied, /data-empty-week/);
+  assert.doesNotMatch(occupied, /data-empty-bid-five/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, /Then the listen URL/);
+  assert.doesNotMatch(occupied, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/data-first-click="hear"/g) ?? []).length, 1);
+  assert.equal((occupied.match(/data-prize=""/g) ?? []).length, 1);
+
+  const leaked = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: [
+        { ...unpaidDraft, rank: 1 },
+        {
+          ...listing({
+            id: "lst_paid_only",
+            track: "Cold Open",
+            artist: "Ada",
+            listenUrl: "https://example.com/cold-open",
+            bidUsd: 5,
+          }),
+          rank: 2,
+        },
+      ],
+    }),
+  );
+  assert.match(leaked, /data-opening-song="true"/);
+  assert.match(leaked, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
+  assert.match(leaked, /data-id="lst_paid_only"/);
+  assert.match(leaked, /data-rank="1"/);
+  assert.match(leaked, /data-first-click="hear"/);
+  assert.match(leaked, /Hear this week/);
+  assert.equal((leaked.match(/data-listing-card/g) ?? []).length, 1);
+  assert.doesNotMatch(leaked, /Ghost Track|Vapor|lst_ghost/);
+  assert.doesNotMatch(leaked, /data-empty-week/);
+  assert.doesNotMatch(leaked, /data-first-click="claim"/);
+  assert.doesNotMatch(leaked, /data-rank="2"/);
+  assert.doesNotMatch(leaked, FORBIDDEN);
 });

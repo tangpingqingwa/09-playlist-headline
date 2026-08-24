@@ -7,21 +7,75 @@ import {
 } from "./listing";
 import { MIN_BID_USD, type Listing } from "./rank";
 
+/** Open Polar checkout. Never a ranked track until Polar reports paid. */
+export type UnpaidTrack = {
+  sessionId: string;
+  weekId: string;
+  track: string;
+  artist: string;
+  listenUrl: string;
+  bidUsd: number;
+};
+
 const listings: Listing[] = [];
+const unpaidTracks: UnpaidTrack[] = [];
 const listingIdBySession = new Map<string, string>();
 
-/** Drop in-memory paid rows. Tests only. */
+function hasPaidInstant(listing: Pick<Listing, "firstPaidAt">): boolean {
+  const paidAt = listing.firstPaidAt;
+  if (typeof paidAt !== "string" || paidAt.trim() === "") return false;
+  return Number.isFinite(Date.parse(paidAt));
+}
+
+/** Drop in-memory paid rows and unpaid Polar leftovers. Tests only. */
 export function resetListings(): void {
   listings.length = 0;
+  unpaidTracks.length = 0;
   listingIdBySession.clear();
 }
 
 export function listPaidForWeek(weekId: string): Listing[] {
-  return listings.filter((listing) => listing.weekId === weekId);
+  return listings.filter(
+    (listing) => listing.weekId === weekId && hasPaidInstant(listing),
+  );
+}
+
+/** Abandoned / open Polar checkout. Stays off the station desk. */
+export function listUnpaid(weekId: string): UnpaidTrack[] {
+  return unpaidTracks
+    .filter((row) => row.weekId === weekId)
+    .map((row) => ({ ...row }));
+}
+
+export function rememberUnpaidCheckout(input: UnpaidTrack): void {
+  if (listingIdBySession.has(input.sessionId)) return;
+  const existing = unpaidTracks.findIndex(
+    (row) => row.sessionId === input.sessionId,
+  );
+  const track: UnpaidTrack = {
+    sessionId: input.sessionId,
+    weekId: input.weekId,
+    track: input.track,
+    artist: input.artist,
+    listenUrl: canonicalListenUrl(input.listenUrl),
+    bidUsd: input.bidUsd,
+  };
+  if (existing >= 0) {
+    unpaidTracks[existing] = track;
+    return;
+  }
+  unpaidTracks.push(track);
+}
+
+export function forgetUnpaidCheckout(sessionId: string): void {
+  const index = unpaidTracks.findIndex((row) => row.sessionId === sessionId);
+  if (index >= 0) unpaidTracks.splice(index, 1);
 }
 
 export function getListingById(id: string): Listing | undefined {
-  return listings.find((listing) => listing.id === id);
+  return listings.find(
+    (listing) => listing.id === id && hasPaidInstant(listing),
+  );
 }
 
 /** Public listen-URL hops. Never a platform play count. */
@@ -40,7 +94,9 @@ export function findPaidByListenUrl(
   const key = canonicalListenUrl(listenUrl);
   return listings.find(
     (listing) =>
-      listing.weekId === weekId && canonicalListenUrl(listing.listenUrl) === key,
+      listing.weekId === weekId &&
+      hasPaidInstant(listing) &&
+      canonicalListenUrl(listing.listenUrl) === key,
   );
 }
 
@@ -62,6 +118,7 @@ export function listingForSession(sessionId: string): Listing | undefined {
 
 /** Rank updates only after a completed paid event. Session replay is a no-op. */
 export function applyPaidEvent(event: PaidBid): Listing {
+  forgetUnpaidCheckout(event.sessionId);
   if (!Number.isInteger(event.amountUsd) || event.amountUsd < 1) {
     throw new Error("bid must be a whole dollar");
   }
