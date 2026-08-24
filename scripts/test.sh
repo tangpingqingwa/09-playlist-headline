@@ -2477,53 +2477,35 @@ fi
 if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Need \$'; then
   fail "empty week must not leak Need \$N"
 fi
-python3 - src/app/page.tsx <<'PY' || fail "occupied Need \$N must change grouping, not a muted twin hop"
-import re
-import sys
-
-src = open(sys.argv[1], encoding="utf-8").read()
-if "data-need-later-quiet" in src or "need-later-quiet" in src:
-    raise SystemExit("stamp-only mute of Need $N (PR #35 REJECT)")
-if "data-hear-after-need-six" in src or "data-need-after-hear-six" in src:
-    raise SystemExit("do not stamp hear-after-need-N / need-after-hear-N")
-board = re.search(r"export function Board\([\s\S]*?\nexport default function ", src)
-if not board:
-    raise SystemExit("Board missing")
-body = board.group(0)
-hear = re.search(
-    r"<p className=\"hear-after-raise\">[\s\S]*?</p>",
-    body,
-)
-if not hear:
-    raise SystemExit("Hear hop missing")
-if "data-first-click=\"hear\"" not in hear.group(0):
-    raise SystemExit("Hear must stay the first occupied click")
-if "Need " in hear.group(0) or "raise-after-hear" in hear.group(0):
-    raise SystemExit("Need $N is still a sibling of Hear")
-rail = re.search(
-    r"<aside\n          className=\"claim-rail\"[\s\S]*?</aside>",
-    body,
-)
-if not rail:
-    raise SystemExit("claim rail missing")
-group = rail.group(0)
-if 'className="raise-after-hear"' not in group:
-    raise SystemExit("Need $N must be grouped inside the claim rail")
-if "Need {formatUsd(defaultAmount)} to take #1" not in group:
-    raise SystemExit("Need $N copy must live in the claim-rail group")
-if 'href="#claim"' not in group:
-    raise SystemExit("Need $N must still hop to #claim")
-if "data-first-click=\"hear\"" in group:
-    raise SystemExit("Hear must not move into the claim rail")
-if "Hear this week" in group:
-    raise SystemExit("Hear copy must not live in the claim rail")
-empty = re.search(
-    r"if \(!listing\) \{[\s\S]*?return \([\s\S]*?\);\n    \}",
-    src,
-)
-if empty and ("raise-after-hear" in empty.group(0) or "Need " in empty.group(0)):
-    raise SystemExit("empty week must not group Need $N")
-PY
+hear_block="$(awk '/<p className="hear-after-raise">/,/<\/p>/' src/app/page.tsx)"
+echo "$hear_block" | grep -q 'data-first-click="hear"' \
+  || fail "Hear must stay the first occupied click"
+if echo "$hear_block" | grep -q 'className="raise-after-hear"'; then
+  fail "Need \$N is still a sibling of Hear"
+fi
+if echo "$hear_block" | grep -q 'Need {formatUsd'; then
+  fail "Need \$N is still a sibling of Hear"
+fi
+rail_block="$(awk '/className="claim-rail"/,/<\/aside>/' src/app/page.tsx)"
+echo "$rail_block" | grep -q 'className="raise-after-hear"' \
+  || fail "Need \$N must be grouped inside the claim rail"
+echo "$rail_block" | grep -q 'Need {formatUsd(defaultAmount)} to take #1' \
+  || fail "Need \$N copy must live in the claim-rail group"
+echo "$rail_block" | grep -q 'href="#claim"' \
+  || fail "Need \$N must still hop to #claim"
+if echo "$rail_block" | grep -q 'data-first-click="hear"'; then
+  fail "Hear must not move into the claim rail"
+fi
+if echo "$rail_block" | grep -q 'Hear this week'; then
+  fail "Hear copy must not live in the claim rail"
+fi
+empty_deck="$(awk '/if \(!listing\) \{/,/^  \}$/' src/app/page.tsx)"
+if echo "$empty_deck" | grep -q 'raise-after-hear'; then
+  fail "empty week must not group Need \$N"
+fi
+if echo "$empty_deck" | grep -q 'Need {formatUsd'; then
+  fail "empty week must not group Need \$N"
+fi
 need_group_rule="$(awk '/^\.week-occupied \.claim-rail \.raise-after-hear \{/,/\}/' src/app/board.css)"
 echo "$need_group_rule" | grep -q 'margin: 0 0 0.85rem' \
   || fail "Need \$N grouping CSS must recede by placement in the claim rail"

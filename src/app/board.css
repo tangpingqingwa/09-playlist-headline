@@ -147,7 +147,7 @@ a:hover {
   margin: 0 0 0.55rem;
 }
 
-/* Occupied: Need $N is grouped with Claim. It is not a Hear twin. */
+/* Occupied Need $N sits on the claim rail, not beside Hear. */
 .week-occupied .claim-rail .raise-after-hear {
   margin: 0 0 0.85rem;
 }
