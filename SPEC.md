@@ -35,7 +35,7 @@ One-line pitch: **Bid USD. Open the week. Listeners hear you first.**
 - Equal bids: the **older** listing keeps the higher rank.
 - Same listing can raise; **raise pays difference** only.
 - Listing is **track + artist + listen URL**.
-- **Weekly reset UTC.** Bids do not carry into next week.
+- **Weekly reset UTC.** Live board is the rolling last 7 days from first paid placement. Not Monday 00:00 UTC.
 - **Playback must be real.** The listen URL is a real https destination. No fake streams.
 - **No invented play counts.** Do not scrape or display Spotify monthly listeners, YouTube views, SoundCloud plays, or any other platform stat.
 - Strip tracking and affiliate query strings from the listen URL.
@@ -76,12 +76,12 @@ There is no logged-in member. Payment is the only write path.
 
 ## 4. The slot
 
-Each UTC week has one open **headline slot**: the first track / opening song on the operator’s real playlist or live radio.
+The rolling last-7-days window has one open **headline slot**: the first track / opening song on the operator’s real playlist or live radio.
 
-- #1 this week is the opening song. The operator plays that paid listing first.
+- #1 in this window is the opening song. The operator plays that paid listing first.
 - Paying less than #1 still lists on the public board, at the rank that bid can take. Those tracks are not the opening song.
-- After the weekly reset, last week’s bids are gone from the live board. Want next week’s open? Pay again.
-- An empty week is valid. There is **no** opening song until someone pays. Do not invent a track.
+- After seven days from first paid placement, that bid is gone from the live board. Want the next open? Pay again. Monday 00:00 UTC is **not** the expiry.
+- An empty window is valid. There is **no** opening song until someone pays. Do not invent a track.
 
 v1 is one public board. Do not fork ranking per station. A later station/playlist row must reuse the same rank function.
 
@@ -94,7 +94,7 @@ A listing is created only after Polar (or the fixture checkout) reports a comple
 ```ts
 type Listing = {
   id: string
-  weekId: string            // ISO week in UTC, e.g. "2026-W34"
+  weekId: string            // ISO week label in UTC, e.g. "2026-W34"; not live expiry
   track: string             // 1–80 chars, trimmed
   artist: string            // 1–80 chars, trimmed
   listenUrl: string         // https, tracking stripped; real playback target
@@ -107,7 +107,7 @@ type Listing = {
 
 **Required to place:** `track`, `artist`, `listenUrl`, `bidUsd`.
 
-**Identity for raise:** canonical `listenUrl` + `weekId`. Same key → raise. Different key → new listing that must pay the full bid.
+**Identity for raise:** canonical `listenUrl` still live in the rolling last 7 days. Same key → raise. Different key → new listing that must pay the full bid.
 
 **Forbidden on the card, in the player, and in the database:**
 
@@ -132,11 +132,11 @@ Clone of outbid.lol. Rank is the bid. Nothing else.
 | Rank | Descending `bidUsd`. **rank = bid** |
 | Below #1 | Still lists, at the rank that amount can take |
 | Ties | **Older wins ties.** Compare `firstPaidAt` ascending, then listing id |
-| Raise | Same `(listenUrl, weekId)` may raise. Charge **new − current** only |
+| Raise | Same listen URL still live in the rolling last 7 days may raise. Charge **new − current** only |
 | Steal | A *different* listing that wants that rank must pay the **full** target amount, not the incumbent’s difference |
 | Floor after raise | New amount must be a whole dollar ≥ current + $1 and ≥ $5 |
 | Claim | A **completed payment** claims the rank. Unpaid checkout does not |
-| Period | Rankings are computed only among listings in the **current** UTC week |
+| Period | Rankings are computed only among listings whose `firstPaidAt` is in the **rolling last 7 days** |
 
 Display order: `bidUsd DESC`, then `firstPaidAt ASC` (older wins ties), then `id ASC`.
 
@@ -156,17 +156,17 @@ Worked examples, same week:
 
 | Field | Value |
 |---|---|
-| Period | 7 days |
-| Boundary | Monday 00:00:00.000 **UTC** |
-| `weekId` | ISO week in UTC, `YYYY-Www` (e.g. `2026-W34`) |
-| What resets | Live rank, bids, and click counters for the new week |
-| What does not carry | Previous week bid amounts. Want the next open? Pay again. |
-| History | Prior-week rows may stay readable as archive. They are not the live opening song. |
+| Period | 7 days from first paid placement |
+| Boundary | Rolling last 7 days. **Not** Monday 00:00:00.000 UTC |
+| `weekId` | ISO week in UTC, `YYYY-Www` (e.g. `2026-W34`). Polar/audit label only |
+| What resets | Live rank after seven days from `firstPaidAt`. Clicks and bids do not carry once that window ends |
+| What does not carry | Previous window bid amounts. Want the next open? Pay again. |
+| History | Aged rows may stay readable as archive. They are not the live opening song. |
 | Empty week | Valid. No invented opening track. |
 
-The board header shows the current `weekId` and the UTC instant of the next reset.
+The occupied board names the rolling last-7-days window. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
-Do not carry bids across the reset. Submitting last week’s listen URL this week is a **new** listing and pays a full bid ≥ $5.
+Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 
 ---
 
@@ -228,13 +228,13 @@ Rank updates **only** after a successful paid event. Abandoned checkout does not
 ## 11. Pages
 
 ```
-GET  /                         public board for the current UTC week + bid form
+GET  /                         public board for the rolling last 7 days + bid form
 POST /checkout                 { track, artist, listenUrl, amountUsd }
                                → PaymentPort.createCheckout (create or raise)
 GET  /return                   checkout return; show paid / pending, never trust query alone
 GET  /click/:id                302 listenUrl; increment public clicks
 GET  /about                    what this is; rank is money; real playback; no play counts
-GET  /rules                    min $5, ties, raise = difference, weekly UTC, no NSFW, no fake streams
+GET  /rules                    min $5, ties, raise = difference, rolling last 7 days, no NSFW, no fake streams
 GET  /healthz                  { ok: true }
 ```
 
@@ -256,7 +256,7 @@ Board UI (clone outbid.lol, not a redesign):
 | `bid_not_higher` | 400 | raise ≤ current |
 | `url_insecure` | 400 | not https |
 | `url_forbidden` | 400 | chat / NSFW / shortener / unusable host |
-| `week_closed` | 400 | bid outside the current UTC week |
+| `week_closed` | 400 | bid outside the rolling last-7-days window |
 | `play_count_forbidden` | 400 | submit tried to attach a play/stream/listener count |
 | `payment_incomplete` | 402 | checkout abandoned; board unchanged |
 | `polar_unavailable` | 503 | live Polar down; fixture never invents a paid event |
@@ -279,7 +279,7 @@ Zero invented listings on any error. Zero invented play counts.
 | 8 | NSFW listen URL | `url_forbidden`; no listing |
 | 9 | Click listen CTA | 302 to stripped URL; public clicks +1; not labeled as plays |
 | 10 | Real playback | listen control / embed uses the stored listen URL; no fake stream |
-| 11 | After Monday 00:00 UTC | board is a new empty week; old bids gone |
+| 11 | After Monday 00:00 UTC | a bid still inside 7 days stays ranked; a bid paid 7 days ago is unranked |
 | 12 | `POLAR_LIVE` unset | fixture / fail-closed; no Polar network |
 
 ---
@@ -292,8 +292,8 @@ Local process, `POLAR_LIVE=1` if Polar secrets exist, else record `BLOCKED-SECRE
 
 | Flow | Pass |
 |---|---|
-| Board | 200, current UTC week, no invented play counts, no fake stream |
-| About / rules | 200, state min $5, older wins ties, raise pays difference, weekly UTC, no fake streams |
+| Board | 200, rolling last 7 days, no invented play counts, no fake stream |
+| About / rules | 200, state min $5, older wins ties, raise pays difference, rolling last 7 days (not Monday 00:00 UTC), no fake streams |
 | Create checkout | Polar session for a real https listen URL **or** `BLOCKED-SECRET` (`POLAR_ACCESS_TOKEN`) |
 | Click | 302, click count increments (fixture listing allowed if live pay is blocked) |
 | Playback | listen control hits the stored URL; not a generated file |

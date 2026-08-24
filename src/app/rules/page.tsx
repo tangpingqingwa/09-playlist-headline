@@ -52,7 +52,8 @@ export default function RulesPage() {
           <tr>
             <th>Raise</th>
             <td>
-              Same canonical listen URL in the same UTC week raises.{" "}
+              Same canonical listen URL still live in the rolling last 7 days
+              raises.{" "}
               <strong>Raise pays difference</strong> only (
               <code>new − current</code>). New amount must be a whole dollar ≥
               current + $1.
@@ -81,12 +82,19 @@ export default function RulesPage() {
         <tbody>
           <tr>
             <th>Period</th>
-            <td>7 days. Live rank is this UTC week only.</td>
+            <td>
+              Rolling last 7 days from first paid placement. Live rank is that
+              window only.
+            </td>
           </tr>
           <tr>
             <th>Boundary</th>
             <td>
-              <strong>Monday 00:00:00.000 UTC</strong>
+              <strong>Rolling last 7 days. Not Monday 00:00 UTC.</strong> A
+              listener outside civil midnight does not lose the opening song on
+              a timezone tax. Not a 24h lock on #1.{" "}
+              <code>weekId</code> stays an ISO week label (
+              <code>YYYY-Www</code>, Monday 00:00:00.000 UTC) for Polar/audit.
             </td>
           </tr>
           <tr>
@@ -95,17 +103,20 @@ export default function RulesPage() {
             </th>
             <td>
               ISO week in UTC, <code>YYYY-Www</code> (e.g. <code>2026-W34</code>
-              ).
+              ). Label only — not the live expiry.
             </td>
           </tr>
           <tr>
             <th>What resets</th>
-            <td>Live rank, bids, and click counters for the new week.</td>
+            <td>
+              Live rank after seven days from first paid placement. Clicks and
+              bids do not carry once that window ends.
+            </td>
           </tr>
           <tr>
             <th>What does not carry</th>
             <td>
-              Previous week bid amounts. Want next week’s open? Pay again.
+              Previous window bid amounts. Want the next open? Pay again.
             </td>
           </tr>
         </tbody>

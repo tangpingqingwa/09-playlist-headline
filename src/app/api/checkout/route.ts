@@ -44,7 +44,7 @@ export async function POST(request: Request): Promise<Response> {
     const weekId = currentWeekUtc().weekId;
     const targetBidUsd = parseTargetBidUsd(body.amountUsd ?? body.bidUsd);
     const listingDraft = parseListingDraft(body, weekId);
-    const existing = findPaidByListenUrl(weekId, listingDraft.listenUrl);
+    const existing = findPaidByListenUrl(listingDraft.listenUrl);
     const quote = quoteBid(existing, targetBidUsd);
     const started = await getPaymentPort().createCheckout({
       listingDraft,

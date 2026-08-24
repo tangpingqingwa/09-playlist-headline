@@ -25,10 +25,13 @@ import { Board } from "../src/app/page";
 import { getBoardListings, MIN_BID_USD, rankListings } from "../src/core/rank";
 import {
   applyPaidEvent,
+  listPaidForWeek,
   listUnpaid,
   resetListings,
 } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
+
+process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
 
 afterEach(() => {
   resetListings();
@@ -121,7 +124,7 @@ test("$5 fixture create lists at #1", async () => {
     amountUsd: MIN_BID_USD,
     kind: "create",
   });
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 
   const paid = await port.completeCheckout(started.sessionId);
   const listing = applyPaidEvent({
@@ -133,7 +136,7 @@ test("$5 fixture create lists at #1", async () => {
     amountUsd: paid.amountUsd,
     paidAt: paid.paidAt,
   });
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.id, listing.id);
   assert.equal(ranked[0]?.rank, 1);
@@ -154,14 +157,14 @@ test("abandoned checkout does not list", async () => {
   });
   await port.abandonCheckout(started.sessionId);
   await assert.rejects(port.completeCheckout(started.sessionId), /payment_incomplete/);
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 
   const result = await resolveReturn({
     sessionId: started.sessionId,
     status: "cancel",
   });
   assert.equal(result.status, "pending");
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 });
 
 test("unpaid Polar checkout stays off the station desk until Polar reports paid", async () => {
@@ -172,7 +175,7 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
     amountUsd: "99",
   });
   assert.equal(started.status, 303);
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
   const leftover = listUnpaid(weekId());
   assert.equal(leftover.length, 1);
   assert.equal(leftover[0]?.track, "Ghost Track");
@@ -182,7 +185,7 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
     createElement(Board, {
       weekId: weekId(),
       nextResetAt: currentWeekUtc().nextResetAt.toISOString(),
-      listings: rankListings(getBoardListings(weekId())),
+      listings: rankListings(getBoardListings()),
       unpaid: leftover,
     }),
   );
@@ -212,7 +215,7 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
   );
   assert.equal(expired.status, 200);
   assert.deepEqual(await expired.json(), { received: true, applied: false });
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
   assert.equal(listUnpaid(weekId()).length, 0);
 });
 
@@ -256,7 +259,7 @@ test("underbid still lists below #1", async () => {
     paidAt: secondPaid.paidAt,
   });
 
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 2);
   assert.equal(ranked[0]?.track, "Twelve Dollar");
   assert.equal(ranked[0]?.rank, 1);
@@ -275,13 +278,13 @@ test("POST /checkout $5 then return lists at #1", async () => {
   assert.equal(started.status, 303);
   const location = started.headers.get("location") ?? "";
   assert.match(location, /\/return\?sessionId=/);
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 
   const sessionId = new URL(location).searchParams.get("sessionId");
   assert.ok(sessionId);
   const result = await resolveReturn({ sessionId });
   assert.equal(result.status, "paid");
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.rank, 1);
   assert.equal(ranked[0]?.bidUsd, 5);
@@ -306,7 +309,7 @@ test("bids below $5 and cents are rejected and never charged", async () => {
   });
   assert.equal(cents.status, 400);
   assert.deepEqual(await cents.json(), { error: "bid_not_whole" });
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 
   assert.throws(() => parseAmountUsd("4"), (err: unknown) => {
     assert.ok(err instanceof CheckoutError);
@@ -330,7 +333,7 @@ test("http listen URL is rejected", async () => {
   });
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { error: "url_insecure" });
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 });
 
 test("fixture webhook paid event lists; expired does not", async () => {
@@ -359,7 +362,7 @@ test("fixture webhook paid event lists; expired does not", async () => {
   );
   assert.equal(paid.status, 200);
   assert.deepEqual(await paid.json(), { received: true, applied: true });
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.rank, 1);
   assert.equal(ranked[0]?.bidUsd, 5);
@@ -373,7 +376,7 @@ test("fixture webhook paid event lists; expired does not", async () => {
     }),
   );
   assert.equal(again.status, 200);
-  assert.equal(getBoardListings(weekId()).length, 1);
+  assert.equal(getBoardListings().length, 1);
 
   const expired = await postWebhook(
     new Request("http://localhost/api/polar/webhook", {
@@ -398,7 +401,7 @@ test("fixture webhook paid event lists; expired does not", async () => {
   );
   assert.equal(expired.status, 200);
   assert.deepEqual(await expired.json(), { received: true, applied: false });
-  assert.equal(getBoardListings(weekId()).length, 1);
+  assert.equal(getBoardListings().length, 1);
 });
 
 test("polarApiBase defaults to production and honors POLAR_API_BASE", () => {
@@ -453,7 +456,7 @@ test("live PolarCheckout never fetches unless POLAR_LIVE=1", async () => {
     polar.completeCheckout(session.sessionId),
     /completes via webhook only/,
   );
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 });
 
 test("live Polar checkout uses POLAR_API_BASE override and optional product_id", async () => {
@@ -495,7 +498,7 @@ test("live Polar checkout uses POLAR_API_BASE override and optional product_id",
   assert.equal(fetches, 1);
   assert.equal(session.sessionId, "chk_sandbox_open");
   assert.equal(session.checkoutUrl, sandboxCheckout);
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 });
 
 test("live Polar webhook signed paid event lists", async () => {
@@ -549,7 +552,7 @@ test("live Polar webhook signed paid event lists", async () => {
     amountUsd: result.amountUsd,
     paidAt: result.paidAt,
   });
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.bidUsd, 8);
   assert.equal(ranked[0]?.track, "Underbid");
@@ -564,7 +567,7 @@ test("/return markup shows paid or pending and never trusts query alone", async 
   assert.match(pendingHtml, /data-return="pending"/);
   assert.match(pendingHtml, /not yet paid|abandoned/i);
   assert.doesNotMatch(pendingHtml, /data-return="paid"/);
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 
   const started = await getPaymentPort().createCheckout({
     listingDraft: draft(),
@@ -578,7 +581,7 @@ test("/return markup shows paid or pending and never trusts query alone", async 
   );
   assert.match(paidHtml, /data-return="paid"/);
   assert.match(paidHtml, /on the board/i);
-  assert.equal(rankListings(getBoardListings(weekId()))[0]?.rank, 1);
+  assert.equal(rankListings(getBoardListings())[0]?.rank, 1);
 });
 
 test("quoteBid charges the full first bid and only the raise difference", () => {
@@ -627,7 +630,7 @@ test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", a
     paidAt: firstPaidAt,
     kind: "create",
   });
-  const before = rankListings(getBoardListings(weekId()));
+  const before = rankListings(getBoardListings());
   assert.equal(before[0]?.id, incumbent.id);
   assert.equal(before[1]?.id, opener.id);
   assert.equal(before[1]?.bidUsd, 5);
@@ -646,8 +649,8 @@ test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", a
   const raiseSession = port.getCheckout(raiseBody.sessionId);
   assert.equal(raiseSession?.kind, "raise");
   assert.equal(raiseSession?.amountUsd, 7);
-  assert.equal(getBoardListings(weekId()).length, 2);
-  assert.equal(getBoardListings(weekId()).find((row) => row.id === opener.id)?.bidUsd, 5);
+  assert.equal(getBoardListings().length, 2);
+  assert.equal(getBoardListings().find((row) => row.id === opener.id)?.bidUsd, 5);
 
   const paid = await port.completeCheckout(raiseBody.sessionId);
   assert.equal(paid.kind, "raise");
@@ -667,7 +670,7 @@ test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", a
   assert.equal(raised.firstPaidAt, firstPaidAt);
   assert.notEqual(raised.lastPaidAt, firstPaidAt);
 
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 2);
   assert.equal(ranked[0]?.id, opener.id);
   assert.equal(ranked[0]?.rank, 1);
@@ -713,7 +716,7 @@ test("different listing pays the full amount and cannot steal a raise difference
     kind: paid.kind,
   });
 
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 2);
   assert.equal(ranked[0]?.listenUrl, "https://example.com/cover");
   assert.equal(ranked[0]?.bidUsd, 12);
@@ -753,13 +756,13 @@ test("bid_not_higher when raise is not above the current bid", async () => {
   assert.equal(lower.status, 400);
   assert.deepEqual(await lower.json(), { error: "bid_not_higher" });
 
-  const ranked = rankListings(getBoardListings(weekId()));
+  const ranked = rankListings(getBoardListings());
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.bidUsd, 8);
   assert.equal(getPaymentPort().getCheckout("unused"), undefined);
 });
 
-test("same listen URL next UTC week is a new full-bid listing", () => {
+test("same listen URL after the rolling window is a new full-bid listing", () => {
   applyPaidEvent({
     sessionId: "chk_last_week",
     weekId: "2026-W33",
@@ -785,6 +788,6 @@ test("same listen URL next UTC week is a new full-bid listing", () => {
   });
   assert.equal(next.bidUsd, 5);
   assert.equal(next.weekId, weekId());
-  assert.equal(getBoardListings(weekId()).length, 1);
-  assert.equal(getBoardListings("2026-W33")[0]?.bidUsd, 20);
+  assert.equal(getBoardListings().length, 1);
+  assert.equal(listPaidForWeek("2026-W33")[0]?.bidUsd, 20);
 });

@@ -6,6 +6,7 @@ import {
   type CheckoutKind,
 } from "./listing";
 import { MIN_BID_USD, type Listing } from "./rank";
+import { bidInRollingWeek, nowUtc } from "./week";
 
 /** Open Polar checkout. Never a ranked track until Polar reports paid. */
 export type UnpaidTrack = {
@@ -34,6 +35,15 @@ export function resetListings(): void {
   listingIdBySession.clear();
 }
 
+/** Polar-paid rows still inside the rolling last-7-days window. */
+export function listPaidInRollingWeek(now: Date = nowUtc()): Listing[] {
+  return listings.filter(
+    (listing) =>
+      hasPaidInstant(listing) && bidInRollingWeek(listing.firstPaidAt, now),
+  );
+}
+
+/** Polar-paid rows stored under an ISO weekId label. Archive / audit only. */
 export function listPaidForWeek(weekId: string): Listing[] {
   return listings.filter(
     (listing) => listing.weekId === weekId && hasPaidInstant(listing),
@@ -86,17 +96,14 @@ export function incrementListingClicks(id: string): Listing | undefined {
   return listing;
 }
 
-/** Same canonical listen URL in this UTC week is one listing. */
+/** Same canonical listen URL still live in the rolling last 7 days is a raise. */
 export function findPaidByListenUrl(
-  weekId: string,
   listenUrl: string,
+  now: Date = nowUtc(),
 ): Listing | undefined {
   const key = canonicalListenUrl(listenUrl);
-  return listings.find(
-    (listing) =>
-      listing.weekId === weekId &&
-      hasPaidInstant(listing) &&
-      canonicalListenUrl(listing.listenUrl) === key,
+  return listPaidInRollingWeek(now).find(
+    (listing) => canonicalListenUrl(listing.listenUrl) === key,
   );
 }
 
@@ -131,7 +138,7 @@ export function applyPaidEvent(event: PaidBid): Listing {
     return existing;
   }
 
-  const existing = findPaidByListenUrl(event.weekId, event.listenUrl);
+  const existing = findPaidByListenUrl(event.listenUrl);
   const kind: CheckoutKind = event.kind ?? (existing ? "raise" : "create");
   if (kind === "create" && event.amountUsd < MIN_BID_USD) {
     throw new Error(`bid must be a whole dollar >= ${MIN_BID_USD}`);

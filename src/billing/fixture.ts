@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { nowUtc } from "../core/week";
 import type {
   CheckoutKind,
   CheckoutRecord,
@@ -50,7 +51,7 @@ export class FixturePayment implements PaymentPort {
     }
     if (session.status !== "paid") {
       session.status = "paid";
-      session.paidAt = new Date().toISOString();
+      session.paidAt = nowUtc().toISOString();
     }
     return paidEvent(session);
   }
@@ -122,7 +123,7 @@ function paidEvent(session: StoredCheckout): PaidEvent {
     listingDraft: { ...session.listingDraft },
     amountUsd: session.amountUsd,
     kind: session.kind,
-    paidAt: session.paidAt ?? new Date().toISOString(),
+    paidAt: session.paidAt ?? nowUtc().toISOString(),
   };
 }
 

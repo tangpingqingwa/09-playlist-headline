@@ -27,22 +27,22 @@ Pay-to-rank clone of outbid.lol. Weekly public auction for the first track / ope
 ## 2. Ranking and week
 
 ```
-weeks (id pk, starts_at, ends_at)          -- Monday 00:00 UTC
+weeks (id pk, starts_at, ends_at)          -- ISO weekId label (Monday 00:00 UTC)
 listings (id, week_id, listen_key, track, artist, listen_url,
           bid_usd, first_paid_at, clicks)
 payments (id, listing_id, polar_session, amount_usd, kind create|raise)
 ```
 
-Board query (current week only):
+Board query (rolling last 7 days):
 
 ```
-WHERE week_id = current_week_utc()
+WHERE first_paid_at >= now - 7 days AND first_paid_at <= now
 ORDER BY bid_usd DESC, first_paid_at ASC, id ASC
 ```
 
-`current_week_utc()` is ISO week in UTC. Adding a second station later must not touch this `ORDER BY`.
+Live rank is that rolling window, not `week_id = current_week_utc()`. Adding a second station later must not touch this `ORDER BY`.
 
-Identity key for raise: canonical `listenUrl` + `weekId`.
+Identity key for raise: canonical `listenUrl` still live in the rolling last 7 days.
 
 ---
 
@@ -70,7 +70,7 @@ Identity key for raise: canonical `listenUrl` + `weekId`.
       healthz/route.ts
     core/
       rank.ts                  # ORDER BY contract
-      week.ts                  # Monday 00:00 UTC
+      week.ts                  # rolling last-7-days window; weekId label
       listing.ts               # track + artist + listen URL
       url.ts                   # strip tracking, reject chat/NSFW
       playback.ts              # real listen URL / official embed only
@@ -101,7 +101,7 @@ No application `src/` in this docs PR.
 
 | Test | Assert |
 |---|---|
-| week | Monday 00:00 UTC included in the new week; Sunday still previous ISO week |
+| week | Monday 00:00 UTC rolls `weekId` label; live board is rolling last 7 days; a Sunday pay stays ranked across Monday midnight |
 | rank | higher bid above; **older wins ties**; below-#1 still lists |
 | raise | $5 → $12 charges **$7**; other listing cannot steal by paying $7 |
 | listing | track + artist + listen URL required; play-count field rejected |
