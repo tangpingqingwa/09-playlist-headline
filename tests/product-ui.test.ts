@@ -3171,3 +3171,179 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.match(formSource, /className="amount-field"/);
   assert.match(formSource, /Outbid/);
 });
+
+test("occupied #1 playback is real and does not invent play counts", () => {
+  const playerRule = cssSource.match(
+    /\.studio-deck\[data-real-playback\] \.player\s*\{[^}]*min-height:\s*([\d.]+)rem/,
+  );
+  const hopHostRule = cssSource.match(
+    /\.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+  );
+  const clickNoteRule = cssSource.match(
+    /\.studio-deck\[data-real-playback\] \.click-note\s*\{[^}]*font-size:\s*([\d.]+)rem/,
+  );
+  assert.ok(playerRule);
+  assert.ok(hopHostRule);
+  assert.ok(clickNoteRule);
+  assert.ok(Number(playerRule[1]) > 14);
+  assert.ok(Number(hopHostRule[1]) > 0.72);
+  assert.ok(Number(clickNoteRule[1]) < Number(hopHostRule[1]));
+  assert.doesNotMatch(
+    cssSource.match(/\.studio-deck\[data-real-playback\] \.player\s*\{[^}]+\}/)?.[0] ??
+      "",
+    /background:/,
+  );
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-real-playback\]/);
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-clicks-are-hops\]/);
+  assert.match(cssSource, /\.board\[data-empty-bid-five\] \[data-stored-listen\]/);
+
+  const empty = renderBoard([]);
+  assert.doesNotMatch(empty, /data-real-playback/);
+  assert.doesNotMatch(empty, /data-clicks-are-hops/);
+  assert.doesNotMatch(empty, /data-stored-listen/);
+  assert.doesNotMatch(empty, /hops, not a platform count/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /There is no player this week/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /data-hear-opening=/);
+  assert.doesNotMatch(empty, /data-playback=/);
+  assert.doesNotMatch(empty, /<iframe/);
+  assert.doesNotMatch(empty, /<audio/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const hop = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      clicks: 4,
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-18T00:00:00.000Z",
+    }),
+  ]);
+  const realStamp = hop.indexOf('data-real-playback="hop"');
+  const stored = hop.indexOf('data-stored-listen=""');
+  const storedUrl = hop.lastIndexOf(
+    'data-listen-url="https://example.com/cold-open"',
+    stored,
+  );
+  const hopsNote = hop.indexOf("hops, not a platform count");
+  const clicksAreHops = hop.indexOf('data-clicks-are-hops=""');
+  const hearHop = hop.indexOf('data-hear-opening="hop"');
+  const clicksCopy = hop.indexOf("4 clicks");
+  const laterCard = hop.indexOf('data-id="lst_two"');
+  const claim = hop.indexOf('id="claim"');
+  assert.notEqual(realStamp, -1);
+  assert.notEqual(stored, -1);
+  assert.notEqual(storedUrl, -1);
+  assert.notEqual(hopsNote, -1);
+  assert.notEqual(clicksAreHops, -1);
+  assert.notEqual(hearHop, -1);
+  assert.notEqual(clicksCopy, -1);
+  assert.notEqual(laterCard, -1);
+  assert.notEqual(claim, -1);
+  assert.ok(hearHop < realStamp);
+  assert.ok(realStamp < stored);
+  assert.ok(stored < hopsNote);
+  assert.ok(clicksAreHops < hopsNote);
+  assert.ok(hopsNote < laterCard);
+  assert.ok(hopsNote < claim);
+  assert.equal((hop.match(/data-real-playback=/g) ?? []).length, 1);
+  assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
+  assert.match(hop, /data-real-playback="hop"/);
+  assert.match(hop, /data-stored-listen=""/);
+  assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
+  assert.match(hop, /data-clicks-are-hops=""/);
+  assert.match(hop, /4 clicks/);
+  assert.match(hop, /hops, not a platform count/);
+  assert.match(hop, /data-prize-before-price=""/);
+  assert.match(hop, /Need \$13 to take #1/);
+  assert.match(hop, /Claim #1 for/);
+  assert.match(hop, />Outbid</);
+  assert.match(hop, /class="station-desk"/);
+  assert.doesNotMatch(hop, /class="station-desk hear-first"/);
+  assert.doesNotMatch(hop, /data-playback=/);
+  assert.doesNotMatch(hop, /<iframe/);
+  assert.doesNotMatch(hop, /<audio/);
+  assert.doesNotMatch(hop, /generated\.mp3/);
+  assert.doesNotMatch(hop, /\bplays\b/i);
+  assert.doesNotMatch(hop, /\bstreams\b/i);
+  assert.doesNotMatch(hop, /1\.2M/);
+  assert.doesNotMatch(hop, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(hop, /Not bidding\?/);
+  assert.doesNotMatch(hop, FORBIDDEN);
+  assert.doesNotMatch(
+    hop.slice(laterCard),
+    /data-real-playback|data-clicks-are-hops|data-stored-listen/,
+  );
+
+  const embed = renderBoard([
+    listing({
+      id: "lst_embed",
+      track: "Cold Open",
+      listenUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      bidUsd: 12,
+      clicks: 0,
+    }),
+  ]);
+  const embedReal = embed.indexOf('data-real-playback="embed"');
+  const embedPlayback = embed.indexOf('data-playback="embed"');
+  const embedHear = embed.indexOf('data-hear-opening="embed"');
+  const embedSrc = embed.indexOf('src="https://www.youtube.com/embed/dQw4w9WgXcQ"');
+  const embedUrl = embed.indexOf(
+    'data-listen-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"',
+  );
+  const embedClicks = embed.indexOf('data-clicks-are-hops=""');
+  assert.notEqual(embedReal, -1);
+  assert.notEqual(embedPlayback, -1);
+  assert.notEqual(embedHear, -1);
+  assert.notEqual(embedSrc, -1);
+  assert.notEqual(embedUrl, -1);
+  assert.notEqual(embedClicks, -1);
+  assert.ok(embed.indexOf('data-first-read="hear"') < embedHear);
+  assert.ok(embedHear < embedReal || embedReal < embedPlayback);
+  assert.ok(embedPlayback < embedClicks);
+  assert.ok(embedSrc < embedClicks);
+  assert.equal((embed.match(/data-real-playback=/g) ?? []).length, 1);
+  assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
+  assert.equal((embed.match(/<iframe/g) ?? []).length, 1);
+  assert.match(embed, /data-real-playback="embed"/);
+  assert.match(embed, /data-playback="embed"/);
+  assert.match(embed, /src="https:\/\/www.youtube.com\/embed\/dQw4w9WgXcQ"/);
+  assert.match(embed, /data-listen-url="https:\/\/www.youtube.com\/watch\?v=dQw4w9WgXcQ"/);
+  assert.match(embed, /href="\/click\/lst_embed"/);
+  assert.match(embed, /hops, not a platform count/);
+  assert.match(embed, /Need \$13 to take #1/);
+  assert.doesNotMatch(embed, /data-hear-opening="hop"/);
+  assert.doesNotMatch(embed, /data-real-playback="hop"/);
+  assert.doesNotMatch(embed, /<audio/);
+  assert.doesNotMatch(embed, /generated\.mp3/);
+  assert.doesNotMatch(embed, /\bplays\b/i);
+  assert.doesNotMatch(embed, FORBIDDEN);
+
+  assert.match(pageSource, /data-real-playback=\{realPlayback\}/);
+  assert.match(pageSource, /data-clicks-are-hops=/);
+  assert.match(pageSource, /data-stored-listen=/);
+  assert.match(pageSource, /hops, not a platform count/);
+  assert.match(pageSource, /playbackForListing/);
+  assert.match(pageSource, /listenClickPath/);
+  assert.match(pageSource, /station-desk/);
+  assert.match(pageSource, /claim-rail/);
+  assert.match(pageSource, /data-empty-bid-five/);
+  assert.doesNotMatch(pageSource, /data-hear-after-need-six/);
+  assert.doesNotMatch(pageSource, /data-need-after-hear-six/);
+});

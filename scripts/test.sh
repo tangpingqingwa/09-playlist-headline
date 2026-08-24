@@ -1943,6 +1943,138 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "empty Bid USD / \$5 cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied #1 playback is real and does not invent play counts =="
+grep -q 'data-real-playback' src/app/page.tsx \
+  || fail "occupied #1 must stamp real playback so play counts cannot invent a stream"
+grep -q 'data-clicks-are-hops' src/app/page.tsx \
+  || fail "occupied #1 must stamp clicks as hops, not plays"
+grep -q 'data-stored-listen' src/app/page.tsx \
+  || fail "hop #1 must stamp the stored listen URL as the playback target"
+grep -q 'hops, not a platform count' src/app/page.tsx \
+  || fail "occupied #1 must say clicks are hops, not a platform count"
+grep -q 'occupied #1 playback is real and does not invent play counts' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover real playback without invented play counts"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-real-playback'; then
+  fail "empty week must not stamp real playback"
+fi
+if grep -n 'className="card"' -A 30 src/app/page.tsx | grep -q 'data-real-playback'; then
+  fail "later ranks must not stamp real playback"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -q 'data-hear-after-need-six' src/app/page.tsx; then
+  fail "real playback must not add a hear-after-need-N stamp"
+fi
+if grep -q 'data-need-after-hear-six' src/app/page.tsx; then
+  fail "real playback must not add a need-after-hear-N stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "real playback must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "real playback must not add a second Hear hop after the difference"
+fi
+if grep -RInEi '1\.2M streams|monthly listeners|waveform|<audio' \
+  src/app/page.tsx src/app/layout.tsx src/app/outbid-form.tsx src/app/board.css
+then
+  fail "real playback must not invent play counts or a fake stream"
+fi
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "real playback cut must keep empty week as Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "real playback cut must keep empty Bid USD as the first read"
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "real playback cut must keep occupied prize before price"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "real playback cut must keep the occupied prize title"
+grep -q 'data-hear-after-need-five' src/app/page.tsx \
+  || fail "real playback cut must keep one first Hear"
+grep -q 'className="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"' src/app/page.tsx \
+  || fail "real playback cut must keep the existing first Hear hop"
+grep -q 'data-need-after-hear-five' src/app/page.tsx \
+  || fail "real playback cut must keep Need \$N after Hear"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "real playback cut must keep the existing Need \$N #claim hop"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "real playback cut must keep Hear as the first click"
+grep -q 'data-raise-note' src/app/page.tsx \
+  || fail "real playback cut must keep the named raise difference"
+grep -q 'Same listen URL pays only the difference' src/app/page.tsx \
+  || fail "real playback cut must keep same listen URL pays only the difference"
+grep -q 'data-raise-after-hear-first' src/app/page.tsx \
+  || fail "real playback cut must keep raise after Hear-first"
+grep -q 'data-hear-after-raise' src/app/page.tsx \
+  || fail "real playback cut must keep the Hear hop above Need \$N"
+grep -q 'data-raise-after-hear' src/app/page.tsx \
+  || fail "real playback cut must keep the Need \$N hop"
+grep -q 'href="#claim"' src/app/page.tsx \
+  || fail "real playback cut must keep the raise hop to #claim"
+grep -q 'Need ' src/app/page.tsx \
+  || fail "real playback cut must keep Need \$N to take #1"
+grep -q 'data-first-read="hear"' src/app/page.tsx \
+  || fail "real playback cut must keep occupied listen as the first read"
+grep -q "opening song is on" src/app/page.tsx \
+  || fail "real playback cut must keep the occupied hear lede"
+grep -q 'data-hear-opening' src/app/page.tsx \
+  || fail "real playback cut must keep one hear path"
+grep -q 'listenClickPath' src/app/page.tsx \
+  || fail "real playback hop must still use the click route"
+grep -q 'playbackForListing' src/app/page.tsx \
+  || fail "real playback must still use stored listen URL playback"
+grep -q 'data-claim-opening' src/app/page.tsx \
+  || fail "real playback cut must not undo the artist claim rail"
+grep -q 'pays only the difference' src/app/outbid-form.tsx \
+  || fail "real playback cut must leave the same-listen-URL difference on the rail"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "real playback cut must leave Claim #1 on the rail"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "real playback cut must keep the dashed amount"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "real playback cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "real playback cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "real playback cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "real playback cut must keep the station-desk columns"
+grep -q 'data-real-playback' src/app/board.css \
+  || fail "real playback CSS must concentrate occupied stored-URL playback"
+grep -q 'data-clicks-are-hops' src/app/board.css \
+  || fail "real playback CSS must hide hop-count chrome on an empty week"
+real_player_rule="$(awk '/^\.studio-deck\[data-real-playback\] \.player \{/,/\}/' src/app/board.css)"
+echo "$real_player_rule" | grep -q 'min-height: 16.5rem' \
+  || fail "real playback must make the official embed taller than the decorative player box"
+if echo "$real_player_rule" | grep -q 'background:'; then
+  fail "real playback must concentrate the player by size, not a recolor"
+fi
+hop_host_rule="$(awk '/^\.studio-deck\[data-real-playback="hop"\] \.hear-row \.listen-host \{/,/\}/' src/app/board.css)"
+echo "$hop_host_rule" | grep -q 'font-size: 0.92rem' \
+  || fail "hop #1 must make the stored host larger than a decorative hostname"
+if echo "$hop_host_rule" | grep -q 'background:'; then
+  fail "real playback must not recolor the hop host"
+fi
+click_note_rule="$(awk '/^\.studio-deck\[data-real-playback\] \.click-note \{/,/\}/' src/app/board.css)"
+echo "$click_note_rule" | grep -q 'font-size: 0.72rem' \
+  || fail "occupied clicks must stay quieter hops, not a play count"
+if echo "$click_note_rule" | grep -q 'background:'; then
+  fail "real playback must not recolor the click note"
+fi
+empty_real_rule="$(awk '/^\.board\[data-empty-bid-five\] \.hear-after-raise,/,/^\}/' src/app/board.css)"
+echo "$empty_real_rule" | grep -q 'data-real-playback' \
+  || fail "empty Bid USD / \$5 CSS must hide occupied real playback"
+echo "$empty_real_rule" | grep -q 'display: none' \
+  || fail "empty Bid USD / \$5 CSS must keep occupied Hear / Need / playback off empty"
+if echo "$empty_real_rule" | grep -q 'background:'; then
+  fail "real playback must hide occupied chrome on empty, not recolor the desk"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "real playback cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "real playback cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2168,6 +2300,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener prize-before-price test did not run"
   grep -q 'empty week stays Bid USD / $5 and does not invent Hear' "$test_log" \
     || fail "first-time listener empty Bid USD / \$5 test did not run"
+  grep -q 'occupied #1 playback is real and does not invent play counts' "$test_log" \
+    || fail "first-time listener real-playback test did not run"
 fi
 
 echo "OK: buildable and testable"

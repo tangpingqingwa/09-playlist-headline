@@ -121,6 +121,7 @@ export function OpeningDeck({
   }
 
   const playback = playbackForListing(listing);
+  const realPlayback = playback.kind === "embed" ? "embed" : "hop";
 
   return (
     <section
@@ -128,6 +129,7 @@ export function OpeningDeck({
       data-opening-song="true"
       data-hear-first="true"
       data-prize-before-price=""
+      data-real-playback={realPlayback}
       data-listing-card=""
       data-rank={listing.rank}
       data-id={listing.id}
@@ -151,7 +153,12 @@ export function OpeningDeck({
           allow="encrypted-media"
         />
       ) : (
-        <p className="hear-row" id="hear-opening">
+        <p
+          className="hear-row"
+          id="hear-opening"
+          data-listen-url={listing.listenUrl}
+          data-stored-listen=""
+        >
           <span className="listen-host">{listenHost(listing.listenUrl)}</span>
         </p>
       )}
@@ -168,9 +175,10 @@ export function OpeningDeck({
         <span className="bid" data-bid="">
           {formatUsd(listing.bidUsd)}
         </span>
-        <span className="clicks" data-clicks="">
+        <span className="clicks" data-clicks="" data-clicks-are-hops="">
           {formatClicks(listing.clicks)}
         </span>
+        <span className="click-note">hops, not a platform count</span>
       </p>
     </section>
   );
