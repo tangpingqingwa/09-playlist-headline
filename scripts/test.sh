@@ -2533,6 +2533,171 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "Need-not-twin cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: empty week has one first click — Claim #1, then the listen URL =="
+grep -q 'empty week has one first click — Claim #1, then the listen URL' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty week one first click: Claim #1 then listen URL"
+grep -q 'empty-claim-first' src/app/outbid-form.tsx \
+  || fail "empty Claim #1 must use the empty-claim-first class"
+grep -q 'data-empty-claim-first' src/app/outbid-form.tsx \
+  || fail "empty Claim #1 must stamp data-empty-claim-first"
+grep -q 'data-first-click="claim"' src/app/outbid-form.tsx \
+  || fail "empty Claim #1 Outbid must win the first click"
+grep -q 'data-later-write' src/app/outbid-form.tsx \
+  || fail "empty week must stamp the listen URL as a later write"
+grep -q 'data-listen-identity' src/app/outbid-form.tsx \
+  || fail "empty week must wrap Track / Artist / Listen URL as listing identity"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "empty week must name the listen URL as a later write"
+grep -q 'EmptyClaimFirstWrite' src/app/outbid-form.tsx \
+  || fail "empty week must compose Claim #1 before the listen URL"
+grep -q 'OccupiedListingWrite' src/app/outbid-form.tsx \
+  || fail "occupied claim must keep listing fields on the rail with Outbid"
+grep -q 'Empty week: Listen URL is a later write after Claim #1 / Outbid' src/app/board.css \
+  || fail "empty CSS must name the listen URL as a later write after Claim #1"
+grep -Fq '.week-empty .claim.empty-claim-first[data-empty-claim-first] .listen-identity[data-later-write]' src/app/board.css \
+  || fail "empty CSS must compose later-write identity off the claim rail"
+grep -Fq '.week-empty .claim.empty-claim-first[data-empty-claim-first] .later-write-label' src/app/board.css \
+  || fail "empty CSS must label the later listen URL write"
+grep -Fq '.week-empty .claim.empty-claim-first[data-empty-claim-first] .outbid[data-first-click="claim"]' src/app/board.css \
+  || fail "empty CSS must make Claim #1 Outbid the first click"
+grep -Fq '.week-occupied .claim .listen-identity[data-later-write]' src/app/board.css \
+  || fail "occupied week must hide empty later-write identity"
+grep -Fq '.week-occupied .claim [data-first-click="claim"]' src/app/board.css \
+  || fail "occupied week must hide empty Claim #1 first-click"
+grep -q 'Then the listen URL' tests/product-ui.test.ts \
+  || fail "product-ui tests must name the later listen URL write"
+grep -q 'data-first-click="claim"' tests/product-ui.test.ts \
+  || fail "product-ui tests must stamp empty Claim #1 as the first click"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep Outbid"
+grep -q 'name="track"' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep Track"
+grep -q 'name="artist"' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep Artist"
+grep -q 'name="listenUrl"' src/app/outbid-form.tsx \
+  || fail "empty one-first cut must keep the listen URL field as a later write"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty one-first cut must keep Hear as the first occupied click"
+grep -q 'data-prize-before-price' src/app/page.tsx \
+  || fail "empty one-first cut must keep occupied song title as the prize"
+grep -q 'data-later-fact' src/app/page.tsx \
+  || fail "empty one-first cut must keep occupied \$bid as a later fact"
+grep -q 'className="raise-after-hear"' src/app/page.tsx \
+  || fail "empty one-first cut must keep Need \$N grouped with Claim"
+grep -q 'className="need-after-hear need-after-hear-two need-after-hear-three need-after-hear-four need-after-hear-five"' src/app/page.tsx \
+  || fail "empty one-first cut must keep the existing Need \$N #claim hop"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty one-first cut must keep Bid USD / \$5"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "empty one-first cut must keep Bid USD as the first read"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty one-first cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty one-first cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty one-first cut must keep the station-desk columns"
+grep -Fq '.week-occupied .claim-rail .raise-after-hear' src/app/board.css \
+  || fail "empty one-first cut must keep Need \$N grouped on the occupied claim rail"
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty later-write must not add another numbered hop stamp"
+fi
+if grep -q 'Not bidding? Hear the opening song' src/app/page.tsx; then
+  fail "empty one-first must not add a second Hear hop"
+fi
+if grep -q 'data-hear-after-difference' src/app/page.tsx; then
+  fail "empty one-first must not add a second Hear hop after the difference"
+fi
+if grep -q 'data-need-later-quiet' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty one-first must not restamp PR #35 mute"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Need \$'; then
+  fail "empty week must not leak Need \$N"
+fi
+if grep -q 'data-first-click="hear"' src/app/outbid-form.tsx; then
+  fail "empty Claim #1 must not steal occupied Hear as the first click"
+fi
+if awk '/function OccupiedListingWrite/,/function EmptyClaimFirstWrite/' src/app/outbid-form.tsx | grep -q 'data-first-click="claim"'; then
+  fail "occupied claim must not stamp empty Claim #1 as the first click"
+fi
+if awk '/function OccupiedListingWrite/,/function EmptyClaimFirstWrite/' src/app/outbid-form.tsx | grep -q 'Then the listen URL'; then
+  fail "occupied claim must not name a later listen URL write"
+fi
+if awk '/function OccupiedListingWrite/,/function EmptyClaimFirstWrite/' src/app/outbid-form.tsx | grep -q 'data-later-write'; then
+  fail "occupied listing fields must stay on the claim rail with Outbid"
+fi
+if ! awk '
+  /function EmptyClaimFirstWrite/ { empty=NR }
+  empty && /data-first-click="claim"/ { click=NR }
+  empty && /Then the listen URL/ { label=NR }
+  empty && /ListingIdentityFields/ { ident=NR }
+  END { exit !(empty && click && label && ident && empty < click && click < label && label < ident) }
+' src/app/outbid-form.tsx; then
+  fail "empty Claim #1 / Outbid must precede the later listen URL write"
+fi
+if ! awk '
+  /function OccupiedListingWrite/ { occ=NR }
+  occ && /ListingIdentityFields/ && !fields { fields=NR }
+  occ && /Outbid/ && !row { row=NR }
+  /function EmptyClaimFirstWrite/ { empty=NR }
+  END { exit !(occ && fields && row && empty && occ < fields && fields < row && row < empty) }
+' src/app/outbid-form.tsx; then
+  fail "occupied claim must keep listing fields before Outbid"
+fi
+claim_first_rule="$(awk '/^\.week-empty \.claim\.empty-claim-first\[data-empty-claim-first\] \.outbid\[data-first-click="claim"\] \{/,/\}/' src/app/board.css)"
+echo "$claim_first_rule" | grep -q 'min-height: 2.75rem' \
+  || fail "empty Claim #1 Outbid must win the first click by size"
+if echo "$claim_first_rule" | grep -q 'background:'; then
+  fail "empty one-first must concentrate Claim #1 by size, not a recolor"
+fi
+later_write_rule="$(awk '/^\.week-empty \.claim\.empty-claim-first\[data-empty-claim-first\] \.listen-identity\[data-later-write\] \{/,/\}/' src/app/board.css)"
+echo "$later_write_rule" | grep -q 'border-top: 1px dashed var(--line)' \
+  || fail "empty later write must sit after Claim #1, not beside it"
+if echo "$later_write_rule" | grep -q 'background:'; then
+  fail "empty later write must recede by placement, not a recolor"
+fi
+later_label_rule="$(awk '/^\.week-empty \.claim\.empty-claim-first\[data-empty-claim-first\] \.later-write-label \{/,/\}/' src/app/board.css)"
+echo "$later_label_rule" | grep -q 'color: var(--muted)' \
+  || fail "empty later-write label must recede after Claim #1"
+if echo "$later_label_rule" | grep -q 'background:'; then
+  fail "empty later-write label must not recolor"
+fi
+later_input_rule="$(awk '/^\.week-empty \.claim\.empty-claim-first\[data-empty-claim-first\] \.listen-identity\[data-later-write\] input \{/,/\}/' src/app/board.css)"
+echo "$later_input_rule" | grep -q 'height: 2.2rem' \
+  || fail "empty later write inputs must be shorter than Claim #1"
+if echo "$later_input_rule" | grep -q 'background:'; then
+  fail "empty later write must not recolor listing inputs"
+fi
+need_group_keep="$(awk '/^\.week-occupied \.claim-rail \.raise-after-hear \{/,/\}/' src/app/board.css)"
+echo "$need_group_keep" | grep -q 'margin: 0 0 0.85rem' \
+  || fail "empty one-first cut must keep Need \$N grouped with Claim"
+if echo "$need_group_keep" | grep -q 'background:'; then
+  fail "empty one-first cut must not recolor occupied Need \$N"
+fi
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /\.week-occupied \.claim-rail \.raise-after-hear/ { need=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  END { exit !(prize && hear && need && later && prize < later && hear < later && need < later) }
+' src/app/board.css; then
+  fail "empty later-write CSS must sit after occupied prize / Hear / Need grouping"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty one-first cut must not rebuild the station desk into a stacked layout"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty one-first cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -2766,6 +2931,8 @@ if [[ -f package.json ]]; then
     || fail "first-time listener empty isolation test did not run"
   grep -q 'occupied Hear is the first click — Need $N is not a muted twin' "$test_log" \
     || fail "first-time listener Need-not-twin composition test did not run"
+  grep -q 'empty week has one first click — Claim #1, then the listen URL' "$test_log" \
+    || fail "first-time artist empty one-first click test did not run"
 fi
 
 echo "OK: buildable and testable"
