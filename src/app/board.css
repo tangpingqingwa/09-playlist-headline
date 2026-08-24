@@ -782,6 +782,65 @@ a:hover {
   color: var(--muted);
 }
 
+/* Unpaid Polar checkout stays off the station desk. Occupied prize is Polar-paid only. */
+.board[data-unpaid-off] .hear-after-raise,
+.board[data-unpaid-off] .raise-after-hear,
+.board[data-unpaid-off] .opening-listen,
+.board[data-unpaid-off] .need-after-hear,
+.board[data-unpaid-off] [data-hear-opening],
+.board[data-unpaid-off] [data-first-click="hear"],
+.board[data-unpaid-off] [data-prize],
+.board[data-unpaid-off] [data-prize-before-price],
+.board[data-unpaid-off] [data-later-fact],
+.board[data-unpaid-off] .later-fact,
+.board[data-unpaid-off] [data-real-playback],
+.board[data-unpaid-off] .later-stack,
+.board[data-unpaid-off] [data-later-stack],
+.board[data-unpaid-off] [data-later-rank],
+.board[data-unpaid-off] [data-later-track],
+.board[data-unpaid-off] [data-listen-later],
+.board[data-unpaid-off] .on-air-flag,
+.board[data-unpaid-off] .opening-track,
+.board[data-unpaid-off] .opening-artist,
+.board[data-unpaid-off] .opening-facts,
+.board[data-unpaid-off] .opening-source,
+.board[data-unpaid-off] .hear-row,
+.board[data-unpaid-off] .player,
+.week-empty[data-unpaid-off] .hear-after-raise,
+.week-empty[data-unpaid-off] .raise-after-hear,
+.week-empty[data-unpaid-off] .opening-listen,
+.week-empty[data-unpaid-off] .need-after-hear,
+.week-empty[data-unpaid-off] [data-hear-opening],
+.week-empty[data-unpaid-off] [data-first-click="hear"],
+.week-empty[data-unpaid-off] [data-prize],
+.week-empty[data-unpaid-off] [data-prize-before-price],
+.week-empty[data-unpaid-off] [data-later-fact],
+.week-empty[data-unpaid-off] .later-stack,
+.week-empty[data-unpaid-off] [data-later-stack],
+.week-empty[data-unpaid-off] [data-later-rank],
+.week-empty[data-unpaid-off] [data-later-track],
+.week-empty[data-unpaid-off] [data-listen-later],
+.week-empty[data-unpaid-off] .on-air-flag,
+.week-empty[data-unpaid-off] .opening-track,
+.week-empty[data-unpaid-off] .player {
+  display: none;
+}
+
+.claim-note[data-unpaid-off] {
+  font-weight: 600;
+}
+
+.week-empty .claim-note[data-unpaid-off] {
+  border-top: 1px dashed var(--line);
+  padding-top: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.week-occupied .claim-note[data-unpaid-off] {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;

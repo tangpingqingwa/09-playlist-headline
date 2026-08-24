@@ -3,10 +3,12 @@ import { BidForm } from "./outbid-form";
 import { listenClickPath, playbackForListing } from "../core/playback";
 import {
   getBoardListings,
+  isPolarPaidListing,
   MIN_BID_USD,
   rankListings,
   type RankedListing,
 } from "../core/rank";
+import { listUnpaid, type UnpaidTrack } from "../core/store";
 import { currentWeekUtc } from "../core/week";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +30,7 @@ function listenHost(listenUrl: string): string {
 }
 
 export function ListingCard({ listing }: { listing: RankedListing }) {
+  if (!isPolarPaidListing(listing)) return null;
   return (
     <article
       className="card later-card"
@@ -72,7 +75,7 @@ export function Leaderboard({
 }: {
   listings: readonly RankedListing[];
 }) {
-  const rest = listings.filter((listing) => listing.rank > 1);
+  const rest = rankListings(listings).filter((listing) => listing.rank > 1);
   if (rest.length === 0) {
     return null;
   }
@@ -103,10 +106,12 @@ export function Leaderboard({
 
 export function OpeningDeck({
   listing,
+  leftoverUnpaid = false,
 }: {
   listing: RankedListing | undefined;
+  leftoverUnpaid?: boolean;
 }) {
-  if (!listing) {
+  if (!listing || !isPolarPaidListing(listing)) {
     return (
       <section
         className="studio-deck empty-deck"
@@ -118,6 +123,9 @@ export function OpeningDeck({
         <p className="empty">
           No opening song this week. Nobody has paid yet. We do not invent a
           track or a stream.
+          {leftoverUnpaid
+            ? " An unpaid Polar checkout stays off this desk until Polar reports paid."
+            : null}
         </p>
         <p className="deck-note">
           There is no player this week. A completed payment claims #1. Until
@@ -200,13 +208,17 @@ export function Board({
   weekId,
   nextResetAt,
   listings,
+  unpaid = [],
 }: {
   weekId: string;
   nextResetAt: string;
   listings: readonly RankedListing[];
+  unpaid?: readonly UnpaidTrack[];
 }) {
-  const opening = listings[0];
+  const paid = rankListings(listings);
+  const opening = paid[0];
   const emptyWeek = opening === undefined;
+  const leftoverUnpaid = unpaid.length > 0;
   const topBid = opening?.bidUsd ?? 0;
   const defaultAmount = topBid > 0 ? topBid + 1 : MIN_BID_USD;
   const openingPlayback = opening ? playbackForListing(opening) : undefined;
@@ -222,6 +234,7 @@ export function Board({
       data-week-empty={emptyWeek ? "true" : undefined}
       data-week-occupied={emptyWeek ? undefined : "true"}
       data-empty-bid-five={emptyWeek ? "" : undefined}
+      data-unpaid-off={emptyWeek && leftoverUnpaid ? "" : undefined}
     >
       <p className="station-call">
         PH <span>09</span> · Playlist Headline
@@ -267,7 +280,7 @@ export function Board({
         className="station-desk"
         data-hear-first={opening ? "true" : "false"}
       >
-        <OpeningDeck listing={opening} />
+        <OpeningDeck listing={opening} leftoverUnpaid={leftoverUnpaid} />
         <aside
           className="claim-rail"
           aria-labelledby="claim-heading"
@@ -296,10 +309,14 @@ export function Board({
               </span>
             </p>
           ) : null}
-          <BidForm defaultAmount={defaultAmount} topBidUsd={opening?.bidUsd} />
+          <BidForm
+            defaultAmount={defaultAmount}
+            topBidUsd={opening?.bidUsd}
+            unpaidOff={opening ? true : leftoverUnpaid}
+          />
         </aside>
       </div>
-      <Leaderboard listings={listings} />
+      <Leaderboard listings={paid} />
     </main>
   );
 }
@@ -307,11 +324,13 @@ export function Board({
 export default function HomePage() {
   const week = currentWeekUtc();
   const listings = rankListings(getBoardListings(week.weekId));
+  const unpaid = listUnpaid(week.weekId);
   return (
     <Board
       weekId={week.weekId}
       nextResetAt={week.nextResetAt.toISOString()}
       listings={listings}
+      unpaid={unpaid}
     />
   );
 }

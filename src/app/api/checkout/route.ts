@@ -5,7 +5,7 @@ import {
   parseListingDraft,
 } from "../../../billing/port";
 import { ListingError, parseTargetBidUsd, quoteBid } from "../../../core/listing";
-import { findPaidByListenUrl } from "../../../core/store";
+import { findPaidByListenUrl, rememberUnpaidCheckout } from "../../../core/store";
 import { currentWeekUtc } from "../../../core/week";
 
 export const CHECKOUT_PATH = "/api/checkout" as const;
@@ -50,6 +50,14 @@ export async function POST(request: Request): Promise<Response> {
       listingDraft,
       amountUsd: quote.chargeUsd,
       kind: quote.kind,
+    });
+    rememberUnpaidCheckout({
+      sessionId: started.sessionId,
+      weekId: listingDraft.weekId,
+      track: listingDraft.track,
+      artist: listingDraft.artist,
+      listenUrl: listingDraft.listenUrl,
+      bidUsd: targetBidUsd,
     });
     if (contentType.includes("application/json")) {
       return NextResponse.json({
