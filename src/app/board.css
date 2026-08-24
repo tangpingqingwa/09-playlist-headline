@@ -243,7 +243,11 @@ a:hover {
 .board[data-empty-bid-five] [data-need-after-hear],
 .board[data-empty-bid-five] [data-raise-after-hear],
 .board[data-empty-bid-five] [data-prize],
-.board[data-empty-bid-five] [data-prize-before-price] {
+.board[data-empty-bid-five] [data-prize-before-price],
+.board[data-empty-bid-five] [data-real-playback],
+.board[data-empty-bid-five] [data-clicks-are-hops],
+.board[data-empty-bid-five] [data-stored-listen],
+.board[data-empty-bid-five] .click-note {
   display: none;
 }
 
@@ -321,6 +325,21 @@ a:hover {
 
 .studio-deck[data-prize-before-price] .opening-facts .clicks {
   font-size: 0.78rem;
+}
+
+/* Occupied #1 only: playback is the stored listen URL. Clicks stay hops. */
+.studio-deck[data-real-playback] .player {
+  min-height: 16.5rem;
+}
+
+.studio-deck[data-real-playback="hop"] .hear-row .listen-host {
+  font-size: 0.92rem;
+}
+
+.studio-deck[data-real-playback] .click-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .opening-artist {
