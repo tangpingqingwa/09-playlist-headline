@@ -340,6 +340,13 @@ a:hover {
   letter-spacing: 0.08em;
 }
 
+.opening-listen.hear-after-need.hear-after-need-two.hear-after-need-three.hear-after-need-four {
+  min-height: 3.65rem;
+  padding: 0 1.75rem;
+  font-size: 1.32rem;
+  letter-spacing: 0.09em;
+}
+
 .opening-listen:hover {
   background: var(--primary);
   border-color: var(--primary);
