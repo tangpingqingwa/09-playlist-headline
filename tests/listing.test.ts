@@ -16,6 +16,8 @@ import {
 } from "../src/core/url";
 import { currentWeekUtc } from "../src/core/week";
 
+process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
 afterEach(() => {
   resetListings();
   resetPaymentPort();
@@ -228,5 +230,5 @@ test("checkout rejects chat, NSFW, and invented play counts without listing", as
   });
   assert.equal(plays.status, 400);
   assert.deepEqual(await plays.json(), { error: "play_count_forbidden" });
-  assert.equal(getBoardListings(weekId()).length, 0);
+  assert.equal(getBoardListings().length, 0);
 });

@@ -7,6 +7,7 @@ import {
   publicBaseUrl,
   type PolarEnv,
 } from "../config";
+import { nowUtc } from "../core/week";
 import type {
   CheckoutKind,
   CheckoutRecord,
@@ -139,7 +140,7 @@ export class PolarPayment implements PaymentPort {
     if (!listingDraft || amountUsd === undefined) {
       return { ignored: true };
     }
-    const paidAt = new Date().toISOString();
+    const paidAt = nowUtc().toISOString();
     const kind = existing?.kind ?? draftKind(data);
     this.sessions.set(sessionId, {
       sessionId,

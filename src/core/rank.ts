@@ -1,6 +1,7 @@
 /** ORDER BY bid_usd DESC, first_paid_at ASC, id ASC. Rank is the bid. */
 
-import { listPaidForWeek } from "./store";
+import { listPaidInRollingWeek } from "./store";
+import { bidInRollingWeek, nowUtc } from "./week";
 
 export const MIN_BID_USD = 5;
 
@@ -31,16 +32,23 @@ export function isPolarPaidListing(
   return Number.isFinite(ms);
 }
 
-/** Live board has no paid rows until Polar reports paid. Never invent a #1 track. */
-export function getBoardListings(weekId: string): Listing[] {
-  return listPaidForWeek(weekId).filter(isPolarPaidListing);
+/**
+ * Live board is Polar-paid rows whose firstPaidAt is in the rolling last 7 days.
+ * `weekId` is an audit label. Never invent a #1 track.
+ */
+export function getBoardListings(now: Date = nowUtc()): Listing[] {
+  return listPaidInRollingWeek(now).filter(isPolarPaidListing);
 }
 
+/** Live board rows: paid firstPaidAt in the rolling last 7 days. Not weekId. */
 export function listingsForWeek(
   listings: readonly Listing[],
-  weekId: string,
+  now: Date = nowUtc(),
 ): Listing[] {
-  return listings.filter((listing) => listing.weekId === weekId);
+  return listings.filter(
+    (listing) =>
+      isPolarPaidListing(listing) && bidInRollingWeek(listing.firstPaidAt, now),
+  );
 }
 
 /**

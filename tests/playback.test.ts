@@ -14,6 +14,8 @@ import { rankListings, type Listing } from "../src/core/rank";
 import { applyPaidEvent, resetListings } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
 
+process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
 afterEach(() => {
   resetListings();
 });
@@ -117,7 +119,9 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.match(rules, /Older wins ties/);
   assert.match(rules, /Raise pays difference/);
   assert.match(rules, /Monday 00:00:00.000 UTC/);
+  assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
   assert.match(rules, /weekly UTC reset/i);
+  assert.match(about, /rolling last 7 days/i);
   assert.match(rules, /No fake streams/);
   assert.match(rules, /No invented play counts/);
   assert.match(rules, /utm_\*/);

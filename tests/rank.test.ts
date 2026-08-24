@@ -14,8 +14,11 @@ import {
 import { resetListings } from "../src/core/store";
 import { currentWeekUtc, isoWeekId, nextMondayUtc } from "../src/core/week";
 
+process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
 const WEEK = "2026-W34";
 const NEXT_RESET = "2026-08-24T00:00:00.000Z";
+const NOW = new Date("2026-08-20T12:00:00.000Z");
 const formSource = readFileSync(
   join(process.cwd(), "src", "app", "outbid-form.tsx"),
   "utf8",
@@ -43,7 +46,7 @@ function renderBoard(listings: Listing[], weekId = WEEK): string {
     createElement(Board, {
       weekId,
       nextResetAt: NEXT_RESET,
-      listings: rankListings(listingsForWeek(listings, weekId)),
+      listings: rankListings(listingsForWeek(listings, NOW)),
     }),
   );
 }
@@ -58,14 +61,14 @@ test("Sunday is still the previous ISO week until Monday UTC", () => {
   assert.equal(isoWeekId(new Date("2026-08-24T00:00:00.000Z")), "2026-W35");
 });
 
-test("next reset is the following Monday 00:00 UTC", () => {
+test("next Monday 00:00 UTC is a weekId label boundary, not rank expiry", () => {
   const monday = new Date("2026-08-17T00:00:00.000Z");
   const sunday = new Date("2026-08-23T12:00:00.000Z");
   assert.equal(nextMondayUtc(monday).toISOString(), NEXT_RESET);
   assert.equal(nextMondayUtc(sunday).toISOString(), NEXT_RESET);
   const week = currentWeekUtc(monday);
   assert.equal(week.weekId, WEEK);
-  assert.equal(week.startsAt.toISOString(), "2026-08-17T00:00:00.000Z");
+  assert.equal(week.startsAt.toISOString(), "2026-08-10T00:00:00.000Z");
   assert.equal(week.nextResetAt.toISOString(), NEXT_RESET);
 });
 
@@ -140,15 +143,22 @@ test("rankListings does not mutate the input", () => {
   );
 });
 
-test("only the current UTC week is ranked on the live board", () => {
+test("only the rolling last 7 days is ranked on the live board", () => {
+  const now = new Date("2026-08-17T12:00:00.000Z");
   const ranked = rankListings(
     listingsForWeek(
       [
         listing({
-          id: "last-week",
+          id: "aged-out",
           weekId: "2026-W33",
           bidUsd: 50,
-          firstPaidAt: "2026-08-10T00:00:00.000Z",
+          firstPaidAt: "2026-08-10T11:59:59.000Z",
+        }),
+        listing({
+          id: "still-live",
+          weekId: "2026-W33",
+          bidUsd: 8,
+          firstPaidAt: "2026-08-16T12:00:00.000Z",
         }),
         listing({
           id: "this-week",
@@ -157,19 +167,19 @@ test("only the current UTC week is ranked on the live board", () => {
           firstPaidAt: "2026-08-17T00:00:00.000Z",
         }),
       ],
-      WEEK,
+      now,
     ),
   );
   assert.deepEqual(
     ranked.map((row) => row.id),
-    ["this-week"],
+    ["still-live", "this-week"],
   );
 });
 
 test("live board loader invents no tracks", () => {
   resetListings();
-  assert.deepEqual(getBoardListings(WEEK), []);
-  assert.deepEqual(getBoardListings("2026-W33"), []);
+  assert.deepEqual(getBoardListings(), []);
+  assert.deepEqual(getBoardListings(new Date("2026-08-10T00:00:00.000Z")), []);
 });
 
 test("unpaid Polar checkout never ranks as #1", () => {

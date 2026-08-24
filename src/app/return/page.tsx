@@ -2,7 +2,7 @@ import React from "react";
 import { getPaymentPort } from "../../billing/port";
 import { getBoardListings, rankListings } from "../../core/rank";
 import { applyPaidEvent, forgetUnpaidCheckout, listingForSession } from "../../core/store";
-import { currentWeekUtc } from "../../core/week";
+
 
 export const dynamic = "force-dynamic";
 
@@ -64,8 +64,7 @@ export async function resolveReturn(params: {
 export default async function ReturnPage({ searchParams }: ReturnPageProps) {
   const params = (await searchParams) ?? {};
   const result = await resolveReturn(params);
-  const week = currentWeekUtc();
-  const listings = rankListings(getBoardListings(week.weekId));
+  const listings = rankListings(getBoardListings());
   const listing = listings.find((row) => row.id === result.listingId);
 
   if (result.status === "pending") {

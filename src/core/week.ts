@@ -1,4 +1,8 @@
-/** ISO week in UTC (`YYYY-Www`). Monday 00:00:00.000 UTC starts the new week. */
+/**
+ * Public board window is rolling last 7 days from first paid placement.
+ * ISO `weekId` (`YYYY-Www`) remains a Monday 00:00 UTC Polar/audit label.
+ * Rank does not expire at civil Monday midnight.
+ */
 
 export type UtcWeek = {
   weekId: string;
@@ -8,6 +12,27 @@ export type UtcWeek = {
 };
 
 const DAY_MS = 86_400_000;
+/** Inclusive length of the public week window. Not a Monday midnight bucket. */
+export const ROLLING_WEEK_MS = 7 * DAY_MS;
+
+/** Split so Next/webpack cannot replace `process.env.WEEK_NOW` at build time. */
+const WEEK_NOW_KEY = ["WEEK", "NOW"].join("_");
+
+/**
+ * Operator / test clock. `WEEK_NOW` is an ISO-8601 instant.
+ * Live rank is a rolling last-7-days filter on `firstPaidAt`, not a delete.
+ */
+export function nowUtc(env: NodeJS.ProcessEnv = process.env): Date {
+  const raw = env[WEEK_NOW_KEY];
+  if (raw === undefined || raw.trim() === "") {
+    return new Date();
+  }
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`invalid ${WEEK_NOW_KEY}: ${raw}`);
+  }
+  return parsed;
+}
 
 export function isoWeekId(now: Date): string {
   const cursor = new Date(
@@ -37,7 +62,10 @@ export function isoWeekMondayUtc(weekId: string): Date {
   return new Date(week1Monday.getTime() + (week - 1) * 7 * DAY_MS);
 }
 
-/** Next Monday 00:00 UTC. A Monday midnight instant already opened this week. */
+/**
+ * Next Monday 00:00 UTC. ISO `weekId` label boundary, not public rank expiry.
+ * A Monday midnight instant already opened this ISO week label.
+ */
 export function nextMondayUtc(now: Date): Date {
   const startOfToday = Date.UTC(
     now.getUTCFullYear(),
@@ -52,9 +80,27 @@ export function nextMondayUtc(now: Date): Date {
   return new Date(startOfToday + daysUntilMonday * DAY_MS);
 }
 
-export function currentWeekUtc(now: Date = new Date()): UtcWeek {
+/** Inclusive start of the rolling last-7-days window. Not civil midnight. */
+export function rollingWeekStart(now: Date = nowUtc()): Date {
+  return new Date(now.getTime() - ROLLING_WEEK_MS);
+}
+
+/** Paid placement still inside the rolling last-7-days window. */
+export function bidInRollingWeek(
+  paidAt: string,
+  now: Date = nowUtc(),
+): boolean {
+  const paid = Date.parse(paidAt);
+  if (Number.isNaN(paid)) {
+    return false;
+  }
+  const t = now.getTime();
+  return paid >= t - ROLLING_WEEK_MS && paid <= t;
+}
+
+export function currentWeekUtc(now: Date = nowUtc()): UtcWeek {
   const weekId = isoWeekId(now);
-  const startsAt = isoWeekMondayUtc(weekId);
-  const endsAt = nextMondayUtc(now);
-  return { weekId, startsAt, endsAt, nextResetAt: endsAt };
+  const startsAt = rollingWeekStart(now);
+  const endsAt = new Date(now.getTime() + 1);
+  return { weekId, startsAt, endsAt, nextResetAt: nextMondayUtc(now) };
 }

@@ -250,6 +250,8 @@ a:hover {
 .board[data-empty-bid-five] [data-real-playback],
 .board[data-empty-bid-five] [data-clicks-are-hops],
 .board[data-empty-bid-five] [data-stored-listen],
+.board[data-empty-bid-five] [data-rolling-week],
+.board[data-empty-bid-five] .week-window,
 .board[data-empty-bid-five] .click-note,
 .week-empty[data-empty-bid-five] .hear-after-raise,
 .week-empty[data-empty-bid-five] .raise-after-hear,
@@ -267,6 +269,8 @@ a:hover {
 .week-empty[data-empty-bid-five] [data-real-playback],
 .week-empty[data-empty-bid-five] [data-clicks-are-hops],
 .week-empty[data-empty-bid-five] [data-stored-listen],
+.week-empty[data-empty-bid-five] [data-rolling-week],
+.week-empty[data-empty-bid-five] .week-window,
 .week-empty[data-empty-bid-five] .click-note,
 .week-empty .hear-after-raise,
 .week-empty .raise-after-hear,
@@ -284,6 +288,8 @@ a:hover {
 .week-empty [data-real-playback],
 .week-empty [data-clicks-are-hops],
 .week-empty [data-stored-listen],
+.week-empty [data-rolling-week],
+.week-empty .week-window,
 .week-empty [data-first-read="hear"],
 .week-empty .click-note,
 .week-empty .on-air-flag,
@@ -806,6 +812,8 @@ a:hover {
 .board[data-unpaid-off] .opening-source,
 .board[data-unpaid-off] .hear-row,
 .board[data-unpaid-off] .player,
+.board[data-unpaid-off] [data-rolling-week],
+.board[data-unpaid-off] .week-window,
 .week-empty[data-unpaid-off] .hear-after-raise,
 .week-empty[data-unpaid-off] .raise-after-hear,
 .week-empty[data-unpaid-off] .opening-listen,
@@ -822,7 +830,9 @@ a:hover {
 .week-empty[data-unpaid-off] [data-listen-later],
 .week-empty[data-unpaid-off] .on-air-flag,
 .week-empty[data-unpaid-off] .opening-track,
-.week-empty[data-unpaid-off] .player {
+.week-empty[data-unpaid-off] .player,
+.week-empty[data-unpaid-off] [data-rolling-week],
+.week-empty[data-unpaid-off] .week-window {
   display: none;
 }
 
@@ -839,6 +849,11 @@ a:hover {
 .week-occupied .claim-note[data-unpaid-off] {
   font-size: 0.78rem;
   font-weight: 500;
+}
+
+/* Occupied rolling last-7-days window. Not Monday 00:00 UTC. */
+.week-occupied .period-meta.week-window[data-rolling-week] {
+  font-size: 0.86rem;
 }
 
 .stub-note,

@@ -330,7 +330,7 @@ else
   record "healthz" "FAIL" "GET /healthz HTTP ${health_code}"
 fi
 
-# --- board: current UTC week, no invented play counts, no fake stream ---
+# --- board: rolling last 7 days, no invented play counts, no fake stream ---
 board0="${WORKDIR}/board0.html"
 board0_code="$(http_get "$BASE" "/" "$board0" || true)"
 if [[ "$board0_code" != "200" ]]; then
@@ -341,15 +341,21 @@ elif ! html_has "$board0" 'data-week="'"${WEEK_ID}"'"' \
   || ! html_has "$board0" 'name="listenUrl"' \
   || ! html_has "$board0" 'name="amountUsd"' \
   || ! html_has "$board0" 'Outbid'; then
-  record "board" "FAIL" "GET / missing current UTC week or bid form"
+  record "board" "FAIL" "GET / missing current UTC week label or bid form"
 elif fake_stream_or_play_count "$board0"; then
   record "board" "FAIL" "GET / invented play counts or fake stream"
 elif html_has "$board0" 'data-empty-week="true"' && html_has "$board0" 'No opening song'; then
-  record "board" "PASS" "GET / 200 week ${WEEK_ID} empty + bid form (no invented opening song)"
+  if html_has "$board0" 'data-rolling-week' || html_has "$board0" 'Rolling last 7 days'; then
+    record "board" "FAIL" "empty week stamped rolling last-7-days on Bid USD / \$5"
+  else
+    record "board" "PASS" "GET / 200 week ${WEEK_ID} empty + bid form (no invented opening song)"
+  fi
 else
   count="$(listing_count "$board0")"
-  if [[ "$count" -gt 0 ]] && html_has "$board0" 'data-opening-song="true"'; then
-    record "board" "PASS" "GET / 200 week ${WEEK_ID}; ${count} already-paid row(s) (not seeded by smoke)"
+  if [[ "$count" -gt 0 ]] && html_has "$board0" 'data-opening-song="true"' \
+    && html_has "$board0" 'data-rolling-week' \
+    && html_has "$board0" 'Rolling last 7 days. Not Monday 00:00 UTC.'; then
+    record "board" "PASS" "GET / 200 week ${WEEK_ID}; rolling last 7 days; ${count} already-paid row(s) (not seeded by smoke)"
   else
     record "board" "FAIL" "GET / 200 but empty/paid board contract broken"
   fi
@@ -366,14 +372,16 @@ if [[ "$about_code" == "200" && "$rules_code" == "200" ]] \
   && html_has "$about_body" 'no fake streams' \
   && html_has "$about_body" 'no invented play counts' \
   && html_has "$about_body" 'playlist-headline' \
+  && html_has "$about_body" 'rolling last 7 days' \
   && html_has "$rules_body" '\$5' \
   && html_has "$rules_body" 'Older wins ties' \
   && html_has "$rules_body" 'Raise pays difference' \
   && html_has "$rules_body" 'Monday 00:00:00.000 UTC' \
+  && html_has "$rules_body" 'Rolling last 7 days. Not Monday 00:00 UTC' \
   && html_has "$rules_body" '[Ww]eekly UTC reset' \
   && html_has "$rules_body" 'No fake streams' \
   && html_has "$rules_body" 'No invented play counts'; then
-  record "about-rules" "PASS" "GET /about and /rules 200; min \$5 / older wins / raise difference / weekly UTC / no fake streams"
+  record "about-rules" "PASS" "GET /about and /rules 200; min \$5 / older wins / raise difference / rolling last 7 days / no fake streams"
 else
   record "about-rules" "FAIL" "about HTTP ${about_code} rules HTTP ${rules_code}"
 fi

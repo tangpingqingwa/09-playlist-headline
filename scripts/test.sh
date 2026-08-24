@@ -142,10 +142,16 @@ grep -q 'firstPaidAt' src/core/rank.ts \
   || fail "rank.ts must tie-break on firstPaidAt"
 grep -q 'getBoardListings' src/core/rank.ts \
   || fail "rank.ts must expose getBoardListings"
-grep -q 'listPaidForWeek' src/core/rank.ts \
-  || fail "live board must read paid listings only"
+grep -q 'listPaidInRollingWeek' src/core/rank.ts \
+  || fail "live board must read paid listings in the rolling last 7 days"
 grep -q 'isoWeekId' src/core/week.ts || fail "week.ts missing isoWeekId"
 grep -q 'Monday' src/core/week.ts || fail "week.ts must document Monday UTC reset"
+grep -q 'ROLLING_WEEK_MS' src/core/week.ts \
+  || fail "week.ts must export the rolling last-7-days window"
+grep -q 'export function bidInRollingWeek' src/core/week.ts \
+  || fail "week.ts must export bidInRollingWeek"
+grep -q 'export function rollingWeekStart' src/core/week.ts \
+  || fail "week.ts must export rollingWeekStart"
 grep -q 'Outbid' src/app/outbid-form.tsx || fail "form missing Outbid button"
 grep -q 'name="track"' src/app/outbid-form.tsx || fail "form missing track"
 grep -q 'name="artist"' src/app/outbid-form.tsx || fail "form missing artist"
@@ -2872,8 +2878,8 @@ grep -q 'export function isPolarPaidListing' src/core/rank.ts \
   || fail "rank.ts must export isPolarPaidListing"
 grep -q 'filter(isPolarPaidListing)' src/core/rank.ts \
   || fail "rankListings must drop unpaid Polar checkout"
-grep -q 'listPaidForWeek(weekId).filter(isPolarPaidListing)' src/core/rank.ts \
-  || fail "live board must load Polar-paid listings only"
+grep -q 'listPaidInRollingWeek(now).filter(isPolarPaidListing)' src/core/rank.ts \
+  || fail "live board must load Polar-paid listings in the rolling last 7 days"
 grep -q 'export function listUnpaid' src/core/store.ts \
   || fail "store.ts must expose unpaid Polar checkout off the desk"
 grep -q 'export function rememberUnpaidCheckout' src/core/store.ts \
@@ -2995,6 +3001,129 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "unpaid-off cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied week window is rolling last-7-days — not Monday 00:00 UTC =="
+[[ -f tests/week.test.ts ]] || fail "missing tests/week.test.ts"
+grep -q 'ROLLING_WEEK_MS' src/core/week.ts \
+  || fail "week.ts must export the rolling last-7-days window"
+grep -q 'export function rollingWeekStart' src/core/week.ts \
+  || fail "week.ts must export rollingWeekStart"
+grep -q 'export function bidInRollingWeek' src/core/week.ts \
+  || fail "week.ts must export bidInRollingWeek"
+grep -q 'listPaidInRollingWeek' src/core/store.ts \
+  || fail "store.ts must list Polar-paid rows in the rolling last 7 days"
+grep -q 'bidInRollingWeek(listing.firstPaidAt' src/core/store.ts \
+  || fail "live paid rows must filter firstPaidAt, not weekId delete"
+grep -q 'findPaidByListenUrl' src/core/store.ts \
+  || fail "raise identity must look up the same listen URL still live in the window"
+grep -q 'findPaidByListenUrl(listingDraft.listenUrl)' src/app/api/checkout/route.ts \
+  || fail "checkout raise must use the rolling live listing"
+grep -q 'getBoardListings()' src/app/page.tsx \
+  || fail "occupied board must load the rolling last-7-days live board"
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "occupied board must stamp the rolling last-7-days window"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/page.tsx \
+  || fail "occupied board must name the rolling last-7-days window, not Monday midnight"
+grep -q 'className="period-meta week-window"' src/app/page.tsx \
+  || fail "occupied period meta must name the rolling window"
+grep -q 'className="period-meta"' src/app/page.tsx \
+  || fail "empty week must keep ISO weekId period meta, not the rolling cue"
+grep -Fq '.week-occupied .period-meta.week-window[data-rolling-week]' src/app/board.css \
+  || fail "CSS must compose occupied rolling last-7-days on the period meta"
+grep -Fq '.week-empty [data-rolling-week]' src/app/board.css \
+  || fail "empty week CSS must keep rolling-week stamps off Bid USD / \$5"
+grep -Fq '.week-empty .week-window' src/app/board.css \
+  || fail "empty week CSS must keep week-window copy off Bid USD / \$5"
+grep -Fq '.board[data-empty-bid-five] [data-rolling-week]' src/app/board.css \
+  || fail "empty Bid USD / \$5 CSS must keep rolling-week stamps off Claim #1"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/rules/page.tsx \
+  || fail "rules must name the rolling last-7-days window"
+grep -q 'rolling last 7 days' src/app/about/page.tsx \
+  || fail "about must name the rolling last-7-days window"
+grep -q 'occupied week window is rolling last-7-days' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover occupied rolling last-7-days window"
+grep -Fq 'rolling last-7-days window is 7 * 24h' tests/week.test.ts \
+  || fail "week tests must cover rolling last-7-days length"
+grep -q 'Monday 00:00 UTC does not drop a bid still inside the rolling week' tests/week.test.ts \
+  || fail "week tests must keep a Sunday pay across Monday midnight"
+grep -q 'live board keeps a Sunday pay across Monday 00:00 UTC' tests/week.test.ts \
+  || fail "week tests must keep Sunday pay on the live board across Monday"
+grep -q 'only the rolling last 7 days is ranked on the live board' tests/rank.test.ts \
+  || fail "rank tests must cover the rolling last-7-days live board"
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'data-rolling-week'; then
+  fail "empty week must not stamp the rolling week window"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-rolling-week=""'; then
+  fail "empty week must not stamp the rolling week window on Bid USD / \$5"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'prize-before-price'; then
+  fail "empty week must not stamp prize before price"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "rolling week must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css; then
+  fail "rolling week is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "rolling-week cut must not rebuild the station desk into a stacked layout"
+fi
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "rolling-week cut must keep occupied song title as the prize"
+grep -q 'Hear this week' src/app/page.tsx \
+  || fail "rolling-week cut must keep occupied Hear"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "rolling-week cut must keep occupied Hear the first click"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "rolling-week cut must keep empty week as Bid USD / \$5"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "rolling-week cut must keep unpaid Polar checkout off the desk"
+grep -q 'data-later-stack' src/app/page.tsx \
+  || fail "rolling-week cut must keep later-rank tracks quieter than #1"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "rolling-week cut must keep Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "rolling-week cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "rolling-week cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "rolling-week cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "rolling-week cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "rolling-week cut must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "rolling-week cut must keep the station-desk columns"
+rolling_window_rule="$(awk '/^\.week-occupied \.period-meta\.week-window\[data-rolling-week\] \{/,/\}/' src/app/board.css)"
+echo "$rolling_window_rule" | grep -q 'font-size: 0.86rem' \
+  || fail "occupied rolling window copy must stay certain by size, not a recolor"
+if echo "$rolling_window_rule" | grep -q 'background:'; then
+  fail "rolling week must name the window, not recolor the desk"
+fi
+empty_rolling_rule="$(awk '/^\.board\[data-empty-bid-five\] \.hear-after-raise,/,/^\}/' src/app/board.css)"
+echo "$empty_rolling_rule" | grep -q 'data-rolling-week' \
+  || fail "empty Bid USD / \$5 CSS must hide rolling-week stamps"
+echo "$empty_rolling_rule" | grep -q 'display: none' \
+  || fail "empty week CSS must hide rolling-week stamps"
+if echo "$empty_rolling_rule" | grep -q 'background:'; then
+  fail "empty week must hide rolling-week stamps, not recolor the desk"
+fi
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && prize < hear && hear < later && later < unpaid && unpaid < rolling) }
+' src/app/board.css; then
+  fail "rolling-week CSS must sit after occupied prize / Hear / empty later-write / unpaid-off"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "rolling-week cut must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -3089,6 +3218,8 @@ grep -q '\$5' src/app/rules/page.tsx || fail "rules must state min \$5"
 grep -q 'Older wins ties' src/app/rules/page.tsx || fail "rules must state older wins ties"
 grep -q 'Raise pays difference' src/app/rules/page.tsx || fail "rules must state raise pays difference"
 grep -q 'Monday 00:00:00.000 UTC' src/app/rules/page.tsx || fail "rules must state weekly UTC reset"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/rules/page.tsx \
+  || fail "rules must name the rolling last-7-days window"
 grep -q 'No fake streams' src/app/rules/page.tsx || fail "rules must forbid fake streams"
 grep -q 'No invented play counts' src/app/rules/page.tsx || fail "rules must forbid invented play counts"
 grep -q 'utm_' src/core/url.ts || fail "url.ts must strip utm_ tracking keys"
@@ -3240,6 +3371,12 @@ if [[ -f package.json ]]; then
     || fail "unpaid Polar checkout rank leftover test did not run"
   grep -q 'unpaid Polar checkout stays off the station desk until Polar reports paid' "$test_log" \
     || fail "unpaid Polar checkout leftover test did not run"
+  grep -q 'occupied week window is rolling last-7-days' "$test_log" \
+    || fail "occupied rolling last-7-days leftover test did not run"
+  grep -Fq 'rolling last-7-days window is 7 * 24h' "$test_log" \
+    || fail "week tests must cover rolling last-7-days window"
+  grep -q 'Monday 00:00 UTC does not drop a bid still inside the rolling week' "$test_log" \
+    || fail "week tests must keep a Sunday pay across Monday midnight"
 fi
 
 echo "OK: buildable and testable"

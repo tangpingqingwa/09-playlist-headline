@@ -266,16 +266,26 @@ export function Board({
               <span className="listen-host">{listenHost(opening.listenUrl)}</span>
             ) : null}
           </p>
+          <p
+            className="period-meta week-window"
+            data-week-id={weekId}
+            data-next-reset={nextResetAt}
+            data-rolling-week=""
+          >
+            Rolling last 7 days. Not Monday 00:00 UTC.
+          </p>
         </>
       ) : (
-        <p className="lede" data-first-read="bid">
-          Bid USD. Open the week. Listeners hear you first. Rank is the bid.
-          Playback is real.
-        </p>
+        <>
+          <p className="lede" data-first-read="bid">
+            Bid USD. Open the week. Listeners hear you first. Rank is the bid.
+            Playback is real.
+          </p>
+          <p className="period-meta" data-week-id={weekId} data-next-reset={nextResetAt}>
+            Week {weekId}. Next reset {nextResetAt}.
+          </p>
+        </>
       )}
-      <p className="period-meta" data-week-id={weekId} data-next-reset={nextResetAt}>
-        Week {weekId}. Next reset {nextResetAt}.
-      </p>
       <div
         className="station-desk"
         data-hear-first={opening ? "true" : "false"}
@@ -323,7 +333,7 @@ export function Board({
 
 export default function HomePage() {
   const week = currentWeekUtc();
-  const listings = rankListings(getBoardListings(week.weekId));
+  const listings = rankListings(getBoardListings());
   const unpaid = listUnpaid(week.weekId);
   return (
     <Board

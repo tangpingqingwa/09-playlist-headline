@@ -20,7 +20,7 @@ export type BidQuote = {
   chargeUsd: number;
 };
 
-/** Identity key: stripped listen URL + UTC week. Same key raises. */
+/** Identity key: stripped listen URL still live in the rolling last 7 days. Same key raises. */
 export function canonicalListenUrl(raw: string): string {
   try {
     return canonicalizeListenUrl(raw);
@@ -62,8 +62,8 @@ export function parseTargetBidUsd(raw: unknown): number {
 }
 
 /**
- * First listing this week pays the full bid (≥ $5).
- * Same (listenUrl, weekId) pays only new − current. Raise must be ≥ current + $1.
+ * First listing in the rolling last 7 days pays the full bid (≥ $5).
+ * Same listen URL still live in that window pays only new − current. Raise must be ≥ current + $1.
  */
 export function quoteBid(
   existing: Pick<Listing, "bidUsd"> | undefined,

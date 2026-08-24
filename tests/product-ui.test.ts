@@ -4665,3 +4665,90 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.doesNotMatch(leaked, /data-rank="2"/);
   assert.doesNotMatch(leaked, FORBIDDEN);
 });
+
+test("occupied week window is rolling last-7-days — not Monday 00:00 UTC", () => {
+  const empty = renderBoard([]);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-opening-song="false"/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, /Then the listen URL/);
+  assert.match(empty, /No opening song/);
+  assert.match(empty, /class="period-meta"/);
+  assert.match(empty, /Week 2026-W34/);
+  assert.doesNotMatch(empty, /data-rolling-week/);
+  assert.doesNotMatch(empty, /Rolling last 7 days/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /data-prize=/);
+  assert.doesNotMatch(empty, /24h lock/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      firstPaidAt: "2026-08-16T12:00:00.000Z",
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-16T18:00:00.000Z",
+    }),
+  ]);
+  const prizeAt = occupied.indexOf(
+    '<h1 class="opening-track" data-prize="">Cold Open</h1>',
+  );
+  const firstClickAt = occupied.indexOf('data-first-click="hear"');
+  const windowAt = occupied.indexOf('data-rolling-week=""');
+  const laterAt = occupied.indexOf('data-later-stack=""');
+  const claimAt = occupied.indexOf('id="claim"');
+  assert.notEqual(prizeAt, -1);
+  assert.notEqual(firstClickAt, -1);
+  assert.notEqual(windowAt, -1);
+  assert.notEqual(laterAt, -1);
+  assert.notEqual(claimAt, -1);
+  assert.ok(firstClickAt < prizeAt);
+  assert.ok(firstClickAt < windowAt);
+  assert.ok(prizeAt < claimAt);
+  assert.ok(claimAt < laterAt);
+  assert.match(occupied, /data-week-occupied="true"/);
+  assert.match(occupied, /data-rolling-week=""/);
+  assert.match(occupied, /Rolling last 7 days\. Not Monday 00:00 UTC\./);
+  assert.match(occupied, /class="period-meta week-window"/);
+  assert.match(occupied, /data-prize=""/);
+  assert.match(occupied, /Hear this week/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /class="queue later-stack"/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.match(occupied, />Outbid</);
+  assert.doesNotMatch(occupied, /data-empty-week/);
+  assert.doesNotMatch(occupied, /data-empty-bid-five/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, /Then the listen URL/);
+  assert.doesNotMatch(occupied, /24h lock/);
+  assert.doesNotMatch(occupied, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(occupied, /class="station-desk hear-first"/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/data-first-click="hear"/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((occupied.match(/data-prize=""/g) ?? []).length, 1);
+
+  assert.match(
+    cssSource,
+    /\.week-occupied \.period-meta\.week-window\[data-rolling-week\]/,
+  );
+  assert.match(cssSource, /\.week-empty \[data-rolling-week\]/);
+  assert.doesNotMatch(formSource, /data-rolling-week/);
+  assert.doesNotMatch(pageSource, /24h lock/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+});

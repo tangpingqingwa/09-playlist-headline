@@ -9,6 +9,8 @@ import { getBoardListings, rankListings } from "../src/core/rank";
 import { applyPaidEvent, getListingById, resetListings } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
 
+process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
 afterEach(() => {
   resetListings();
 });
@@ -45,7 +47,7 @@ test("GET /click/:id 302s to the stripped listen URL and increments clicks", asy
   });
   assert.equal(again.status, 302);
   assert.equal(getListingById(listing.id)?.clicks, 2);
-  assert.equal(getBoardListings(weekId())[0]?.clicks, 2);
+  assert.equal(getBoardListings()[0]?.clicks, 2);
 });
 
 test("unknown listing click is 404 and does not invent a hop", async () => {
@@ -71,7 +73,7 @@ test("board listen CTA uses the click route and does not label clicks as plays",
     createElement(Board, {
       weekId: weekId(),
       nextResetAt: "2026-08-24T00:00:00.000Z",
-      listings: rankListings(getBoardListings(weekId())),
+      listings: rankListings(getBoardListings()),
     }),
   );
   assert.match(html, new RegExp(`href="/click/${listing.id}"`));
