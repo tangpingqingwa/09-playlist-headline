@@ -25,6 +25,7 @@ afterEach(() => {
 const WEEK = "2026-W34";
 const NEXT_RESET = "2026-08-24T00:00:00.000Z";
 const readmeSource = readFileSync(join(process.cwd(), "README.md"), "utf8");
+const specSource = readFileSync(join(process.cwd(), "SPEC.md"), "utf8");
 
 function listing(partial: Partial<Listing> & Pick<Listing, "id" | "listenUrl">): Listing {
   return {
@@ -194,6 +195,26 @@ test("README weekly names last-7-days — not this week", () => {
   assert.doesNotMatch(readmeSource, /Weekly public auction/);
   assert.doesNotMatch(readmeSource, /Hear last 7 days/);
   assert.doesNotMatch(readmeSource, /Hear this week/);
+});
+
+test("SPEC persona names last-7-days — not this week", () => {
+  assert.match(
+    specSource,
+    /Put a real track first last 7 days so listeners hear it first/,
+  );
+  assert.match(
+    specSource,
+    /SPEC persona copy names last 7 days, not this calendar week/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(specSource, /Put a real track first this week/);
+  assert.doesNotMatch(specSource, /Hear last 7 days/);
+  assert.doesNotMatch(specSource, /Hear this week/);
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
 });
 
 test("paid listing listen hop stays on the stored URL", () => {
