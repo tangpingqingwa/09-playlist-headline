@@ -32,7 +32,7 @@ export default function RulesPage() {
           <tr>
             <th>Minimum</th>
             <td>
-              First bid for a listing this week must be <strong>$5</strong>.
+              First bid for a listing last 7 days must be <strong>$5</strong>.
             </td>
           </tr>
           <tr>
