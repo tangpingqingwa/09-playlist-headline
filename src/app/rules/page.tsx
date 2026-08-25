@@ -122,7 +122,8 @@ export default function RulesPage() {
         </tbody>
       </table>
       <p>
-        An empty week is valid. There is no opening song until someone pays. Do
+        An empty week is valid. There is no opening song until someone pays. The
+        empty open is last 7 days from a paid claim, not Monday 00:00 UTC. Do
         not invent a track.
       </p>
 
