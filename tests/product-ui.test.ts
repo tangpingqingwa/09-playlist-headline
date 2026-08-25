@@ -5228,3 +5228,181 @@ test("empty Claim / deck name last-7-days — not this week", () => {
   assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(cssSource, /hear-after-need-N/);
 });
+
+test("empty lede names last-7-days — not this week", () => {
+  const empty = renderBoard([]);
+  const ledeWindowAt = empty.indexOf('data-empty-lede-window=""');
+  const bidReadAt = empty.indexOf('data-first-read="bid"');
+  const bidCopyAt = empty.indexOf("Bid USD");
+  const openCopyAt = empty.indexOf("Open last 7 days");
+  const kickerAt = empty.indexOf('data-empty-kicker=""');
+  const claimWindowAt = empty.indexOf('data-empty-claim-window=""');
+  const claimAt = empty.indexOf('id="claim"');
+  const firstClickAt = empty.indexOf('data-first-click="claim"');
+  assert.notEqual(ledeWindowAt, -1);
+  assert.notEqual(bidReadAt, -1);
+  assert.notEqual(bidCopyAt, -1);
+  assert.notEqual(openCopyAt, -1);
+  assert.notEqual(kickerAt, -1);
+  assert.notEqual(claimWindowAt, -1);
+  assert.notEqual(claimAt, -1);
+  assert.notEqual(firstClickAt, -1);
+  assert.ok(ledeWindowAt < kickerAt);
+  assert.ok(bidReadAt < claimAt);
+  assert.ok(bidCopyAt < openCopyAt);
+  assert.ok(openCopyAt < claimAt);
+  assert.ok(kickerAt < claimAt);
+  assert.ok(claimWindowAt < firstClickAt);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /data-empty-lede-window=""/);
+  assert.match(empty, /Bid USD/);
+  assert.match(empty, /Open last 7 days/);
+  assert.match(empty, /Last 7 days&#x27; open/);
+  assert.match(empty, /\$5 claims last 7 days/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, /Then the listen URL/);
+  assert.match(empty, />Outbid</);
+  assert.match(empty, /data-empty-bid-five=""/);
+  assert.match(empty, /Last 7 days from a paid open\. Not Monday midnight UTC\./);
+  assert.doesNotMatch(empty, /Open the week/);
+  assert.doesNotMatch(empty, /This week&#x27;s open/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Also last 7 days/);
+  assert.doesNotMatch(empty, /data-hear-window/);
+  assert.doesNotMatch(empty, /data-later-window/);
+  assert.doesNotMatch(empty, /data-occupied-window/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /24h lock/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.equal((empty.match(/data-first-read="bid"/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-empty-lede-window=""/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-first-click="claim"/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-empty-kicker=""/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-empty-claim-window=""/g) ?? []).length, 1);
+
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      firstPaidAt: "2026-08-16T12:00:00.000Z",
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-16T18:00:00.000Z",
+    }),
+  ]);
+  assert.match(occupied, /Hear last 7 days&#x27; opening song/);
+  assert.match(occupied, /Also last 7 days/);
+  assert.match(occupied, /Last 7 days&#x27; opening song is on/);
+  assert.match(occupied, /data-hear-window=""/);
+  assert.match(occupied, /data-later-window=""/);
+  assert.match(occupied, /data-occupied-window=""/);
+  assert.match(occupied, /data-first-read="hear"/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.match(occupied, /On air · opening song/);
+  assert.doesNotMatch(occupied, /data-empty-lede-window/);
+  assert.doesNotMatch(occupied, /data-empty-kicker/);
+  assert.doesNotMatch(occupied, /data-empty-claim-window/);
+  assert.doesNotMatch(occupied, /Open last 7 days/);
+  assert.doesNotMatch(occupied, /Last 7 days&#x27; open</);
+  assert.doesNotMatch(occupied, /\$5 claims last 7 days/);
+  assert.doesNotMatch(occupied, /Open the week/);
+  assert.doesNotMatch(occupied, /This week&#x27;s open/);
+  assert.doesNotMatch(occupied, /Hear this week/);
+  assert.doesNotMatch(occupied, /Also this week/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, /24h lock/);
+  assert.doesNotMatch(occupied, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/Hear last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Also last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/data-first-read="hear"/g) ?? []).length, 1);
+
+  const leftover = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: [],
+      unpaid: [
+        {
+          sessionId: "fix_abandoned",
+          weekId: WEEK,
+          track: "Ghost Track",
+          artist: "Vapor",
+          listenUrl: "https://example.com/ghost",
+          bidUsd: 99,
+        },
+      ],
+    }),
+  );
+  assert.match(leftover, /data-empty-lede-window=""/);
+  assert.match(leftover, /Open last 7 days/);
+  assert.match(leftover, /Last 7 days&#x27; open/);
+  assert.match(leftover, /\$5 claims last 7 days/);
+  assert.match(leftover, /Claim #1 for/);
+  assert.match(leftover, /data-first-click="claim"/);
+  assert.match(leftover, /Unpaid Polar checkout stays off this desk/);
+  assert.doesNotMatch(leftover, /Open the week/);
+  assert.doesNotMatch(leftover, /This week&#x27;s open/);
+  assert.doesNotMatch(leftover, /Hear last 7 days/);
+  assert.doesNotMatch(leftover, /Ghost Track|Vapor/);
+  assert.doesNotMatch(leftover, FORBIDDEN);
+
+  assert.match(pageSource, /Open last 7 days/);
+  assert.match(pageSource, /data-empty-lede-window=""/);
+  assert.match(pageSource, /Last 7 days&apos; open/);
+  assert.doesNotMatch(pageSource, /Open the week/);
+  assert.doesNotMatch(pageSource, /This week&apos;s open/);
+  assert.match(formSource, /claims last 7 days' opening song/);
+  assert.doesNotMatch(formSource, /data-empty-lede-window/);
+  assert.doesNotMatch(formSource, /Open last 7 days/);
+  assert.doesNotMatch(formSource, /Hear last 7 days/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.match(pageSource, /Hear last 7 days&apos; opening song/);
+  assert.match(pageSource, /Also last 7 days/);
+  assert.match(cssSource, /Empty lede names last 7 days/);
+  assert.match(
+    cssSource,
+    /\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\]/,
+  );
+  assert.match(cssSource, /\.week-occupied \[data-empty-lede-window\]/);
+  const emptyLedeRule =
+    cssSource.match(
+      /\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(emptyLedeRule, /font-weight:\s*600/);
+  assert.doesNotMatch(emptyLedeRule, /background:/);
+  const occupiedHearRule =
+    cssSource.match(
+      /\.week-occupied \.opening-listen\[data-hear-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(occupiedHearRule, /font-weight:\s*700/);
+  const kickerRule =
+    cssSource.match(
+      /\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(kickerRule, /font-weight:\s*600/);
+  const claimRule =
+    cssSource.match(
+      /\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(claimRule, /font-weight:\s*600/);
+  assert.doesNotMatch(pageSource, /24h lock/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(cssSource, /hear-after-need-N/);
+});
