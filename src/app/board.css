@@ -893,6 +893,20 @@ a:hover {
   display: none;
 }
 
+/* Empty Claim / deck name last 7 days. Not this calendar week. Occupied Hear stays off. */
+.week-empty .empty-deck .deck-kicker[data-empty-kicker] {
+  font-weight: 600;
+}
+
+.week-empty .claim.empty-claim-first .claim-note[data-empty-claim-window] {
+  font-weight: 600;
+}
+
+.week-occupied [data-empty-kicker],
+.week-occupied [data-empty-claim-window] {
+  display: none;
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;
