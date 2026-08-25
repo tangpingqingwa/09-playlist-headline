@@ -199,7 +199,7 @@ echo "== UX: first-time listener empty week is honest =="
 if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
   fail "empty week must not claim the studio stays dark on a lit cream card"
 fi
-grep -q 'There is no player this week' src/app/page.tsx \
+grep -q 'There is no player last 7 days' src/app/page.tsx \
   || fail "empty week must tell a first-time listener there is no player"
 grep -q 'No opening song' src/app/page.tsx \
   || fail "empty week must still say there is no opening song"
@@ -238,8 +238,8 @@ grep -q 'data-claim-opening' src/app/page.tsx \
   || fail "claim rail must mark empty vs take for the opening song"
 grep -q 'data-claim-note' src/app/outbid-form.tsx \
   || fail "claim note must mark empty vs take"
-grep -q 'claims this week' src/app/outbid-form.tsx \
-  || fail "empty claim must say \$5 claims this week's opening song"
+grep -q 'claims last 7 days' src/app/outbid-form.tsx \
+  || fail "empty claim must say \$5 claims last 7 days' opening song"
 grep -q 'Need \$' src/app/outbid-form.tsx \
   || fail "occupied claim must name the dollar amount to take #1"
 grep -q 'pays only the difference' src/app/outbid-form.tsx \
@@ -1918,8 +1918,8 @@ grep -q 'listenClickPath' src/app/page.tsx \
   || fail "empty Bid USD / \$5 hop must still use the click route"
 grep -q 'data-claim-opening' src/app/page.tsx \
   || fail "empty Bid USD / \$5 cut must not undo the artist claim rail"
-grep -q 'claims this week' src/app/outbid-form.tsx \
-  || fail "empty Bid USD / \$5 cut must keep \$5 claims this week's opening song"
+grep -q 'claims last 7 days' src/app/outbid-form.tsx \
+  || fail "empty Bid USD / \$5 cut must keep \$5 claims last 7 days' opening song"
 grep -q 'pays only the difference' src/app/outbid-form.tsx \
   || fail "empty Bid USD / \$5 cut must leave the same-listen-URL difference on the rail"
 grep -q 'Claim #1 for' src/app/outbid-form.tsx \
@@ -2314,8 +2314,8 @@ grep -q 'playbackForListing' src/app/page.tsx \
   || fail "empty isolation must still use stored listen URL playback"
 grep -q 'data-claim-opening' src/app/page.tsx \
   || fail "empty isolation must not undo the artist claim rail"
-grep -q 'claims this week' src/app/outbid-form.tsx \
-  || fail "empty isolation must keep \$5 claims this week's opening song"
+grep -q 'claims last 7 days' src/app/outbid-form.tsx \
+  || fail "empty isolation must keep \$5 claims last 7 days' opening song"
 grep -q 'pays only the difference' src/app/outbid-form.tsx \
   || fail "empty isolation must leave the same-listen-URL difference on the rail"
 grep -q 'Claim #1 for' src/app/outbid-form.tsx \
@@ -3472,6 +3472,134 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "occupied last-7-days chrome must not revive the stays-dark empty week"
 fi
 
+echo "== UX: empty Claim / deck name last-7-days — not this week =="
+grep -q "Last 7 days&apos; open" src/app/page.tsx \
+  || fail "empty deck kicker must name last 7 days, not this week"
+grep -q 'data-empty-kicker=""' src/app/page.tsx \
+  || fail "empty deck kicker must stamp last-7-days chrome"
+grep -q 'No opening song last 7 days' src/app/page.tsx \
+  || fail "empty prize copy must name last 7 days, not this week"
+grep -q 'There is no player last 7 days' src/app/page.tsx \
+  || fail "empty deck note must name last 7 days, not this week"
+grep -q "claims last 7 days' opening song" src/app/outbid-form.tsx \
+  || fail "empty Claim #1 must name last 7 days' opening song, not this week"
+grep -q 'data-empty-claim-window' src/app/outbid-form.tsx \
+  || fail "empty Claim #1 must stamp last-7-days chrome"
+if grep -q "This week&apos;s open" src/app/page.tsx; then
+  fail "empty deck kicker must not name this week's open"
+fi
+if grep -Fq 'No opening song this week' src/app/page.tsx; then
+  fail "empty prize copy must not name this week"
+fi
+if grep -Fq 'There is no player this week' src/app/page.tsx; then
+  fail "empty deck note must not name this week"
+fi
+if grep -Fq "claims this week's opening song" src/app/outbid-form.tsx; then
+  fail "empty Claim #1 must not name this week's opening song"
+fi
+grep -q 'Empty Claim #1 and the empty deck kicker name last 7 days' SPEC.md \
+  || fail "SPEC must say empty Claim / deck name last 7 days"
+grep -q 'empty Claim / deck name last-7-days' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty Claim / deck last-7-days copy"
+grep -Fq '.week-empty .empty-deck .deck-kicker[data-empty-kicker]' src/app/board.css \
+  || fail "CSS must compose empty last-7-days deck kicker"
+grep -Fq '.week-empty .claim.empty-claim-first .claim-note[data-empty-claim-window]' src/app/board.css \
+  || fail "CSS must compose empty last-7-days Claim copy"
+grep -Fq '.week-occupied [data-empty-kicker]' src/app/board.css \
+  || fail "occupied CSS must keep empty deck kicker off Hear"
+grep -Fq '.week-occupied [data-empty-claim-window]' src/app/board.css \
+  || fail "occupied CSS must keep empty Claim last-7-days chrome off Hear"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-hear-window'; then
+  fail "empty week must not stamp occupied Hear last-7-days chrome"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty Claim #1 must not invent Hear"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'data-hear-window'; then
+  fail "empty Claim #1 must not stamp occupied Hear chrome"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six|data-hear-after-need-seven' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty Claim / deck last-7-days copy must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css; then
+  fail "empty Claim / deck last-7-days copy is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty Claim / deck last-7-days copy must not rebuild the station desk into a stacked layout"
+fi
+grep -q "Hear last 7 days&apos; opening song" src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep occupied Hear last-7-days chrome"
+grep -q 'Also last 7 days' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep occupied later tracks last-7-days chrome"
+grep -q 'data-hear-window=""' src/app/page.tsx \
+  || fail "empty Claim / deck cut must not restamp occupied Hear window chrome"
+grep -q 'data-later-window=""' src/app/page.tsx \
+  || fail "empty Claim / deck cut must not restamp occupied later-track chrome"
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep occupied rolling last-7-days"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep empty rolling-copy"
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "empty Claim / deck cut must keep last-7-days raise identity"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep occupied song title as the prize"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep occupied Hear the first click"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty Claim / deck cut must keep Claim #1"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "empty Claim / deck cut must keep empty later-write listen URL"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty Claim / deck cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "empty Claim / deck cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty Claim / deck cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty Claim / deck cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty Claim / deck cut must leave the claim rail in place"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep unpaid off the board"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty Claim / deck cut must keep honest empty station"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty Claim / deck cut must keep the station-desk columns"
+empty_kicker_rule="$(awk '/^\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\] \{/,/\}/' src/app/board.css)"
+echo "$empty_kicker_rule" | grep -q 'font-weight: 600' \
+  || fail "empty last-7-days deck kicker must stay certain by weight, not a recolor"
+if echo "$empty_kicker_rule" | grep -q 'background:'; then
+  fail "empty last-7-days deck kicker must name the window, not recolor the desk"
+fi
+empty_claim_rule="$(awk '/^\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_claim_rule" | grep -q 'font-weight: 600' \
+  || fail "empty last-7-days Claim copy must stay certain by weight, not a recolor"
+if echo "$empty_claim_rule" | grep -q 'background:'; then
+  fail "empty last-7-days Claim copy must name the window, not recolor the desk"
+fi
+hear_window_keep="$(awk '/^\.week-occupied \.opening-listen\[data-hear-window\] \{/,/\}/' src/app/board.css)"
+echo "$hear_window_keep" | grep -q 'font-weight: 700' \
+  || fail "empty Claim / deck cut must not restamp occupied Hear last-7-days weight"
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  /Empty week names last 7 days/ { empty=NR }
+  /Occupied Hear \/ later tracks name last 7 days/ { chrome=NR }
+  /Empty Claim \/ deck name last 7 days/ { claim=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && empty && chrome && claim && prize < hear && hear < later && later < unpaid && unpaid < rolling && rolling < empty && empty < chrome && chrome < claim) }
+' src/app/board.css; then
+  fail "empty Claim / deck CSS must sit after occupied prize / Hear / empty later-write / unpaid-off / occupied rolling / empty rolling-copy / occupied Hear chrome"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty Claim / deck last-7-days copy must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -3744,6 +3872,8 @@ if [[ -f package.json ]]; then
     || fail "occupied raise-identity rules leftover test did not run"
   grep -q 'occupied Hear / later tracks name last-7-days' "$test_log" \
     || fail "occupied Hear / later tracks last-7-days leftover test did not run"
+  grep -q 'empty Claim / deck name last-7-days' "$test_log" \
+    || fail "empty Claim / deck last-7-days leftover test did not run"
 fi
 
 echo "OK: buildable and testable"

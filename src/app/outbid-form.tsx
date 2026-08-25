@@ -148,13 +148,14 @@ export function BidForm({
           className="claim-note"
           data-claim-note={occupied ? "take" : "empty"}
           data-empty-bid-five={occupied ? undefined : ""}
+          data-empty-claim-window={occupied ? undefined : ""}
           data-unpaid-off={unpaidOff ? "" : undefined}
         >
           {occupied
             ? `Need $${takeUsd} to take #1. A new listing pays that full amount. Same listen URL pays only the difference. Unpaid Polar checkout stays off this desk until Polar reports paid. An abandoned track is not #1.`
             : unpaidOff
-              ? `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1. Unpaid Polar checkout stays off this desk until Polar reports paid. An abandoned track is not #1.`
-              : `$${MIN_BID_USD} claims this week's opening song. A completed payment takes #1.`}
+              ? `$${MIN_BID_USD} claims last 7 days' opening song. A completed payment takes #1. Unpaid Polar checkout stays off this desk until Polar reports paid. An abandoned track is not #1.`
+              : `$${MIN_BID_USD} claims last 7 days' opening song. A completed payment takes #1.`}
         </p>
         {occupied ? <OccupiedListingWrite /> : <EmptyClaimFirstWrite />}
       </form>

@@ -120,17 +120,19 @@ export function OpeningDeck({
         data-empty-week="true"
         data-opening-song="false"
       >
-        <p className="deck-kicker">This week&apos;s open</p>
+        <p className="deck-kicker" data-empty-kicker="">
+          Last 7 days&apos; open
+        </p>
         <h1>No opening song</h1>
         <p className="empty">
-          No opening song this week. Nobody has paid yet. We do not invent a
+          No opening song last 7 days. Nobody has paid yet. We do not invent a
           track or a stream.
           {leftoverUnpaid
             ? " An unpaid Polar checkout stays off this desk until Polar reports paid."
             : null}
         </p>
         <p className="deck-note">
-          There is no player this week. A completed payment claims #1.
+          There is no player last 7 days. A completed payment claims #1.
           The open is last 7 days from that payment — not Monday midnight UTC.
         </p>
       </section>
