@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import AboutPage from "../src/app/about/page";
 import { Board, ListingCard } from "../src/app/page";
 import RulesPage from "../src/app/rules/page";
 import { rankListings, type Listing } from "../src/core/rank";
@@ -17,6 +18,10 @@ const formSource = readFileSync(join(root, "src", "app", "outbid-form.tsx"), "ut
 const layoutSource = readFileSync(join(root, "src", "app", "layout.tsx"), "utf8");
 const rulesSource = readFileSync(
   join(root, "src", "app", "rules", "page.tsx"),
+  "utf8",
+);
+const aboutSource = readFileSync(
+  join(root, "src", "app", "about", "page.tsx"),
   "utf8",
 );
 const specSource = readFileSync(join(root, "SPEC.md"), "utf8");
@@ -6040,3 +6045,224 @@ test("rules min-bid names last-7-days — not this week", () => {
   assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(cssSource, /hear-after-need-N/);
 });
+
+test("about weekly names last-7-days — not this week", () => {
+  const about = renderToStaticMarkup(createElement(AboutPage));
+  const auctionAt = about.indexOf("public auction last 7 days");
+  const rankAt = about.indexOf("Rank is the bid");
+  const playbackAt = about.indexOf("Playback is real");
+  assert.notEqual(auctionAt, -1);
+  assert.notEqual(rankAt, -1);
+  assert.notEqual(playbackAt, -1);
+  assert.ok(auctionAt < rankAt);
+  assert.ok(rankAt < playbackAt);
+  assert.match(
+    specSource,
+    /A public auction last 7 days for the \*\*first track \/ opening song\*\*/,
+  );
+  assert.match(
+    specSource,
+    /About copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules min-bid copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /\*\*\$5\*\* on a first bid for a listing last 7 days/,
+  );
+  assert.match(
+    specSource,
+    /One-line pitch: \*\*Bid USD\. Open last 7 days\. Listeners hear you first\.\*\*/,
+  );
+  assert.match(
+    specSource,
+    /Empty product pitch names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty site metadata names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty lede names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty Claim #1 and the empty deck kicker name last 7 days/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(
+    specSource,
+    /A weekly public auction for the \*\*first track \/ opening song\*\*/,
+  );
+  assert.match(
+    aboutSource,
+    /Public auction last 7 days for the opening song\. Rank is the bid\. Playback is real\. No invented play counts\./,
+  );
+  assert.match(
+    aboutSource,
+    /Playlist Headline is a public auction last 7 days for the/,
+  );
+  assert.doesNotMatch(aboutSource, /Weekly public auction/);
+  assert.doesNotMatch(aboutSource, /weekly public auction/);
+  assert.doesNotMatch(aboutSource, /Hear last 7 days/);
+  assert.doesNotMatch(aboutSource, /Hear this week/);
+  assert.doesNotMatch(aboutSource, /data-first-click="hear"/);
+  assert.doesNotMatch(aboutSource, /hear-after-need-N/);
+  assert.match(
+    rulesSource,
+    /First bid for a listing last 7 days must be <strong>\$5<\/strong>/,
+  );
+  assert.doesNotMatch(
+    rulesSource,
+    /First bid for a listing this week must be/,
+  );
+  assert.match(about, /data-page="about"/);
+  assert.match(about, /public auction last 7 days/);
+  assert.match(about, /<strong>first track \/ opening song<\/strong>/);
+  assert.match(about, /Rank is the bid/);
+  assert.match(about, /Playback is real/);
+  assert.match(about, /no fake streams/i);
+  assert.match(about, /no invented play counts/i);
+  assert.match(about, /rolling last 7 days/i);
+  assert.match(about, /playlist-headline/);
+  assert.match(about, /outbid\.lol/);
+  assert.doesNotMatch(about, /weekly public auction/i);
+  assert.doesNotMatch(about, /Hear last 7 days/);
+  assert.doesNotMatch(about, /Hear this week/);
+  assert.doesNotMatch(about, /data-first-click="hear"/);
+  assert.doesNotMatch(about, /1\.2M streams/);
+
+  const empty = renderBoard([]);
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      firstPaidAt: "2026-08-16T12:00:00.000Z",
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-16T18:00:00.000Z",
+    }),
+  ]);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /Open last 7 days/);
+  assert.match(empty, /Last 7 days&#x27; open/);
+  assert.match(empty, /\$5 claims last 7 days/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, />Outbid</);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Also last 7 days/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.equal((empty.match(/data-first-read="bid"/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-first-click="claim"/g) ?? []).length, 1);
+  assert.match(occupied, /Hear last 7 days&#x27; opening song/);
+  assert.match(occupied, /Also last 7 days/);
+  assert.match(occupied, /data-hear-window=""/);
+  assert.match(occupied, /data-later-window=""/);
+  assert.match(occupied, /data-first-read="hear"/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.doesNotMatch(occupied, /Open last 7 days/);
+  assert.doesNotMatch(occupied, /\$5 claims last 7 days/);
+  assert.doesNotMatch(occupied, /Hear this week/);
+  assert.doesNotMatch(occupied, /Also this week/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/Hear last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Also last 7 days/g) ?? []).length, 1);
+
+  const leftover = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: [],
+      unpaid: [
+        {
+          sessionId: "fix_abandoned",
+          weekId: WEEK,
+          track: "Ghost Track",
+          artist: "Vapor",
+          listenUrl: "https://example.com/ghost",
+          bidUsd: 99,
+        },
+      ],
+    }),
+  );
+  assert.match(leftover, /Open last 7 days/);
+  assert.match(leftover, /\$5 claims last 7 days/);
+  assert.match(leftover, /Claim #1 for/);
+  assert.match(leftover, /Unpaid Polar checkout stays off this desk/);
+  assert.doesNotMatch(leftover, /Hear last 7 days/);
+  assert.doesNotMatch(leftover, /Ghost Track|Vapor/);
+  assert.doesNotMatch(leftover, FORBIDDEN);
+
+  assert.match(layoutSource, /Bid USD\. Open last 7 days\. Listeners hear you first/);
+  assert.doesNotMatch(layoutSource, /Hear last 7 days/);
+  assert.match(pageSource, /Open last 7 days/);
+  assert.match(pageSource, /Hear last 7 days&apos; opening song/);
+  assert.match(pageSource, /Also last 7 days/);
+  assert.doesNotMatch(pageSource, /Hear this week/);
+  assert.doesNotMatch(pageSource, /Also this week/);
+  assert.match(formSource, /claims last 7 days' opening song/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.doesNotMatch(formSource, /Hear last 7 days/);
+  assert.match(cssSource, /About weekly names last 7 days/);
+  assert.match(cssSource, /Rules min-bid names last 7 days/);
+  assert.match(cssSource, /Empty product pitch names last 7 days/);
+  assert.match(cssSource, /Empty site metadata names last 7 days/);
+  assert.match(cssSource, /Empty lede names last 7 days/);
+  const aboutCommentAt = cssSource.indexOf("About weekly names last 7 days");
+  const aboutRulesCommentAt = cssSource.indexOf(
+    "Rules min-bid names last 7 days",
+  );
+  const aboutPitchCommentAt = cssSource.indexOf(
+    "Empty product pitch names last 7 days",
+  );
+  const aboutMetaCommentAt = cssSource.indexOf(
+    "Empty site metadata names last 7 days",
+  );
+  assert.ok(aboutPitchCommentAt > aboutMetaCommentAt);
+  assert.ok(aboutRulesCommentAt > aboutPitchCommentAt);
+  assert.ok(aboutCommentAt > aboutRulesCommentAt);
+  const occupiedHearAboutKeep =
+    cssSource.match(
+      /\.week-occupied \.opening-listen\[data-hear-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(occupiedHearAboutKeep, /font-weight:\s*700/);
+  const emptyLedeAboutKeep =
+    cssSource.match(
+      /\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(emptyLedeAboutKeep, /font-weight:\s*600/);
+  const kickerAboutKeep =
+    cssSource.match(
+      /\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(kickerAboutKeep, /font-weight:\s*600/);
+  const claimAboutKeep =
+    cssSource.match(
+      /\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(claimAboutKeep, /font-weight:\s*600/);
+  assert.doesNotMatch(pageSource, /24h lock/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(cssSource, /hear-after-need-N/);
+});
+

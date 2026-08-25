@@ -3,7 +3,7 @@ import React from "react";
 export const metadata = {
   title: "About · Playlist Headline",
   description:
-    "Weekly public auction for the opening song. Rank is the bid. Playback is real. No invented play counts.",
+    "Public auction last 7 days for the opening song. Rank is the bid. Playback is real. No invented play counts.",
 };
 
 export default function AboutPage() {
@@ -11,7 +11,7 @@ export default function AboutPage() {
     <main className="doc-page" data-page="about">
       <h1>About</h1>
       <p>
-        Playlist Headline is a weekly public auction for the{" "}
+        Playlist Headline is a public auction last 7 days for the{" "}
         <strong>first track / opening song</strong> on a real playlist or live
         radio. Artists, labels, and promoters bid whole US dollars so listeners
         hear their song first.
