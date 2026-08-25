@@ -6,7 +6,11 @@ import {
   parseListingDraft,
   resetPaymentPort,
 } from "../src/billing/port";
-import { ListingError, canonicalListenUrl } from "../src/core/listing";
+import {
+  ListingError,
+  canonicalListenUrl,
+  listingListenKey,
+} from "../src/core/listing";
 import { getBoardListings } from "../src/core/rank";
 import { resetListings } from "../src/core/store";
 import {
@@ -36,6 +40,17 @@ async function postJson(payload: Record<string, unknown>): Promise<Response> {
     }),
   );
 }
+
+test("raise identity key is the canonical listen URL, not weekId", () => {
+  assert.equal(
+    listingListenKey("https://example.com/cold-open?utm_source=x"),
+    "https://example.com/cold-open",
+  );
+  assert.doesNotMatch(
+    listingListenKey("https://example.com/cold-open"),
+    /2026-W/,
+  );
+});
 
 test("listing requires track, artist, and listen URL", () => {
   assert.throws(

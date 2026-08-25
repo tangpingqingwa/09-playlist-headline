@@ -42,7 +42,7 @@ ORDER BY bid_usd DESC, first_paid_at ASC, id ASC
 
 Live rank is that rolling window, not `week_id = current_week_utc()`. Adding a second station later must not touch this `ORDER BY`.
 
-Identity key for raise: canonical `listenUrl` still live in the rolling last 7 days.
+Identity key for raise: canonical `listenUrl` still live in the rolling last 7 days. Raise identity is the same canonical listen URL still inside that window — not `weekId`.
 
 ---
 
@@ -103,7 +103,7 @@ No application `src/` in this docs PR.
 |---|---|
 | week | Monday 00:00 UTC rolls `weekId` label; live board is rolling last 7 days; a Sunday pay stays ranked across Monday midnight |
 | rank | higher bid above; **older wins ties**; below-#1 still lists |
-| raise | $5 → $12 charges **$7**; other listing cannot steal by paying $7 |
+| raise | $5 → $12 charges **$7**; other listing cannot steal by paying $7; same listen URL still in last 7 days raises after `weekId` rolls |
 | listing | track + artist + listen URL required; play-count field rejected |
 | url | `utm_source` stripped; telegram invite → `url_forbidden` |
 | playback | player/embed target is the stored listen URL; no generated file; empty week has no stream |
@@ -138,7 +138,7 @@ Each heading below is one PR. Dependencies are hard. Do not start the next PR in
 - **Acceptance:** $5 fixture create lists at #1. Abandoned checkout does not. CI does not set `POLAR_LIVE`.
 
 ### PR 4: raise-bid
-- **Description:** Same canonical listen URL in the same UTC week raises by paying the difference. Different listing pays full amount. `firstPaidAt` unchanged.
+- **Description:** Same canonical listen URL still inside last 7 days raises; `weekId` is not the raise key. Charge is **new − current**; cannot steal #1 by paying only the incumbent’s difference. Different listing pays full amount. `firstPaidAt` unchanged.
 - **Files:** `src/core/listing.ts`, checkout raise path, `tests/checkout.test.ts`
 - **Dependencies:** PR 3
 - **Acceptance:** SPEC acceptance 5. `bid_not_higher` when raise ≤ current.

@@ -107,7 +107,7 @@ type Listing = {
 
 **Required to place:** `track`, `artist`, `listenUrl`, `bidUsd`.
 
-**Identity for raise:** canonical `listenUrl` still live in the rolling last 7 days. Same key → raise. Different key → new listing that must pay the full bid.
+**Identity for raise:** canonical `listenUrl` still inside the rolling last 7 days from first paid placement. Same key → raise. Different key → new listing that must pay the full bid. `weekId` stays a Polar/audit label — not raise identity. An artist who paid Sunday still raises on Monday if that listen URL is inside last 7 days. After the window ends, the same URL is a new listing (full bid), not a raise.
 
 **Forbidden on the card, in the player, and in the database:**
 
@@ -132,7 +132,7 @@ Clone of outbid.lol. Rank is the bid. Nothing else.
 | Rank | Descending `bidUsd`. **rank = bid** |
 | Below #1 | Still lists, at the rank that amount can take |
 | Ties | **Older wins ties.** Compare `firstPaidAt` ascending, then listing id |
-| Raise | Same listen URL still live in the rolling last 7 days may raise. Charge **new − current** only |
+| Raise | Same listen URL still inside last 7 days may raise. `weekId` is not the raise key. Charge **new − current** only |
 | Steal | A *different* listing that wants that rank must pay the **full** target amount, not the incumbent’s difference |
 | Floor after raise | New amount must be a whole dollar ≥ current + $1 and ≥ $5 |
 | Claim | A **completed payment** claims the rank. Unpaid checkout does not |

@@ -118,6 +118,9 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.match(rules, /\$5/);
   assert.match(rules, /Older wins ties/);
   assert.match(rules, /Raise pays difference/);
+  assert.match(rules, /Same canonical listen URL still inside last 7 days raises/);
+  assert.match(rules, /weekId<\/code> stays an audit label — not raise identity/);
+  assert.doesNotMatch(rules, /same UTC week raises/i);
   assert.match(rules, /Monday 00:00:00.000 UTC/);
   assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
   assert.match(rules, /weekly UTC reset/i);
@@ -132,6 +135,16 @@ test("about and rules state real playback, no fake streams, no invented play cou
 
   assert.doesNotMatch(about, /1\.2M streams/);
   assert.doesNotMatch(rules, /1\.2M streams/);
+});
+
+test("occupied /rules raise identity is last-7-days, not the UTC week label", () => {
+  const html = renderToStaticMarkup(createElement(RulesPage));
+  assert.match(html, /Same canonical listen URL still inside last 7 days raises/);
+  assert.match(html, /weekId<\/code> stays an audit label — not raise identity/);
+  assert.doesNotMatch(html, /same UTC week raises/i);
+  assert.doesNotMatch(html, /same weekId/i);
+  assert.match(html, /Raise pays difference/);
+  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
 });
 
 test("paid listing listen hop stays on the stored URL", () => {

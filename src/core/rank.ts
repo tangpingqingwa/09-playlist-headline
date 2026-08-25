@@ -35,6 +35,8 @@ export function isPolarPaidListing(
 /**
  * Live board is Polar-paid rows whose firstPaidAt is in the rolling last 7 days.
  * `weekId` is an audit label. Never invent a #1 track.
+ * Same listen URL still inside last 7 days raises. A new URL always pays a full bid.
+ * weekId is not the raise key.
  */
 export function getBoardListings(now: Date = nowUtc()): Listing[] {
   return listPaidInRollingWeek(now).filter(isPolarPaidListing);

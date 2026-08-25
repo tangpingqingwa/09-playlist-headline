@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   canonicalListenUrl,
+  listingListenKey,
   quoteBid,
   targetBidAfterPayment,
   type CheckoutKind,
@@ -43,7 +44,10 @@ export function listPaidInRollingWeek(now: Date = nowUtc()): Listing[] {
   );
 }
 
-/** Polar-paid rows stored under an ISO weekId label. Archive / audit only. */
+/**
+ * Audit lookup by Polar `weekId` label.
+ * Raise identity is `findPaidByListenUrl` (last 7 days), not this weekId.
+ */
 export function listPaidForWeek(weekId: string): Listing[] {
   return listings.filter(
     (listing) => listing.weekId === weekId && hasPaidInstant(listing),
@@ -96,14 +100,14 @@ export function incrementListingClicks(id: string): Listing | undefined {
   return listing;
 }
 
-/** Same canonical listen URL still live in the rolling last 7 days is a raise. */
+/** Raise identity: same canonical listen URL still inside last 7 days. Not weekId. */
 export function findPaidByListenUrl(
   listenUrl: string,
   now: Date = nowUtc(),
 ): Listing | undefined {
-  const key = canonicalListenUrl(listenUrl);
+  const key = listingListenKey(listenUrl);
   return listPaidInRollingWeek(now).find(
-    (listing) => canonicalListenUrl(listing.listenUrl) === key,
+    (listing) => listingListenKey(listing.listenUrl) === key,
   );
 }
 
@@ -146,7 +150,7 @@ export function applyPaidEvent(event: PaidBid): Listing {
 
   if (existing) {
     if (kind === "create") {
-      throw new Error("same listen URL this week must raise, not create");
+      throw new Error("same listen URL still inside last 7 days must raise, not create");
     }
     const targetBidUsd = targetBidAfterPayment(existing, event.amountUsd, kind);
     quoteBid(existing, targetBidUsd);
@@ -160,7 +164,7 @@ export function applyPaidEvent(event: PaidBid): Listing {
   }
 
   if (kind === "raise") {
-    throw new Error("raise requires an existing listing this week");
+    throw new Error("raise requires an existing listing still inside last 7 days");
   }
 
   const listing: Listing = {

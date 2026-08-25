@@ -3231,6 +3231,108 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "empty last-7-days copy must not revive the stays-dark empty week"
 fi
 
+echo "== UX: occupied raise identity is last-7-days — not the UTC week label =="
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "occupied /rules must name last-7-days raise identity"
+grep -q 'weekId</code> stays an audit label — not raise identity' src/app/rules/page.tsx \
+  || fail "occupied /rules must keep weekId as an audit label"
+if grep -qi 'same UTC week raises' src/app/rules/page.tsx; then
+  fail "occupied /rules must not tax raise identity as the UTC week"
+fi
+if grep -qi 'in the same weekId' src/app/rules/page.tsx SPEC.md; then
+  fail "raise identity must not key on weekId"
+fi
+grep -Fq '**Identity for raise:** canonical `listenUrl` still inside the rolling last 7 days' SPEC.md \
+  || fail "SPEC must name last-7-days raise identity"
+grep -Fq '`weekId` stays a Polar/audit label — not raise identity' SPEC.md \
+  || fail "SPEC must keep weekId as an audit label, not raise identity"
+grep -Fq 'Same listen URL still inside last 7 days may raise. `weekId` is not the raise key.' SPEC.md \
+  || fail "SPEC raise rule must raise inside last 7 days, not weekId"
+grep -Fq 'Raise identity is the same canonical listen URL still inside that window — not `weekId`' BUILD.md \
+  || fail "BUILD must keep raise identity off weekId"
+grep -q 'Same listen URL still inside last 7 days raises' src/core/rank.ts \
+  || fail "rank.ts must name last-7-days raise identity"
+grep -q 'weekId is not the raise key' src/core/rank.ts \
+  || fail "rank.ts must keep weekId off raise identity"
+grep -q 'weekId is not the raise key' src/core/listing.ts \
+  || fail "listing.ts must keep weekId off raise identity"
+grep -q 'export function listingListenKey(listenUrl: string)' src/core/listing.ts \
+  || fail "listingListenKey must key raise on the listen URL, not weekId"
+if grep -Fq '${weekId}|' src/core/listing.ts; then
+  fail "listingListenKey must not prefix raise identity with weekId"
+fi
+grep -q 'findPaidByListenUrl(listingDraft.listenUrl)' src/app/api/checkout/route.ts \
+  || fail "checkout raise must look up the rolling live listing"
+if grep -A 20 'export async function POST' src/app/api/checkout/route.ts | grep -q 'listPaidForWeek'; then
+  fail "checkout must not key raise identity on weekId"
+fi
+grep -A 20 'export function applyPaidEvent' src/core/store.ts | grep -q 'findPaidByListenUrl' \
+  || fail "applyPaidEvent must look up the rolling live listing"
+if grep -A 40 'export function applyPaidEvent' src/core/store.ts | grep -q 'listPaidForWeek'; then
+  fail "applyPaidEvent must not key raise identity on weekId"
+fi
+grep -Fq 'Raise identity is `findPaidByListenUrl`' src/core/store.ts \
+  || fail "weekId listing lookup must stay an audit helper, not raise identity"
+grep -Fq 'Raise identity: same canonical listen URL still inside last 7 days. Not weekId.' src/core/week.ts \
+  || fail "week.ts must name last-7-days raise identity, not weekId"
+grep -q 'occupied /rules raise identity is last-7-days, not the UTC week label' tests/playback.test.ts \
+  || fail "rules tests must cover last-7-days raise identity"
+grep -q 'same listen URL still inside last-7-days raises after the UTC week label rolls' tests/checkout.test.ts \
+  || fail "checkout tests must cover Sunday pay Monday raise"
+grep -q 'raise identity key is the canonical listen URL, not weekId' tests/listing.test.ts \
+  || fail "listing tests must cover last-7-days raise identity"
+grep -q 'Raise pays difference' src/app/rules/page.tsx \
+  || fail "raise-identity cut must keep raise pays difference"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/rules/page.tsx \
+  || fail "raise-identity cut must keep occupied rolling last-7-days"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "raise-identity cut must keep occupied song title as the prize"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "raise-identity cut must keep occupied Hear the first click"
+grep -q 'Hear this week' src/app/page.tsx \
+  || fail "raise-identity cut must keep occupied Hear"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "raise-identity cut must keep Claim #1"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "raise-identity cut must keep empty later-write listen URL"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "raise-identity cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "raise-identity cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "raise-identity cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "raise-identity cut must not rebuild the station desk"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "raise-identity cut must keep unpaid off the board"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "raise-identity cut must keep honest empty station"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "raise-identity cut must keep empty rolling-copy"
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "raise-identity cut must keep occupied rolling last-7-days"
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'Hear this week'; then
+  fail "empty Claim #1 must not invent Hear"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six|data-hear-after-need-seven' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx src/app/rules/page.tsx; then
+  fail "raise identity must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/core/rank.ts src/core/store.ts src/core/week.ts src/core/listing.ts; then
+  fail "raise identity is not a 24h lock on #1"
+fi
+if grep -qE 'grid-template-columns: 1fr 1fr' src/app/outbid-form.tsx src/app/page.tsx src/app/rules/page.tsx; then
+  fail "raise identity must not rebuild the station desk into a long form"
+fi
+python3 - src/app/board.css <<'PY' || fail "raise identity must not recolor the station"
+import sys
+css = open(sys.argv[1], encoding="utf-8").read()
+if "raise-identity" in css or "raise-rolling" in css:
+    raise SystemExit(1)
+PY
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -3280,7 +3382,7 @@ grep -q 'bid_not_higher' src/core/listing.ts \
 grep -q 'canonicalListenUrl' src/core/listing.ts \
   || fail "listing.ts must key raises on the canonical listen URL"
 grep -q 'findPaidByListenUrl' src/core/store.ts \
-  || fail "store.ts must look up the same listen URL this week"
+  || fail "store.ts must look up the same listen URL still inside last 7 days"
 grep -q 'kind: quote.kind' src/app/api/checkout/route.ts \
   || fail "checkout raise path must pass create or raise"
 grep -q 'quoteBid' src/app/api/checkout/route.ts \
@@ -3289,6 +3391,8 @@ grep -q 'bid_not_higher' tests/checkout.test.ts \
   || fail "checkout tests must cover bid_not_higher"
 grep -q 'pays \$7' tests/checkout.test.ts \
   || fail "checkout tests must cover SPEC acceptance 5"
+grep -q 'same listen URL still inside last-7-days raises after the UTC week label rolls' tests/checkout.test.ts \
+  || fail "checkout tests must raise a Sunday pay across Monday weekId"
 grep -q 'data-return="paid"' src/app/return/page.tsx \
   || fail "return page must show paid copy"
 grep -q 'data-return="pending"' src/app/return/page.tsx \
@@ -3324,6 +3428,13 @@ grep -q 'playlist-headline' src/app/about/page.tsx || fail "about must name the 
 grep -q '\$5' src/app/rules/page.tsx || fail "rules must state min \$5"
 grep -q 'Older wins ties' src/app/rules/page.tsx || fail "rules must state older wins ties"
 grep -q 'Raise pays difference' src/app/rules/page.tsx || fail "rules must state raise pays difference"
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "rules must name last-7-days raise identity"
+grep -q 'weekId</code> stays an audit label — not raise identity' src/app/rules/page.tsx \
+  || fail "rules must keep weekId as an audit label"
+if grep -qi 'same UTC week raises' src/app/rules/page.tsx; then
+  fail "rules must not tax raise identity as the UTC week"
+fi
 grep -q 'Monday 00:00:00.000 UTC' src/app/rules/page.tsx || fail "rules must state weekly UTC reset"
 grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/rules/page.tsx \
   || fail "rules must name the rolling last-7-days window"
@@ -3488,6 +3599,10 @@ if [[ -f package.json ]]; then
     || fail "week tests must cover rolling last-7-days window"
   grep -q 'Monday 00:00 UTC does not drop a bid still inside the rolling week' "$test_log" \
     || fail "week tests must keep a Sunday pay across Monday midnight"
+  grep -q 'same listen URL still inside last-7-days raises after the UTC week label rolls' "$test_log" \
+    || fail "Sunday pay Monday raise leftover test did not run"
+  grep -q 'occupied /rules raise identity is last-7-days, not the UTC week label' "$test_log" \
+    || fail "occupied raise-identity rules leftover test did not run"
 fi
 
 echo "OK: buildable and testable"

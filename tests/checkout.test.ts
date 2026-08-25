@@ -17,6 +17,7 @@ import {
 import { polarLiveEnabled } from "../src/config";
 import {
   ListingError,
+  listingListenKey,
   parseTargetBidUsd,
   quoteBid,
 } from "../src/core/listing";
@@ -25,11 +26,12 @@ import { Board } from "../src/app/page";
 import { getBoardListings, MIN_BID_USD, rankListings } from "../src/core/rank";
 import {
   applyPaidEvent,
+  findPaidByListenUrl,
   listPaidForWeek,
   listUnpaid,
   resetListings,
 } from "../src/core/store";
-import { currentWeekUtc } from "../src/core/week";
+import { currentWeekUtc, isoWeekId, nowUtc } from "../src/core/week";
 
 process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
 
@@ -760,6 +762,95 @@ test("bid_not_higher when raise is not above the current bid", async () => {
   assert.equal(ranked.length, 1);
   assert.equal(ranked[0]?.bidUsd, 8);
   assert.equal(getPaymentPort().getCheckout("unused"), undefined);
+});
+
+test("same listen URL still inside last-7-days raises after the UTC week label rolls", async () => {
+  const previousWeekNow = process.env.WEEK_NOW;
+  const url = "https://example.com/sunday-raise";
+  try {
+    process.env.WEEK_NOW = "2026-08-16T12:00:00.000Z";
+    const placed = applyPaidEvent({
+      sessionId: "chk_sunday_5",
+      weekId: "2026-W33",
+      track: "Sunday Open",
+      artist: "Ada",
+      listenUrl: url,
+      amountUsd: 5,
+      paidAt: "2026-08-16T12:00:00.000Z",
+      kind: "create",
+    });
+    assert.equal(placed.weekId, "2026-W33");
+    assert.equal(placed.firstPaidAt, "2026-08-16T12:00:00.000Z");
+    assert.equal(listingListenKey(url), url);
+
+    process.env.WEEK_NOW = "2026-08-17T00:00:00.000Z";
+    assert.equal(isoWeekId(nowUtc()), "2026-W34");
+    assert.equal(listPaidForWeek("2026-W34").length, 0);
+    const live = findPaidByListenUrl(url);
+    assert.equal(live?.id, placed.id);
+    assert.equal(live?.weekId, "2026-W33");
+    assert.equal(getBoardListings().length, 1);
+    assert.deepEqual(quoteBid(live, 7), {
+      kind: "raise",
+      targetBidUsd: 7,
+      chargeUsd: 2,
+    });
+
+    const raiseJson = await postJson({
+      track: "Sunday Raised",
+      artist: "Ada",
+      listenUrl: url,
+      amountUsd: 7,
+    });
+    assert.equal(raiseJson.status, 200);
+    const raiseBody = (await raiseJson.json()) as { sessionId: string };
+    const raiseSession = getPaymentPort().getCheckout(raiseBody.sessionId);
+    assert.equal(raiseSession?.kind, "raise");
+    assert.equal(raiseSession?.amountUsd, 2);
+    assert.equal(raiseSession?.listingDraft.weekId, "2026-W34");
+
+    const paid = await getPaymentPort().completeCheckout(raiseBody.sessionId);
+    const raised = applyPaidEvent({
+      sessionId: paid.sessionId,
+      weekId: paid.listingDraft.weekId,
+      track: paid.listingDraft.track,
+      artist: paid.listingDraft.artist,
+      listenUrl: paid.listingDraft.listenUrl,
+      amountUsd: paid.amountUsd,
+      paidAt: paid.paidAt,
+      kind: paid.kind,
+    });
+    assert.equal(raised.id, placed.id);
+    assert.equal(raised.weekId, "2026-W33");
+    assert.equal(raised.bidUsd, 7);
+    assert.equal(raised.firstPaidAt, placed.firstPaidAt);
+    assert.equal(raised.track, "Sunday Raised");
+
+    process.env.WEEK_NOW = "2026-08-23T12:00:01.000Z";
+    assert.equal(findPaidByListenUrl(url), undefined);
+    assert.deepEqual(quoteBid(undefined, 5), {
+      kind: "create",
+      targetBidUsd: 5,
+      chargeUsd: 5,
+    });
+    const aged = await postJson({
+      track: "Sunday Open",
+      artist: "Ada",
+      listenUrl: url,
+      amountUsd: 5,
+    });
+    assert.equal(aged.status, 200);
+    const agedBody = (await aged.json()) as { sessionId: string };
+    const agedSession = getPaymentPort().getCheckout(agedBody.sessionId);
+    assert.equal(agedSession?.kind, "create");
+    assert.equal(agedSession?.amountUsd, 5);
+  } finally {
+    if (previousWeekNow === undefined) {
+      delete process.env.WEEK_NOW;
+    } else {
+      process.env.WEEK_NOW = previousWeekNow;
+    }
+  }
 });
 
 test("same listen URL after the rolling window is a new full-bid listing", () => {
