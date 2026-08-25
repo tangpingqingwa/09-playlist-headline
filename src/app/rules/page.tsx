@@ -144,7 +144,7 @@ export default function RulesPage() {
           to fill the slot.
         </li>
         <li>
-          If the week has no paid #1, there is no player and no opening song.
+          If last 7 days has no paid #1, there is no player and no opening song.
         </li>
       </ul>
 

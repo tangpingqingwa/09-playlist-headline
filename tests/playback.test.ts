@@ -133,6 +133,8 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
   assert.match(rules, /weekly UTC reset/i);
   assert.match(rules, /empty open is last 7 days from a paid claim/);
+  assert.match(rules, /If last 7 days has no paid #1, there is no player and no opening song/);
+  assert.doesNotMatch(rules, /If the week has no paid #1/);
   assert.match(about, /rolling last 7 days/i);
   assert.match(rules, /No fake streams/);
   assert.match(rules, /No invented play counts/);
@@ -229,6 +231,44 @@ test("SPEC empty-playback names last-7-days — not this week", () => {
   assert.match(
     specSource,
     /SPEC persona copy names last 7 days, not this calendar week/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(specSource, /If the week has no paid #1/);
+  assert.doesNotMatch(specSource, /Hear last 7 days/);
+  assert.doesNotMatch(specSource, /Hear this week/);
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
+});
+
+test("rules empty-playback names last-7-days — not this week", () => {
+  const html = renderToStaticMarkup(createElement(RulesPage));
+  assert.match(html, /data-page="rules"/);
+  assert.match(
+    html,
+    /If last 7 days has no paid #1, there is no player and no opening song/,
+  );
+  assert.doesNotMatch(html, /If the week has no paid #1/);
+  assert.doesNotMatch(html, /Hear last 7 days/);
+  assert.doesNotMatch(html, /Hear this week/);
+  assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
+  assert.match(html, /Older wins ties/);
+  assert.match(html, /Raise pays difference/);
+  assert.match(html, /No fake streams/);
+  assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(
+    specSource,
+    /If last 7 days has no paid #1, there is no player and no opening song/,
+  );
+  assert.match(
+    specSource,
+    /SPEC empty-playback copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules empty-playback copy names last 7 days, not this calendar week/,
   );
   assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
   assert.doesNotMatch(specSource, /If the week has no paid #1/);
