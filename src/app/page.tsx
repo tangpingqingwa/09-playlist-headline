@@ -287,8 +287,12 @@ export function Board({
         </>
       ) : (
         <>
-          <p className="lede" data-first-read="bid">
-            Bid USD. Open the week. Listeners hear you first. Rank is the bid.
+          <p
+            className="lede"
+            data-first-read="bid"
+            data-empty-lede-window=""
+          >
+            Bid USD. Open last 7 days. Listeners hear you first. Rank is the bid.
             Playback is real.
           </p>
           <p

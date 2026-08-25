@@ -907,6 +907,15 @@ a:hover {
   display: none;
 }
 
+/* Empty lede names last 7 days. Not this calendar week. Occupied Hear stays off. */
+.week-empty .lede[data-first-read="bid"][data-empty-lede-window] {
+  font-weight: 600;
+}
+
+.week-occupied [data-empty-lede-window] {
+  display: none;
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;
