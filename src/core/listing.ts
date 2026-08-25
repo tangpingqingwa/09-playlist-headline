@@ -32,8 +32,12 @@ export function canonicalListenUrl(raw: string): string {
   }
 }
 
-export function listingListenKey(weekId: string, listenUrl: string): string {
-  return `${weekId}|${canonicalListenUrl(listenUrl)}`;
+/**
+ * Raise identity: canonical listen URL still inside last 7 days.
+ * weekId is not the raise key.
+ */
+export function listingListenKey(listenUrl: string): string {
+  return canonicalListenUrl(listenUrl);
 }
 
 /** Whole US dollars. Floor and raise-vs-create live in quoteBid. */
@@ -63,7 +67,8 @@ export function parseTargetBidUsd(raw: unknown): number {
 
 /**
  * First listing in the rolling last 7 days pays the full bid (≥ $5).
- * Same listen URL still live in that window pays only new − current. Raise must be ≥ current + $1.
+ * Same listen URL still inside last 7 days raises. weekId is not the raise key.
+ * Charge is only new − current. Raise must be ≥ current + $1.
  */
 export function quoteBid(
   existing: Pick<Listing, "bidUsd"> | undefined,

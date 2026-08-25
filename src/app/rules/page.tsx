@@ -3,7 +3,7 @@ import React from "react";
 export const metadata = {
   title: "Rules · Playlist Headline",
   description:
-    "Min $5. Older wins ties. Raise pays the difference. Weekly UTC reset. No fake streams. No invented play counts.",
+    "Min $5. Older wins ties. Raise pays the difference. Rolling last 7 days. No fake streams. No invented play counts.",
 };
 
 export default function RulesPage() {
@@ -52,8 +52,8 @@ export default function RulesPage() {
           <tr>
             <th>Raise</th>
             <td>
-              Same canonical listen URL still live in the rolling last 7 days
-              raises.{" "}
+              Same canonical listen URL still inside last 7 days raises.{" "}
+              <code>weekId</code> stays an audit label — not raise identity.{" "}
               <strong>Raise pays difference</strong> only (
               <code>new − current</code>). New amount must be a whole dollar ≥
               current + $1.
