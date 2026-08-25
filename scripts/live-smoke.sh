@@ -346,9 +346,13 @@ elif fake_stream_or_play_count "$board0"; then
   record "board" "FAIL" "GET / invented play counts or fake stream"
 elif html_has "$board0" 'data-empty-week="true"' && html_has "$board0" 'No opening song'; then
   if html_has "$board0" 'data-rolling-week' || html_has "$board0" 'Rolling last 7 days'; then
-    record "board" "FAIL" "empty week stamped rolling last-7-days on Bid USD / \$5"
+    record "board" "FAIL" "empty week stamped occupied rolling chrome on Bid USD / \$5"
+  elif html_has "$board0" 'Last 7 days from a paid open' \
+    && html_has "$board0" 'Not Monday midnight UTC' \
+    && ! html_has "$board0" 'Next reset'; then
+    record "board" "PASS" "GET / 200 week ${WEEK_ID} empty last 7 days (not Monday midnight) + bid form"
   else
-    record "board" "PASS" "GET / 200 week ${WEEK_ID} empty + bid form (no invented opening song)"
+    record "board" "FAIL" "empty week missing last-7-days copy or still expires at Monday reset"
   fi
 else
   count="$(listing_count "$board0")"

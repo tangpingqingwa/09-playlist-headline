@@ -3124,6 +3124,113 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "rolling-week cut must not revive the stays-dark empty week"
 fi
 
+echo "== UX: empty station copy is a rolling last-7-days window — not Monday 00:00 UTC =="
+grep -q 'data-empty-window=""' src/app/page.tsx \
+  || fail "empty station must stamp a fair last-7-days window"
+grep -q 'className="period-meta"' src/app/page.tsx \
+  || fail "empty station must keep period meta, not occupied week-window chrome"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "empty station copy must name last 7 days, not Monday midnight UTC"
+grep -q 'The open is last 7 days from that payment — not Monday midnight UTC.' src/app/page.tsx \
+  || fail "empty deck note must name last 7 days, not Monday midnight UTC"
+if grep -Fq 'Week {weekId}. Next reset {nextResetAt}.' src/app/page.tsx; then
+  fail "empty station must not expire the week at Monday 00:00 UTC next-reset copy"
+fi
+if grep -Fq 'Until then this week stays empty.' src/app/page.tsx; then
+  fail "empty deck must not leave the open as an unnamed this-week expiry"
+fi
+grep -q 'empty open is last 7 days from a paid claim' src/app/rules/page.tsx \
+  || fail "rules must say the empty open is last 7 days, not Monday 00:00 UTC"
+grep -q 'Empty station copy names the same fair window' SPEC.md \
+  || fail "SPEC must say empty station copy names the rolling last-7-days window"
+grep -q 'empty station copy is a rolling last-7-days window' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty last-7-days copy"
+grep -Fq '.week-empty .period-meta[data-empty-window]' src/app/board.css \
+  || fail "CSS must compose empty last-7-days copy on the period meta"
+grep -Fq '.week-empty .empty-deck .deck-note' src/app/board.css \
+  || fail "CSS must make empty last-7-days deck copy certain"
+grep -Fq '.week-occupied [data-empty-window]' src/app/board.css \
+  || fail "occupied CSS must keep empty-window copy off Hear / song prize"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-rolling-week=""'; then
+  fail "empty week must not stamp occupied rolling chrome on Bid USD / \$5"
+fi
+if grep -n 'data-empty-window' src/app/page.tsx | grep -q 'data-rolling-week'; then
+  fail "empty last-7-days copy must not reuse occupied rolling chrome"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'data-empty-window'; then
+  fail "empty Claim #1 must not stamp the last-7-days window on the form"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear this week'; then
+  fail "empty last-7-days copy must not invent a Hear hop"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty last-7-days copy must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css; then
+  fail "empty last-7-days window is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty last-7-days copy must not rebuild the station desk into a stacked layout"
+fi
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep occupied rolling chrome"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep occupied rolling last-7-days sentence"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep occupied song title as the prize"
+grep -q 'Hear this week' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep occupied Hear"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep occupied Hear the first click"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep empty week as Bid USD / \$5"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep unpaid Polar checkout off the desk"
+grep -q 'data-later-stack' src/app/page.tsx \
+  || fail "empty last-7-days copy must keep later-rank tracks quieter than #1"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty last-7-days copy must keep Claim #1"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty last-7-days copy must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "empty last-7-days copy must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty last-7-days copy must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty last-7-days copy must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty last-7-days copy must leave the claim rail in place"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty last-7-days copy must keep the station-desk columns"
+empty_window_rule="$(awk '/^\.week-empty \.period-meta\[data-empty-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_window_rule" | grep -q 'font-size: 0.86rem' \
+  || fail "empty last-7-days copy must stay certain by size, not a recolor"
+echo "$empty_window_rule" | grep -q 'font-weight: 600' \
+  || fail "empty last-7-days copy must stay certain by weight, not a recolor"
+if echo "$empty_window_rule" | grep -q 'background:'; then
+  fail "empty last-7-days copy must name the window, not recolor the desk"
+fi
+empty_note_rule="$(awk '/^\.week-empty \.empty-deck \.deck-note \{/,/\}/' src/app/board.css)"
+echo "$empty_note_rule" | grep -q 'font-weight: 600' \
+  || fail "empty last-7-days deck note must stay certain by weight"
+if echo "$empty_note_rule" | grep -q 'background:'; then
+  fail "empty last-7-days deck note must not recolor the desk"
+fi
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  /Empty week names last 7 days/ { empty=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && empty && prize < hear && hear < later && later < unpaid && unpaid < rolling && rolling < empty) }
+' src/app/board.css; then
+  fail "empty last-7-days CSS must sit after occupied prize / Hear / empty later-write / unpaid-off / occupied rolling"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "empty last-7-days copy must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -3220,6 +3327,8 @@ grep -q 'Raise pays difference' src/app/rules/page.tsx || fail "rules must state
 grep -q 'Monday 00:00:00.000 UTC' src/app/rules/page.tsx || fail "rules must state weekly UTC reset"
 grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/rules/page.tsx \
   || fail "rules must name the rolling last-7-days window"
+grep -q 'empty open is last 7 days from a paid claim' src/app/rules/page.tsx \
+  || fail "rules must say the empty open is last 7 days, not Monday 00:00 UTC"
 grep -q 'No fake streams' src/app/rules/page.tsx || fail "rules must forbid fake streams"
 grep -q 'No invented play counts' src/app/rules/page.tsx || fail "rules must forbid invented play counts"
 grep -q 'utm_' src/core/url.ts || fail "url.ts must strip utm_ tracking keys"
@@ -3373,6 +3482,8 @@ if [[ -f package.json ]]; then
     || fail "unpaid Polar checkout leftover test did not run"
   grep -q 'occupied week window is rolling last-7-days' "$test_log" \
     || fail "occupied rolling last-7-days leftover test did not run"
+  grep -q 'empty station copy is a rolling last-7-days window' "$test_log" \
+    || fail "empty last-7-days station copy test did not run"
   grep -Fq 'rolling last-7-days window is 7 * 24h' "$test_log" \
     || fail "week tests must cover rolling last-7-days window"
   grep -q 'Monday 00:00 UTC does not drop a bid still inside the rolling week' "$test_log" \

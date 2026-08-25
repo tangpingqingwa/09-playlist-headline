@@ -121,6 +121,7 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.match(rules, /Monday 00:00:00.000 UTC/);
   assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
   assert.match(rules, /weekly UTC reset/i);
+  assert.match(rules, /empty open is last 7 days from a paid claim/);
   assert.match(about, /rolling last 7 days/i);
   assert.match(rules, /No fake streams/);
   assert.match(rules, /No invented play counts/);

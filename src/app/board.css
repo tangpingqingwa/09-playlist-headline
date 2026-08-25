@@ -856,6 +856,20 @@ a:hover {
   font-size: 0.86rem;
 }
 
+/* Empty week names last 7 days. Not Monday midnight UTC. Occupied rolling chrome stays off. */
+.week-empty .period-meta[data-empty-window] {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.week-empty .empty-deck .deck-note {
+  font-weight: 600;
+}
+
+.week-occupied [data-empty-window] {
+  display: none;
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;

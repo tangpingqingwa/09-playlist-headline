@@ -162,9 +162,9 @@ Worked examples, same week:
 | What resets | Live rank after seven days from `firstPaidAt`. Clicks and bids do not carry once that window ends |
 | What does not carry | Previous window bid amounts. Want the next open? Pay again. |
 | History | Aged rows may stay readable as archive. They are not the live opening song. |
-| Empty week | Valid. No invented opening track. |
+| Empty week | Valid. No invented opening track. Empty copy names last 7 days, not Monday midnight UTC. |
 
-The occupied board names the rolling last-7-days window. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
+The occupied board names the rolling last-7-days window. Empty station copy names the same fair window without occupied rolling chrome. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
 Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 

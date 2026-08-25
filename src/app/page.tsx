@@ -128,8 +128,8 @@ export function OpeningDeck({
             : null}
         </p>
         <p className="deck-note">
-          There is no player this week. A completed payment claims #1. Until
-          then this week stays empty.
+          There is no player this week. A completed payment claims #1.
+          The open is last 7 days from that payment — not Monday midnight UTC.
         </p>
       </section>
     );
@@ -281,8 +281,12 @@ export function Board({
             Bid USD. Open the week. Listeners hear you first. Rank is the bid.
             Playback is real.
           </p>
-          <p className="period-meta" data-week-id={weekId} data-next-reset={nextResetAt}>
-            Week {weekId}. Next reset {nextResetAt}.
+          <p
+            className="period-meta"
+            data-week-id={weekId}
+            data-empty-window=""
+          >
+            Last 7 days from a paid open. Not Monday midnight UTC.
           </p>
         </>
       )}
