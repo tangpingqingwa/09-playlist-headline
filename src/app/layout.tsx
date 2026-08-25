@@ -4,7 +4,7 @@ import "./board.css";
 export const metadata = {
   title: "Playlist Headline",
   description:
-    "Bid USD. Open the week. Listeners hear you first. Rank is the bid. Playback is real.",
+    "Bid USD. Open last 7 days. Listeners hear you first. Rank is the bid. Playback is real.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
