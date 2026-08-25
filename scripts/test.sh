@@ -5237,6 +5237,254 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "rules empty-playback last-7-days copy must not revive the stays-dark empty week"
 fi
 
+echo "== UX: rules empty-week names last-7-days — not this week =="
+grep -Fq 'An empty last 7 days is valid.' src/app/rules/page.tsx \
+  || fail "rules empty-week must name last 7 days, not this week"
+if grep -Fq 'An empty week is valid.' src/app/rules/page.tsx; then
+  fail "rules empty-week must not name this calendar week"
+fi
+grep -q 'Rules empty-week copy names last 7 days' SPEC.md \
+  || fail "SPEC must say rules empty-week copy names last 7 days"
+grep -Fq 'If last 7 days has no paid #1, there is no player and no opening song.' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must not restamp rules empty-playback"
+if grep -Fq 'If the week has no paid #1' src/app/rules/page.tsx; then
+  fail "rules empty-playback must not name this calendar week"
+fi
+grep -q 'Rules empty-playback copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp rules empty-playback SPEC copy"
+grep -Fq 'If last 7 days has no paid #1, there is no player and no opening song. Honest empty state.' SPEC.md \
+  || fail "rules empty-week cut must not restamp SPEC empty-playback"
+grep -q 'SPEC empty-playback copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp SPEC empty-playback SPEC copy"
+if grep -Fq 'If the week has no paid #1' SPEC.md; then
+  fail "SPEC empty-playback must not name this calendar week"
+fi
+grep -q 'SPEC persona copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp SPEC persona"
+grep -Fq '| Artist / label / promoter | Put a real track first last 7 days so listeners hear it first |' SPEC.md \
+  || fail "rules empty-week cut must not restamp SPEC persona first-track"
+if grep -Fq 'Put a real track first this week' SPEC.md; then
+  fail "SPEC persona must not name this calendar week"
+fi
+grep -q 'README copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp README weekly SPEC copy"
+grep -Fq 'Public auction last 7 days for the first track / opening song' README.md \
+  || fail "rules empty-week cut must not restamp README weekly"
+if grep -Fiq 'weekly public auction' README.md; then
+  fail "rules empty-week cut must not restamp README this calendar week"
+fi
+grep -q 'About copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp about weekly SPEC copy"
+grep -Fq 'A public auction last 7 days for the **first track / opening song**' SPEC.md \
+  || fail "rules empty-week cut must not restamp SPEC product statement"
+if grep -Fq 'A weekly public auction for the **first track / opening song**' SPEC.md; then
+  fail "SPEC product statement must not name this calendar week"
+fi
+grep -q 'Empty stays Claim #1 first, no Hear' SPEC.md \
+  || fail "rules empty-week cut must stay Claim #1 first, no Hear"
+grep -q 'Rules min-bid copy names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp rules min-bid SPEC copy"
+grep -Fq '| Minimum | **$5** on a first bid for a listing last 7 days |' SPEC.md \
+  || fail "rules empty-week cut must not restamp rules min-bid"
+grep -Fq 'First bid for a listing last 7 days must be' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must not restamp rules min-bid last-7-days copy"
+if grep -Fq 'First bid for a listing this week' src/app/rules/page.tsx; then
+  fail "rules min-bid must not name this calendar week"
+fi
+grep -Fq 'One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**' SPEC.md \
+  || fail "rules empty-week cut must not restamp empty product pitch"
+grep -q 'Empty product pitch names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp empty product pitch SPEC copy"
+grep -q 'Empty site metadata names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp empty site metadata SPEC copy"
+grep -q 'Empty lede names last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp empty lede SPEC copy"
+grep -q 'Empty Claim #1 and the empty deck kicker name last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp empty Claim / deck SPEC copy"
+grep -q 'Occupied Hear and later tracks name last 7 days' SPEC.md \
+  || fail "rules empty-week cut must not restamp occupied Hear / later tracks SPEC copy"
+grep -q 'Bid USD. Open last 7 days. Listeners hear you first.' src/app/layout.tsx \
+  || fail "rules empty-week cut must not restamp empty site metadata last-7-days copy"
+if grep -q 'Hear last 7 days' src/app/layout.tsx; then
+  fail "empty site metadata must not invent a Hear hop"
+fi
+if grep -q 'Hear this week' src/app/layout.tsx; then
+  fail "empty site metadata must not invent Hear this week"
+fi
+grep -q 'Open last 7 days' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp empty lede last-7-days copy"
+grep -q 'There is no player last 7 days' src/app/page.tsx \
+  || fail "rules empty-week cut must keep empty player copy last 7 days"
+grep -q 'data-empty-lede-window=""' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp empty lede chrome"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "rules empty-week cut must keep Bid USD as the first read"
+if grep -Fq 'Open the week' src/app/page.tsx; then
+  fail "empty lede must not name this calendar week"
+fi
+grep -q "Last 7 days&apos; open" src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp empty deck kicker last-7-days copy"
+grep -q "claims last 7 days' opening song" src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must not restamp empty Claim last-7-days copy"
+if grep -n 'data-empty-lede-window' -A 8 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty lede must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty Claim #1 must not invent Hear"
+fi
+if grep -q 'Hear last 7 days' SPEC.md; then
+  fail "rules empty-week must not invent a Hear hop on SPEC"
+fi
+if grep -q 'Hear this week' SPEC.md; then
+  fail "rules empty-week must not invent Hear this week on SPEC"
+fi
+if grep -q 'Hear last 7 days' README.md; then
+  fail "rules empty-week cut must not restamp README with Hear"
+fi
+if grep -q 'Hear last 7 days' src/app/about/page.tsx; then
+  fail "rules empty-week cut must not restamp about with Hear"
+fi
+if grep -q 'Hear last 7 days' src/app/rules/page.tsx; then
+  fail "rules empty-week must not invent Hear on /rules"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six|data-hear-after-need-seven' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx src/app/layout.tsx src/app/rules/page.tsx src/app/about/page.tsx README.md SPEC.md; then
+  fail "rules empty-week last-7-days copy must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css src/app/layout.tsx src/app/about/page.tsx README.md; then
+  fail "rules empty-week last-7-days copy is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "rules empty-week last-7-days copy must not rebuild the station desk into a stacked layout"
+fi
+grep -Fq 'public auction last 7 days' src/app/about/page.tsx \
+  || fail "rules empty-week cut must not restamp about weekly last-7-days copy"
+if grep -Fiq 'weekly public auction' src/app/about/page.tsx; then
+  fail "rules empty-week cut must not restamp about this calendar week"
+fi
+grep -q "Hear last 7 days&apos; opening song" src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp occupied Hear last-7-days chrome"
+grep -q 'Also last 7 days' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp occupied later tracks last-7-days chrome"
+grep -q 'data-hear-window=""' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp occupied Hear window chrome"
+grep -q 'data-later-window=""' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp occupied later-track chrome"
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "rules empty-week cut must keep occupied rolling last-7-days"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "rules empty-week cut must keep empty rolling-copy"
+grep -q 'data-empty-kicker=""' src/app/page.tsx \
+  || fail "rules empty-week cut must not restamp empty deck kicker"
+grep -q 'data-empty-claim-window' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must not restamp empty Claim last-7-days chrome"
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must keep last-7-days raise identity"
+grep -q 'empty open is last 7 days from a paid claim' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must keep empty last-7-days open copy"
+grep -q 'Older wins ties' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must keep older wins ties"
+grep -q 'Raise pays difference' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must keep raise pays difference"
+grep -q 'No fake streams' src/app/rules/page.tsx \
+  || fail "rules empty-week cut must keep no fake streams"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "rules empty-week cut must keep occupied song title as the prize"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "rules empty-week cut must keep occupied Hear the first click"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must keep Claim #1"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must keep empty later-write listen URL"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "rules empty-week cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "rules empty-week cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "rules empty-week cut must leave the claim rail in place"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "rules empty-week cut must keep unpaid off the board"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "rules empty-week cut must keep honest empty station"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "rules empty-week cut must keep the station-desk columns"
+grep -q 'Leaderboard' src/app/layout.tsx \
+  || fail "rules empty-week cut must keep Leaderboard"
+grep -q 'href="/about"' src/app/layout.tsx \
+  || fail "rules empty-week cut must keep About"
+grep -q 'href="/rules"' src/app/layout.tsx \
+  || fail "rules empty-week cut must keep Rules"
+grep -q 'rules empty-week names last-7-days' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover rules empty-week last-7-days copy"
+grep -q 'rules empty-week names last-7-days' tests/playback.test.ts \
+  || fail "playback tests must cover rules empty-week last-7-days copy"
+grep -q 'Rules empty-week names last 7 days' src/app/board.css \
+  || fail "CSS must document rules empty-week last-7-days copy"
+grep -q 'Rules empty-playback names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp rules empty-playback CSS"
+grep -q 'SPEC empty-playback names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp SPEC empty-playback CSS"
+grep -q 'SPEC persona names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp SPEC persona CSS"
+grep -q 'README weekly names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp README weekly CSS"
+grep -q 'About weekly names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp about weekly CSS"
+grep -q 'Rules min-bid names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp rules min-bid CSS"
+grep -q 'Empty product pitch names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp empty product pitch CSS"
+grep -q 'Empty site metadata names last 7 days' src/app/board.css \
+  || fail "rules empty-week cut must not restamp empty site metadata CSS"
+grep -Fq '.week-empty .lede[data-first-read="bid"][data-empty-lede-window]' src/app/board.css \
+  || fail "rules empty-week cut must keep empty last-7-days lede composition"
+grep -Fq '.week-occupied [data-empty-lede-window]' src/app/board.css \
+  || fail "rules empty-week cut must keep empty last-7-days lede off occupied Hear"
+empty_lede_keep="$(awk '/^\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_lede_keep" | grep -q 'font-weight: 600' \
+  || fail "rules empty-week cut must not restamp empty last-7-days lede weight"
+empty_kicker_keep="$(awk '/^\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\] \{/,/\}/' src/app/board.css)"
+echo "$empty_kicker_keep" | grep -q 'font-weight: 600' \
+  || fail "rules empty-week cut must not restamp empty deck kicker weight"
+empty_claim_keep="$(awk '/^\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_claim_keep" | grep -q 'font-weight: 600' \
+  || fail "rules empty-week cut must not restamp empty Claim last-7-days weight"
+hear_window_keep="$(awk '/^\.week-occupied \.opening-listen\[data-hear-window\] \{/,/\}/' src/app/board.css)"
+echo "$hear_window_keep" | grep -q 'font-weight: 700' \
+  || fail "rules empty-week cut must not restamp occupied Hear last-7-days weight"
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  /Empty week names last 7 days/ { empty=NR }
+  /Occupied Hear \/ later tracks name last 7 days/ { chrome=NR }
+  /Empty Claim \/ deck name last 7 days/ { claim=NR }
+  /Empty lede names last 7 days/ { lede=NR }
+  /Empty site metadata names last 7 days/ { meta=NR }
+  /Empty product pitch names last 7 days/ { pitch=NR }
+  /Rules min-bid names last 7 days/ { rules=NR }
+  /About weekly names last 7 days/ { about=NR }
+  /README weekly names last 7 days/ { readme=NR }
+  /SPEC persona names last 7 days/ { persona=NR }
+  /SPEC empty-playback names last 7 days/ { playback=NR }
+  /Rules empty-playback names last 7 days/ { rulesplay=NR }
+  /Rules empty-week names last 7 days/ { emptyweek=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && empty && chrome && claim && lede && meta && pitch && rules && about && readme && persona && playback && rulesplay && emptyweek && prize < hear && hear < later && later < unpaid && unpaid < rolling && rolling < empty && empty < chrome && chrome < claim && claim < lede && lede < meta && meta < pitch && pitch < rules && rules < about && about < readme && readme < persona && persona < playback && playback < rulesplay && rulesplay < emptyweek) }
+' src/app/board.css; then
+  fail "rules empty-week CSS must sit after occupied prize / Hear / empty later-write / unpaid-off / occupied rolling / empty rolling-copy / occupied Hear chrome / empty Claim deck / empty lede / empty meta / empty pitch / rules min-bid / about weekly / README weekly / SPEC persona / SPEC empty-playback / rules empty-playback"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx src/app/layout.tsx src/app/rules/page.tsx src/app/about/page.tsx README.md SPEC.md; then
+  fail "rules empty-week last-7-days copy must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
@@ -5349,6 +5597,11 @@ grep -Fq 'If last 7 days has no paid #1, there is no player and no opening song.
   || fail "rules empty-playback must name last 7 days, not this week"
 if grep -Fq 'If the week has no paid #1' src/app/rules/page.tsx; then
   fail "rules empty-playback must not name this calendar week"
+fi
+grep -Fq 'An empty last 7 days is valid.' src/app/rules/page.tsx \
+  || fail "rules empty-week must name last 7 days, not this week"
+if grep -Fq 'An empty week is valid.' src/app/rules/page.tsx; then
+  fail "rules empty-week must not name this calendar week"
 fi
 grep -q 'Playback is real' src/app/about/page.tsx || fail "about must state real playback"
 grep -q 'no invented play counts' src/app/about/page.tsx || fail "about must forbid invented play counts"
@@ -5559,6 +5812,8 @@ if [[ -f package.json ]]; then
     || fail "SPEC empty-playback last-7-days leftover test did not run"
   grep -q 'rules empty-playback names last-7-days' "$test_log" \
     || fail "rules empty-playback last-7-days leftover test did not run"
+  grep -q 'rules empty-week names last-7-days' "$test_log" \
+    || fail "rules empty-week last-7-days leftover test did not run"
 fi
 
 echo "OK: buildable and testable"
