@@ -164,7 +164,7 @@ Worked examples, same week:
 | History | Aged rows may stay readable as archive. They are not the live opening song. |
 | Empty week | Valid. No invented opening track. Empty copy names last 7 days, not Monday midnight UTC. |
 
-The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. SPEC persona copy names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
+The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. SPEC persona copy names last 7 days, not this calendar week. SPEC empty-playback copy names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
 Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 
@@ -176,7 +176,7 @@ Listeners must be able to hear the winner. Playback is not decorative.
 
 1. The listen URL is a real `https` page or stream the bidder controls (Spotify, Apple Music, YouTube / YouTube Music, SoundCloud, Bandcamp, Mixcloud, an official radio stream, or the artist’s own site).
 2. The board’s listen control **302**s to that stored URL, or embeds it through a documented official embed for that host. Both are real playback. A silent custom player that does not load the listing’s URL is a **fake stream** and is forbidden.
-3. If the week has no paid #1, there is no player and no opening song. Honest empty state.
+3. If last 7 days has no paid #1, there is no player and no opening song. Honest empty state.
 4. Never invent, generate, or loop audio to fill the slot.
 5. Never display a play count, stream count, or listener count from any platform. Public **clicks** on our listen hop are the only counter.
 

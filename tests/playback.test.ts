@@ -217,6 +217,30 @@ test("SPEC persona names last-7-days — not this week", () => {
   assert.doesNotMatch(readmeSource, /weekly public auction/i);
 });
 
+test("SPEC empty-playback names last-7-days — not this week", () => {
+  assert.match(
+    specSource,
+    /If last 7 days has no paid #1, there is no player and no opening song/,
+  );
+  assert.match(
+    specSource,
+    /SPEC empty-playback copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /SPEC persona copy names last 7 days, not this calendar week/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(specSource, /If the week has no paid #1/);
+  assert.doesNotMatch(specSource, /Hear last 7 days/);
+  assert.doesNotMatch(specSource, /Hear this week/);
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
+});
+
 test("paid listing listen hop stays on the stored URL", () => {
   const listingRow = applyPaidEvent({
     sessionId: "chk_play",
