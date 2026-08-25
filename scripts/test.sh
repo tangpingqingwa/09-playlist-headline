@@ -3861,6 +3861,158 @@ if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.
   fail "empty meta last-7-days copy must not revive the stays-dark empty week"
 fi
 
+echo "== UX: empty pitch names last-7-days — not this week =="
+grep -Fq 'One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**' SPEC.md \
+  || fail "empty product pitch must name last 7 days, not this week"
+if grep -Fq 'Open the week' SPEC.md; then
+  fail "empty product pitch must not name this calendar week"
+fi
+if grep -Fq 'One-line pitch: **Bid USD. Open the week.' SPEC.md; then
+  fail "SPEC one-line pitch must not still say Open the week"
+fi
+grep -q 'Listeners hear you first' SPEC.md \
+  || fail "empty product pitch must keep Listeners hear you first"
+grep -q 'Empty product pitch names last 7 days' SPEC.md \
+  || fail "SPEC must say empty product pitch names last 7 days"
+grep -q 'Empty stays Claim #1 first, no Hear' SPEC.md \
+  || fail "empty product pitch must stay Claim #1 first, no Hear"
+grep -q 'Bid USD. Open last 7 days. Listeners hear you first.' src/app/layout.tsx \
+  || fail "empty pitch cut must not restamp empty site metadata last-7-days copy"
+if grep -Fq 'Open the week' src/app/layout.tsx; then
+  fail "empty site metadata must not name this calendar week"
+fi
+if grep -q 'Hear last 7 days' src/app/layout.tsx; then
+  fail "empty site metadata must not invent a Hear hop"
+fi
+if grep -q 'Hear this week' src/app/layout.tsx; then
+  fail "empty site metadata must not invent Hear this week"
+fi
+grep -q 'Open last 7 days' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp empty lede last-7-days copy"
+grep -q 'data-empty-lede-window=""' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp empty lede chrome"
+grep -q 'data-first-read="bid"' src/app/page.tsx \
+  || fail "empty pitch cut must keep Bid USD as the first read"
+if grep -Fq 'Open the week' src/app/page.tsx; then
+  fail "empty lede must not name this calendar week"
+fi
+grep -q "Last 7 days&apos; open" src/app/page.tsx \
+  || fail "empty pitch cut must not restamp empty deck kicker last-7-days copy"
+grep -q "claims last 7 days' opening song" src/app/outbid-form.tsx \
+  || fail "empty pitch cut must not restamp empty Claim last-7-days copy"
+grep -q 'Empty site metadata names last 7 days' SPEC.md \
+  || fail "empty pitch cut must not restamp empty site metadata SPEC copy"
+grep -q 'empty pitch names last-7-days' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover empty product pitch last-7-days copy"
+grep -q 'Empty product pitch names last 7 days' src/app/board.css \
+  || fail "CSS must document empty last-7-days product pitch"
+grep -q 'Empty site metadata names last 7 days' src/app/board.css \
+  || fail "empty pitch cut must not restamp empty site metadata CSS"
+grep -Fq '.week-empty .lede[data-first-read="bid"][data-empty-lede-window]' src/app/board.css \
+  || fail "empty pitch cut must keep empty last-7-days lede composition"
+grep -Fq '.week-occupied [data-empty-lede-window]' src/app/board.css \
+  || fail "empty pitch cut must keep empty last-7-days lede off occupied Hear"
+if grep -n 'data-empty-lede-window' -A 8 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty lede must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty Claim #1 must not invent Hear"
+fi
+if grep -q 'data-empty-lede-window' src/app/outbid-form.tsx; then
+  fail "empty pitch cut must not restamp empty Claim copy"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six|data-hear-after-need-seven' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx src/app/layout.tsx; then
+  fail "empty pitch last-7-days copy must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css src/app/layout.tsx; then
+  fail "empty pitch last-7-days copy is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "empty pitch last-7-days copy must not rebuild the station desk into a stacked layout"
+fi
+grep -q "Hear last 7 days&apos; opening song" src/app/page.tsx \
+  || fail "empty pitch cut must not restamp occupied Hear last-7-days chrome"
+grep -q 'Also last 7 days' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp occupied later tracks last-7-days chrome"
+grep -q 'data-hear-window=""' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp occupied Hear window chrome"
+grep -q 'data-later-window=""' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp occupied later-track chrome"
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "empty pitch cut must keep occupied rolling last-7-days"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "empty pitch cut must keep empty rolling-copy"
+grep -q 'data-empty-kicker=""' src/app/page.tsx \
+  || fail "empty pitch cut must not restamp empty deck kicker"
+grep -q 'data-empty-claim-window' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must not restamp empty Claim last-7-days chrome"
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "empty pitch cut must keep last-7-days raise identity"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "empty pitch cut must keep occupied song title as the prize"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "empty pitch cut must keep occupied Hear the first click"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must keep Claim #1"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must keep empty later-write listen URL"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "empty pitch cut must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "empty pitch cut must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "empty pitch cut must leave the claim rail in place"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "empty pitch cut must keep unpaid off the board"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "empty pitch cut must keep honest empty station"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "empty pitch cut must keep the station-desk columns"
+grep -q 'Leaderboard' src/app/layout.tsx \
+  || fail "empty pitch cut must keep Leaderboard"
+grep -q 'href="/about"' src/app/layout.tsx \
+  || fail "empty pitch cut must keep About"
+grep -q 'href="/rules"' src/app/layout.tsx \
+  || fail "empty pitch cut must keep Rules"
+empty_lede_keep="$(awk '/^\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_lede_keep" | grep -q 'font-weight: 600' \
+  || fail "empty pitch cut must not restamp empty last-7-days lede weight"
+empty_kicker_keep="$(awk '/^\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\] \{/,/\}/' src/app/board.css)"
+echo "$empty_kicker_keep" | grep -q 'font-weight: 600' \
+  || fail "empty pitch cut must not restamp empty deck kicker weight"
+empty_claim_keep="$(awk '/^\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\] \{/,/\}/' src/app/board.css)"
+echo "$empty_claim_keep" | grep -q 'font-weight: 600' \
+  || fail "empty pitch cut must not restamp empty Claim last-7-days weight"
+hear_window_keep="$(awk '/^\.week-occupied \.opening-listen\[data-hear-window\] \{/,/\}/' src/app/board.css)"
+echo "$hear_window_keep" | grep -q 'font-weight: 700' \
+  || fail "empty pitch cut must not restamp occupied Hear last-7-days weight"
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  /Empty week names last 7 days/ { empty=NR }
+  /Occupied Hear \/ later tracks name last 7 days/ { chrome=NR }
+  /Empty Claim \/ deck name last 7 days/ { claim=NR }
+  /Empty lede names last 7 days/ { lede=NR }
+  /Empty site metadata names last 7 days/ { meta=NR }
+  /Empty product pitch names last 7 days/ { pitch=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && empty && chrome && claim && lede && meta && pitch && prize < hear && hear < later && later < unpaid && unpaid < rolling && rolling < empty && empty < chrome && chrome < claim && claim < lede && lede < meta && meta < pitch) }
+' src/app/board.css; then
+  fail "empty pitch CSS must sit after occupied prize / Hear / empty later-write / unpaid-off / occupied rolling / empty rolling-copy / occupied Hear chrome / empty Claim deck / empty lede / empty meta"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx src/app/layout.tsx; then
+  fail "empty pitch last-7-days copy must not revive the stays-dark empty week"
+fi
+
 echo "== checkout files =="
 for f in \
   src/billing/port.ts \
