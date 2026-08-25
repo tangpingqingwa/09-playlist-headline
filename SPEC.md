@@ -20,7 +20,7 @@ A weekly public auction for the **first track / opening song** on a **real** pla
 
 Rank is the bid. Nothing else. The winner is actually played first. Playback must be real. There are no fake streams and no invented play counts.
 
-One-line pitch: **Bid USD. Open the week. Listeners hear you first.**
+One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**
 
 ---
 
@@ -164,7 +164,7 @@ Worked examples, same week:
 | History | Aged rows may stay readable as archive. They are not the live opening song. |
 | Empty week | Valid. No invented opening track. Empty copy names last 7 days, not Monday midnight UTC. |
 
-The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
+The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
 Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 
