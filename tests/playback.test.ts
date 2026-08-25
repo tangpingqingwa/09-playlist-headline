@@ -131,7 +131,8 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.doesNotMatch(rules, /same UTC week raises/i);
   assert.match(rules, /Monday 00:00:00.000 UTC/);
   assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
-  assert.match(rules, /weekly UTC reset/i);
+  assert.match(rules, /<h2>Rolling last 7 days<\/h2>/);
+  assert.doesNotMatch(rules, /<h2>Weekly UTC reset<\/h2>/);
   assert.match(rules, /empty open is last 7 days from a paid claim/);
   assert.match(rules, /If last 7 days has no paid #1, there is no player and no opening song/);
   assert.doesNotMatch(rules, /If the week has no paid #1/);
@@ -298,6 +299,53 @@ test("rules empty-week names last-7-days — not this week", () => {
   assert.match(html, /Raise pays difference/);
   assert.match(html, /No fake streams/);
   assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(
+    specSource,
+    /Rules empty-week copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules empty-playback copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /If last 7 days has no paid #1, there is no player and no opening song/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(specSource, /If the week has no paid #1/);
+  assert.doesNotMatch(specSource, /Hear last 7 days/);
+  assert.doesNotMatch(specSource, /Hear this week/);
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
+});
+
+test("rules weekly-reset heading names last-7-days — not this week", () => {
+  const html = renderToStaticMarkup(createElement(RulesPage));
+  assert.match(html, /data-page="rules"/);
+  assert.match(html, /<h2>Rolling last 7 days<\/h2>/);
+  assert.doesNotMatch(html, /<h2>Weekly UTC reset<\/h2>/);
+  assert.doesNotMatch(html, /Hear last 7 days/);
+  assert.doesNotMatch(html, /Hear this week/);
+  assert.match(html, /An empty last 7 days is valid/);
+  assert.doesNotMatch(html, /An empty week is valid/);
+  assert.match(
+    html,
+    /If last 7 days has no paid #1, there is no player and no opening song/,
+  );
+  assert.doesNotMatch(html, /If the week has no paid #1/);
+  assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
+  assert.match(html, /Older wins ties/);
+  assert.match(html, /Raise pays difference/);
+  assert.match(html, /No fake streams/);
+  assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(
+    specSource,
+    /Rules weekly-reset heading names last 7 days, not this calendar week/,
+  );
   assert.match(
     specSource,
     /Rules empty-week copy names last 7 days, not this calendar week/,

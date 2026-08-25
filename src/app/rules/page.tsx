@@ -77,7 +77,7 @@ export default function RulesPage() {
         </tbody>
       </table>
 
-      <h2>Weekly UTC reset</h2>
+      <h2>Rolling last 7 days</h2>
       <table>
         <tbody>
           <tr>
