@@ -87,7 +87,9 @@ export function Leaderboard({
       aria-labelledby="queue-heading"
     >
       <div className="queue-head">
-        <h2 id="queue-heading">Also this week</h2>
+        <h2 id="queue-heading" data-later-window="">
+          Also last 7 days
+        </h2>
         <p>
           Rank is the bid. These tracks are not the opening song. Clicks are
           hops, not a platform count.
@@ -241,8 +243,13 @@ export function Board({
       </p>
       {opening ? (
         <>
-          <p className="lede" data-hear-first="true" data-first-read="hear">
-            This week&apos;s opening song is on. Rank is the bid. Playback is
+          <p
+            className="lede"
+            data-hear-first="true"
+            data-first-read="hear"
+            data-occupied-window=""
+          >
+            Last 7 days&apos; opening song is on. Rank is the bid. Playback is
             real.
           </p>
           <p className="hear-after-raise">
@@ -259,8 +266,9 @@ export function Board({
               data-hear-after-need-four="true"
               data-hear-after-need-five="true"
               data-hear-opening={hearIsHop ? "hop" : undefined}
+              data-hear-window=""
             >
-              Hear this week&apos;s opening song
+              Hear last 7 days&apos; opening song
             </a>
             {hearIsHop ? (
               <span className="listen-host">{listenHost(opening.listenUrl)}</span>

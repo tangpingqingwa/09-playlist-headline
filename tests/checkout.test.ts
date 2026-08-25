@@ -200,7 +200,7 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
   assert.doesNotMatch(html, /Vapor/);
   assert.doesNotMatch(html, /\$99/);
   assert.doesNotMatch(html, /data-prize=/);
-  assert.doesNotMatch(html, /Hear this week/);
+  assert.doesNotMatch(html, /Hear last 7 days/);
 
   const sessionId = new URL(started.headers.get("location") ?? "", "http://localhost")
     .searchParams.get("sessionId");
