@@ -24,6 +24,8 @@ test("live-smoke is operator-only and stays off the offline gate", () => {
   assert.match(script, /\/rules/);
   assert.match(script, /Older wins ties/);
   assert.match(script, /Raise pays difference/);
+  assert.match(script, /<h2>Rolling last 7 days<\/h2>/);
+  assert.doesNotMatch(script, /\[Ww\]eekly UTC reset/);
   assert.match(script, /\/api\/checkout/);
   assert.match(script, /\/click\//);
   assert.match(script, /data-listen-url/);
