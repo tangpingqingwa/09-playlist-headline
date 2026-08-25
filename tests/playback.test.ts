@@ -116,6 +116,8 @@ test("about and rules state real playback, no fake streams, no invented play cou
 
   assert.match(rules, /data-page="rules"/);
   assert.match(rules, /\$5/);
+  assert.match(rules, /First bid for a listing last 7 days must be/);
+  assert.doesNotMatch(rules, /First bid for a listing this week/);
   assert.match(rules, /Older wins ties/);
   assert.match(rules, /Raise pays difference/);
   assert.match(rules, /Same canonical listen URL still inside last 7 days raises/);
@@ -145,6 +147,21 @@ test("occupied /rules raise identity is last-7-days, not the UTC week label", ()
   assert.doesNotMatch(html, /same weekId/i);
   assert.match(html, /Raise pays difference/);
   assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+});
+
+test("rules min-bid names last-7-days — not this week", () => {
+  const html = renderToStaticMarkup(createElement(RulesPage));
+  assert.match(html, /data-page="rules"/);
+  assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
+  assert.match(html, /\$5/);
+  assert.doesNotMatch(html, /First bid for a listing this week/);
+  assert.doesNotMatch(html, /Hear last 7 days/);
+  assert.doesNotMatch(html, /Hear this week/);
+  assert.match(html, /Older wins ties/);
+  assert.match(html, /Raise pays difference/);
+  assert.match(html, /Same canonical listen URL still inside last 7 days raises/);
+  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(html, /empty open is last 7 days from a paid claim/);
 });
 
 test("paid listing listen hop stays on the stored URL", () => {

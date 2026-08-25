@@ -5,6 +5,7 @@ import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Board, ListingCard } from "../src/app/page";
+import RulesPage from "../src/app/rules/page";
 import { rankListings, type Listing } from "../src/core/rank";
 
 const WEEK = "2026-W34";
@@ -14,6 +15,10 @@ const pageSource = readFileSync(join(root, "src", "app", "page.tsx"), "utf8");
 const cssSource = readFileSync(join(root, "src", "app", "board.css"), "utf8");
 const formSource = readFileSync(join(root, "src", "app", "outbid-form.tsx"), "utf8");
 const layoutSource = readFileSync(join(root, "src", "app", "layout.tsx"), "utf8");
+const rulesSource = readFileSync(
+  join(root, "src", "app", "rules", "page.tsx"),
+  "utf8",
+);
 const specSource = readFileSync(join(root, "SPEC.md"), "utf8");
 
 const FORBIDDEN =
@@ -5834,6 +5839,203 @@ test("empty pitch names last-7-days — not this week", () => {
   const ledeCommentAt = cssSource.indexOf("Empty lede names last 7 days");
   assert.ok(ledeCommentAt >= 0 && metaCommentAt > ledeCommentAt);
   assert.ok(pitchCommentAt > metaCommentAt);
+  assert.doesNotMatch(pageSource, /24h lock/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(cssSource, /hear-after-need-N/);
+});
+
+test("rules min-bid names last-7-days — not this week", () => {
+  const rules = renderToStaticMarkup(createElement(RulesPage));
+  const minBidAt = rules.indexOf("First bid for a listing last 7 days must be");
+  const fiveAt = rules.indexOf("<strong>$5</strong>");
+  const raiseAt = rules.indexOf(
+    "Same canonical listen URL still inside last 7 days raises",
+  );
+  assert.notEqual(minBidAt, -1);
+  assert.notEqual(fiveAt, -1);
+  assert.notEqual(raiseAt, -1);
+  assert.ok(minBidAt < fiveAt);
+  assert.ok(minBidAt < raiseAt);
+  assert.match(
+    specSource,
+    /\*\*\$5\*\* on a first bid for a listing last 7 days/,
+  );
+  assert.match(
+    specSource,
+    /Rules min-bid copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /One-line pitch: \*\*Bid USD\. Open last 7 days\. Listeners hear you first\.\*\*/,
+  );
+  assert.match(
+    specSource,
+    /Empty product pitch names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty site metadata names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty lede names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Empty Claim #1 and the empty deck kicker name last 7 days/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
+  assert.doesNotMatch(
+    specSource,
+    /\*\*\$5\*\* on a first bid for a listing in this week/,
+  );
+  assert.match(
+    rulesSource,
+    /First bid for a listing last 7 days must be <strong>\$5<\/strong>/,
+  );
+  assert.doesNotMatch(
+    rulesSource,
+    /First bid for a listing this week must be/,
+  );
+  assert.doesNotMatch(rulesSource, /Hear last 7 days/);
+  assert.doesNotMatch(rulesSource, /Hear this week/);
+  assert.doesNotMatch(rulesSource, /data-first-click="hear"/);
+  assert.doesNotMatch(rulesSource, /hear-after-need-N/);
+  assert.match(rules, /data-page="rules"/);
+  assert.match(rules, /First bid for a listing last 7 days must be/);
+  assert.match(rules, /<strong>\$5<\/strong>/);
+  assert.match(rules, /Older wins ties/);
+  assert.match(rules, /Raise pays difference/);
+  assert.match(rules, /Same canonical listen URL still inside last 7 days raises/);
+  assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(rules, /empty open is last 7 days from a paid claim/);
+  assert.doesNotMatch(rules, /First bid for a listing this week/);
+  assert.doesNotMatch(rules, /Hear last 7 days/);
+  assert.doesNotMatch(rules, /Hear this week/);
+  assert.doesNotMatch(rules, /data-first-click="hear"/);
+  assert.doesNotMatch(rules, /1\.2M streams/);
+
+  const empty = renderBoard([]);
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      firstPaidAt: "2026-08-16T12:00:00.000Z",
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-16T18:00:00.000Z",
+    }),
+  ]);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-first-read="bid"/);
+  assert.match(empty, /Open last 7 days/);
+  assert.match(empty, /Last 7 days&#x27; open/);
+  assert.match(empty, /\$5 claims last 7 days/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, />Outbid</);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Also last 7 days/);
+  assert.doesNotMatch(empty, /data-first-read="hear"/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.equal((empty.match(/data-first-read="bid"/g) ?? []).length, 1);
+  assert.equal((empty.match(/data-first-click="claim"/g) ?? []).length, 1);
+  assert.match(occupied, /Hear last 7 days&#x27; opening song/);
+  assert.match(occupied, /Also last 7 days/);
+  assert.match(occupied, /data-hear-window=""/);
+  assert.match(occupied, /data-later-window=""/);
+  assert.match(occupied, /data-first-read="hear"/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.doesNotMatch(occupied, /Open last 7 days/);
+  assert.doesNotMatch(occupied, /\$5 claims last 7 days/);
+  assert.doesNotMatch(occupied, /Hear this week/);
+  assert.doesNotMatch(occupied, /Also this week/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/Hear last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Also last 7 days/g) ?? []).length, 1);
+
+  const leftover = renderToStaticMarkup(
+    createElement(Board, {
+      weekId: WEEK,
+      nextResetAt: NEXT_RESET,
+      listings: [],
+      unpaid: [
+        {
+          sessionId: "fix_abandoned",
+          weekId: WEEK,
+          track: "Ghost Track",
+          artist: "Vapor",
+          listenUrl: "https://example.com/ghost",
+          bidUsd: 99,
+        },
+      ],
+    }),
+  );
+  assert.match(leftover, /Open last 7 days/);
+  assert.match(leftover, /\$5 claims last 7 days/);
+  assert.match(leftover, /Claim #1 for/);
+  assert.match(leftover, /Unpaid Polar checkout stays off this desk/);
+  assert.doesNotMatch(leftover, /Hear last 7 days/);
+  assert.doesNotMatch(leftover, /Ghost Track|Vapor/);
+  assert.doesNotMatch(leftover, FORBIDDEN);
+
+  assert.match(layoutSource, /Bid USD\. Open last 7 days\. Listeners hear you first/);
+  assert.doesNotMatch(layoutSource, /Hear last 7 days/);
+  assert.match(pageSource, /Open last 7 days/);
+  assert.match(pageSource, /Hear last 7 days&apos; opening song/);
+  assert.match(pageSource, /Also last 7 days/);
+  assert.doesNotMatch(pageSource, /Hear this week/);
+  assert.doesNotMatch(pageSource, /Also this week/);
+  assert.match(formSource, /claims last 7 days' opening song/);
+  assert.match(formSource, /Claim #1 for/);
+  assert.doesNotMatch(formSource, /Hear last 7 days/);
+  assert.match(cssSource, /Rules min-bid names last 7 days/);
+  assert.match(cssSource, /Empty product pitch names last 7 days/);
+  assert.match(cssSource, /Empty site metadata names last 7 days/);
+  assert.match(cssSource, /Empty lede names last 7 days/);
+  const rulesCommentAt = cssSource.indexOf("Rules min-bid names last 7 days");
+  const pitchCommentAt = cssSource.indexOf(
+    "Empty product pitch names last 7 days",
+  );
+  const metaCommentAt = cssSource.indexOf(
+    "Empty site metadata names last 7 days",
+  );
+  assert.ok(pitchCommentAt > metaCommentAt);
+  assert.ok(rulesCommentAt > pitchCommentAt);
+  const occupiedHearKeep =
+    cssSource.match(
+      /\.week-occupied \.opening-listen\[data-hear-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(occupiedHearKeep, /font-weight:\s*700/);
+  const emptyLedeKeep =
+    cssSource.match(
+      /\.week-empty \.lede\[data-first-read="bid"\]\[data-empty-lede-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(emptyLedeKeep, /font-weight:\s*600/);
+  const kickerKeep =
+    cssSource.match(
+      /\.week-empty \.empty-deck \.deck-kicker\[data-empty-kicker\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(kickerKeep, /font-weight:\s*600/);
+  const claimKeep =
+    cssSource.match(
+      /\.week-empty \.claim\.empty-claim-first \.claim-note\[data-empty-claim-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(claimKeep, /font-weight:\s*600/);
   assert.doesNotMatch(pageSource, /24h lock/);
   assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(cssSource, /hear-after-need-N/);

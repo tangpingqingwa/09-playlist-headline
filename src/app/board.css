@@ -920,6 +920,8 @@ a:hover {
 
 /* Empty product pitch names last 7 days. Not this calendar week. Occupied Hear stays off. */
 
+/* Rules min-bid names last 7 days. Not this calendar week. Occupied Hear stays off. */
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;
