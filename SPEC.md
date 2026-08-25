@@ -66,7 +66,7 @@ One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**
 
 | Persona | Need |
 |---|---|
-| Artist / label / promoter | Put a real track first this week so listeners hear it first |
+| Artist / label / promoter | Put a real track first last 7 days so listeners hear it first |
 | Listener | Hear the real opening song; click through to the real listen URL |
 | Spectator | Watch who is paying. No login. |
 
@@ -164,7 +164,7 @@ Worked examples, same week:
 | History | Aged rows may stay readable as archive. They are not the live opening song. |
 | Empty week | Valid. No invented opening track. Empty copy names last 7 days, not Monday midnight UTC. |
 
-The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
+The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. SPEC persona copy names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
 Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 
