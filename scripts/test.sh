@@ -217,7 +217,7 @@ grep -q 'empty week does not claim the studio stays dark' tests/product-ui.test.
 echo "== UX: first-time listener hears paid #1 one way =="
 grep -q 'data-hear-opening' src/app/page.tsx \
   || fail "paid #1 must mark one hear control"
-grep -q 'Hear this week' src/app/page.tsx \
+grep -q 'Hear last 7 days' src/app/page.tsx \
   || fail "hop-only #1 must offer one hear hop"
 if grep -q 'Official embed is not available' src/app/page.tsx; then
   fail "do not apologize for a missing embed next to the hop"
@@ -2936,7 +2936,7 @@ grep -q 'unpaid Polar checkout stays off the station desk until Polar reports pa
   || fail "checkout tests must keep unpaid Polar checkout off the desk"
 grep -q 'data-prize=' src/app/page.tsx \
   || fail "unpaid-off cut must keep occupied song title as the prize"
-grep -q 'Hear this week' src/app/page.tsx \
+grep -q 'Hear last 7 days' src/app/page.tsx \
   || fail "unpaid-off cut must keep occupied Hear"
 grep -q 'data-first-click="hear"' src/app/page.tsx \
   || fail "unpaid-off cut must keep occupied Hear the first click"
@@ -3072,7 +3072,7 @@ if grep -q 'station-desk hear-first' src/app/page.tsx; then
 fi
 grep -q 'data-prize=' src/app/page.tsx \
   || fail "rolling-week cut must keep occupied song title as the prize"
-grep -q 'Hear this week' src/app/page.tsx \
+grep -q 'Hear last 7 days' src/app/page.tsx \
   || fail "rolling-week cut must keep occupied Hear"
 grep -q 'data-first-click="hear"' src/app/page.tsx \
   || fail "rolling-week cut must keep occupied Hear the first click"
@@ -3178,7 +3178,7 @@ grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/page.tsx \
   || fail "empty last-7-days copy must keep occupied rolling last-7-days sentence"
 grep -q 'data-prize=' src/app/page.tsx \
   || fail "empty last-7-days copy must keep occupied song title as the prize"
-grep -q 'Hear this week' src/app/page.tsx \
+grep -q 'Hear last 7 days' src/app/page.tsx \
   || fail "empty last-7-days copy must keep occupied Hear"
 grep -q 'data-first-click="hear"' src/app/page.tsx \
   || fail "empty last-7-days copy must keep occupied Hear the first click"
@@ -3289,7 +3289,7 @@ grep -q 'data-prize=' src/app/page.tsx \
   || fail "raise-identity cut must keep occupied song title as the prize"
 grep -q 'data-first-click="hear"' src/app/page.tsx \
   || fail "raise-identity cut must keep occupied Hear the first click"
-grep -q 'Hear this week' src/app/page.tsx \
+grep -q 'Hear last 7 days' src/app/page.tsx \
   || fail "raise-identity cut must keep occupied Hear"
 grep -q 'Claim #1 for' src/app/outbid-form.tsx \
   || fail "raise-identity cut must keep Claim #1"
@@ -3332,6 +3332,145 @@ css = open(sys.argv[1], encoding="utf-8").read()
 if "raise-identity" in css or "raise-rolling" in css:
     raise SystemExit(1)
 PY
+
+echo "== UX: occupied Hear / later tracks name last-7-days — not this week =="
+grep -q 'Hear last 7 days' src/app/page.tsx \
+  || fail "occupied Hear must name last 7 days, not this week"
+grep -q "Hear last 7 days&apos; opening song" src/app/page.tsx \
+  || fail "occupied Hear copy must name last 7 days' opening song"
+grep -q 'Also last 7 days' src/app/page.tsx \
+  || fail "occupied later tracks must name last 7 days, not this week"
+grep -q "Last 7 days&apos; opening song is on" src/app/page.tsx \
+  || fail "occupied lede must name last 7 days, not this week"
+grep -q 'data-hear-window=""' src/app/page.tsx \
+  || fail "occupied Hear must stamp last-7-days window chrome"
+grep -q 'data-later-window=""' src/app/page.tsx \
+  || fail "occupied later tracks must stamp last-7-days window chrome"
+grep -q 'data-occupied-window=""' src/app/page.tsx \
+  || fail "occupied lede must stamp last-7-days window chrome"
+if grep -q "Hear this week" src/app/page.tsx; then
+  fail "occupied Hear must not name a calendar week"
+fi
+if grep -q "Also this week" src/app/page.tsx; then
+  fail "occupied later tracks must not name a calendar week"
+fi
+if grep -q "This week&apos;s opening song is on" src/app/page.tsx; then
+  fail "occupied lede must not name this week's opening song"
+fi
+grep -q 'Occupied Hear and later tracks name last 7 days, not this calendar week' SPEC.md \
+  || fail "SPEC must say occupied Hear / later tracks name last 7 days"
+grep -q 'occupied Hear / later tracks name last-7-days' tests/product-ui.test.ts \
+  || fail "product-ui tests must cover occupied Hear / later tracks last-7-days chrome"
+grep -Fq '.week-occupied .lede[data-first-read="hear"][data-occupied-window]' src/app/board.css \
+  || fail "CSS must compose occupied last-7-days lede"
+grep -Fq '.week-occupied .opening-listen[data-hear-window]' src/app/board.css \
+  || fail "CSS must compose occupied last-7-days Hear"
+grep -Fq '.week-occupied .queue.later-stack[data-later-stack] .queue-head h2[data-later-window]' src/app/board.css \
+  || fail "CSS must compose occupied last-7-days later tracks"
+grep -Fq '.week-empty [data-occupied-window]' src/app/board.css \
+  || fail "empty CSS must keep occupied last-7-days lede off Claim #1"
+grep -Fq '.week-empty [data-hear-window]' src/app/board.css \
+  || fail "empty CSS must keep occupied last-7-days Hear off Claim #1"
+grep -Fq '.week-empty [data-later-window]' src/app/board.css \
+  || fail "empty CSS must keep occupied last-7-days later tracks off Claim #1"
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty week must not invent a Hear hop"
+fi
+if grep -n 'data-empty-week' -A 20 src/app/page.tsx | grep -q 'data-hear-window'; then
+  fail "empty week must not stamp occupied Hear last-7-days chrome"
+fi
+if grep -n 'data-empty-window' src/app/page.tsx | grep -q 'data-hear-window'; then
+  fail "empty last-7-days copy must not reuse occupied Hear chrome"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'Hear last 7 days'; then
+  fail "empty Claim #1 must not invent Hear"
+fi
+if awk '/function EmptyClaimFirstWrite/,/export function BidForm/' src/app/outbid-form.tsx | grep -q 'data-hear-window'; then
+  fail "empty Claim #1 must not stamp occupied Hear chrome"
+fi
+if grep -qE 'data-hear-after-need-six|data-need-after-hear-six|data-hear-after-need-seven' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "occupied last-7-days chrome must not add another numbered hop stamp"
+fi
+if grep -Eqi '24h lock|lock on #1' src/app/page.tsx src/app/outbid-form.tsx src/app/board.css; then
+  fail "occupied last-7-days chrome is not a 24h lock on #1"
+fi
+if grep -q 'station-desk hear-first' src/app/page.tsx; then
+  fail "occupied last-7-days chrome must not rebuild the station desk into a stacked layout"
+fi
+grep -q 'data-rolling-week=""' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep occupied rolling last-7-days"
+grep -q 'Rolling last 7 days. Not Monday 00:00 UTC.' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep occupied rolling last-7-days sentence"
+grep -q 'Last 7 days from a paid open. Not Monday midnight UTC.' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep empty rolling-copy"
+grep -q 'Same canonical listen URL still inside last 7 days raises' src/app/rules/page.tsx \
+  || fail "occupied last-7-days chrome must keep last-7-days raise identity"
+grep -q 'weekId is not the raise key' src/core/listing.ts \
+  || fail "occupied last-7-days chrome must not restamp raise-rolling-identity"
+grep -q 'data-prize=' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep occupied song title as the prize"
+grep -q 'data-first-click="hear"' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep occupied Hear the first click"
+grep -q 'Claim #1 for' src/app/outbid-form.tsx \
+  || fail "occupied last-7-days chrome must keep Claim #1"
+grep -q 'Then the listen URL' src/app/outbid-form.tsx \
+  || fail "occupied last-7-days chrome must keep empty later-write listen URL"
+grep -q 'amount-field' src/app/outbid-form.tsx \
+  || fail "occupied last-7-days chrome must keep the dashed amount"
+grep -q 'className="step"' src/app/outbid-form.tsx \
+  || fail "occupied last-7-days chrome must keep ± steppers"
+grep -q 'Outbid' src/app/outbid-form.tsx \
+  || fail "occupied last-7-days chrome must keep Outbid"
+grep -q 'station-desk' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must not rebuild the station desk"
+grep -q 'claim-rail' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must leave the claim rail in place"
+grep -q 'data-unpaid-off' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep unpaid off the board"
+grep -q 'data-empty-bid-five' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep honest empty station"
+grep -q 'data-later-stack' src/app/page.tsx \
+  || fail "occupied last-7-days chrome must keep later-rank tracks quieter than #1"
+grep -q 'grid-template-columns: minmax(0, 1.45fr)' src/app/board.css \
+  || fail "occupied last-7-days chrome must keep the station-desk columns"
+lede_window_rule="$(awk '/^\.week-occupied \.lede\[data-first-read="hear"\]\[data-occupied-window\] \{/,/\}/' src/app/board.css)"
+echo "$lede_window_rule" | grep -q 'font-weight: 600' \
+  || fail "occupied last-7-days lede must stay certain by weight, not a recolor"
+if echo "$lede_window_rule" | grep -q 'background:'; then
+  fail "occupied last-7-days lede must name the window, not recolor the desk"
+fi
+hear_window_rule="$(awk '/^\.week-occupied \.opening-listen\[data-hear-window\] \{/,/\}/' src/app/board.css)"
+echo "$hear_window_rule" | grep -q 'font-weight: 700' \
+  || fail "occupied last-7-days Hear must stay certain by weight, not a recolor"
+if echo "$hear_window_rule" | grep -q 'background:'; then
+  fail "occupied last-7-days Hear must name the window, not recolor the desk"
+fi
+if echo "$hear_window_rule" | grep -q 'min-height:'; then
+  fail "occupied last-7-days Hear must not add another Hear hop size"
+fi
+later_window_rule="$(awk '/^\.week-occupied \.queue\.later-stack\[data-later-stack\] \.queue-head h2\[data-later-window\] \{/,/\}/' src/app/board.css)"
+echo "$later_window_rule" | grep -q 'font-size: 1.05rem' \
+  || fail "occupied last-7-days later tracks must stay certain by size, not a recolor"
+echo "$later_window_rule" | grep -q 'font-weight: 600' \
+  || fail "occupied last-7-days later tracks must stay certain by weight, not a recolor"
+if echo "$later_window_rule" | grep -q 'background:'; then
+  fail "occupied last-7-days later tracks must name the window, not recolor the desk"
+fi
+if ! awk '
+  /\.week-occupied \.studio-deck\[data-prize-before-price\] \.opening-track/ { prize=NR }
+  /\.week-occupied \.opening-listen \{/ { hear=NR }
+  /Empty week: Listen URL is a later write after Claim #1 \/ Outbid/ { later=NR }
+  /Unpaid Polar checkout stays off the station desk/ { unpaid=NR }
+  /Occupied rolling last-7-days window/ { rolling=NR }
+  /Empty week names last 7 days/ { empty=NR }
+  /Occupied Hear \/ later tracks name last 7 days/ { chrome=NR }
+  END { exit !(prize && hear && later && unpaid && rolling && empty && chrome && prize < hear && hear < later && later < unpaid && unpaid < rolling && rolling < empty && empty < chrome) }
+' src/app/board.css; then
+  fail "occupied last-7-days chrome CSS must sit after occupied prize / Hear / empty later-write / unpaid-off / occupied rolling / empty rolling-copy"
+fi
+if grep -qi 'stays dark' src/app/page.tsx src/app/board.css src/app/outbid-form.tsx; then
+  fail "occupied last-7-days chrome must not revive the stays-dark empty week"
+fi
 
 echo "== checkout files =="
 for f in \
@@ -3603,6 +3742,8 @@ if [[ -f package.json ]]; then
     || fail "Sunday pay Monday raise leftover test did not run"
   grep -q 'occupied /rules raise identity is last-7-days, not the UTC week label' "$test_log" \
     || fail "occupied raise-identity rules leftover test did not run"
+  grep -q 'occupied Hear / later tracks name last-7-days' "$test_log" \
+    || fail "occupied Hear / later tracks last-7-days leftover test did not run"
 fi
 
 echo "OK: buildable and testable"

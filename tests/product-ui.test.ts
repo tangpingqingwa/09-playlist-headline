@@ -128,7 +128,7 @@ test("player exists only for paid #1 and only for the stored listen URL", () => 
   assert.match(html, /4 clicks/);
   assert.match(html, /data-hear-opening="embed"/);
   assert.match(html, /Open on youtube.com/);
-  assert.match(html, /Hear this week/);
+  assert.match(html, /Hear last 7 days/);
   assert.match(html, /data-first-click="hear"/);
   assert.equal((html.match(/data-playback="embed"/g) ?? []).length, 1);
   assert.equal((html.match(/data-hear-opening=/g) ?? []).length, 1);
@@ -162,7 +162,7 @@ test("opening song lives once on the studio deck, not again as the first queue c
   assert.match(html, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
   assert.match(html, /data-id="lst_open"/);
   assert.match(html, /data-id="lst_two"/);
-  assert.match(html, /Also this week/);
+  assert.match(html, /Also last 7 days/);
   assert.match(html, /These tracks are not the opening song/);
   assert.equal((html.match(/data-id="lst_open"/g) ?? []).length, 1);
   assert.equal((html.match(/Cold Open/g) ?? []).length, 1);
@@ -214,7 +214,7 @@ test("generic listen URL has no embed player and cards stay track — artist —
   assert.match(html, /1 click</);
   assert.doesNotMatch(html, /data-leaderboard/);
   assert.doesNotMatch(html, /<h3 class="track">Cold Open<\/h3>/);
-  assert.match(html, /Hear this week/);
+  assert.match(html, /Hear last 7 days/);
   assert.match(html, /data-hear-opening="hop"/);
   assert.doesNotMatch(html, /Official embed is not available/);
   assert.doesNotMatch(html, /<iframe/);
@@ -237,7 +237,7 @@ test("paid #1 has one certain way to hear the opening song", () => {
   assert.match(embed, /Open on youtube.com/);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.equal((embed.match(/<iframe/g) ?? []).length, 1);
-  assert.match(embed, /Hear this week/);
+  assert.match(embed, /Hear last 7 days/);
   assert.match(embed, /data-first-click="hear"/);
   assert.match(embed, /href="#hear-opening"/);
   assert.doesNotMatch(embed, /Official embed is not available/);
@@ -250,12 +250,12 @@ test("paid #1 has one certain way to hear the opening song", () => {
     }),
   ]);
   assert.match(hop, /data-hear-opening="hop"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /href="\/click\/lst_hop"/);
   assert.match(hop, /data-first-click="hear"/);
   assert.match(hop, /example.com/);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.doesNotMatch(hop, /<iframe/);
   assert.doesNotMatch(hop, /data-playback=/);
   assert.doesNotMatch(hop, /Official embed is not available/);
@@ -263,7 +263,7 @@ test("paid #1 has one certain way to hear the opening song", () => {
 
   const empty = renderBoard([]);
   assert.doesNotMatch(empty, /data-hear-opening=/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /<iframe/);
   assert.doesNotMatch(empty, FORBIDDEN);
 });
@@ -365,7 +365,7 @@ test("occupied listen is the first read, not Claim #1 / raise copy", () => {
   assert.match(hop, /data-hear-first="true"/);
   assert.match(hop, /data-opening-song="true"[^>]*data-hear-first="true"/);
   assert.match(hop, /opening song is on/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
@@ -475,7 +475,7 @@ test("first-time artist raising after listen-first is certain above the fold", (
   assert.equal((embed.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((embed.match(/data-hear-opening=/g) ?? []).length, 1);
   assert.match(embed, /Need \$13 to take #1/);
-  assert.match(embed, /Hear this week/);
+  assert.match(embed, /Hear last 7 days/);
   assert.match(embed, /href="#hear-opening"/);
   assert.doesNotMatch(embed, FORBIDDEN);
 
@@ -538,7 +538,7 @@ test("occupied hear is the first click after the Need $N hop", () => {
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /data-first-read="hear"/);
@@ -631,7 +631,7 @@ test("occupied raise after Hear-first is certain above the fold", () => {
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /data-first-click="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -710,13 +710,13 @@ test("occupied hear after the named raise difference is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -752,7 +752,7 @@ test("occupied hear after the named raise difference is certain", () => {
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, FORBIDDEN);
 });
 
@@ -800,11 +800,11 @@ test("occupied hear is one first Hear, not a second hop after the difference", (
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.match(hop, /data-hear-one-first="true"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /Claim #1 for/);
@@ -841,7 +841,7 @@ test("occupied hear is one first Hear, not a second hop after the difference", (
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -901,7 +901,7 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/Need \$13 to take #1/g) ?? []).length, 2);
@@ -911,7 +911,7 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /data-hear-one-first="true"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -963,7 +963,7 @@ test("occupied Need $N after one Hear is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1027,7 +1027,7 @@ test("occupied hear after Need $N is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1041,7 +1041,7 @@ test("occupied hear after Need $N is certain", () => {
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
   assert.match(hop, /data-hear-one-first="true"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -1112,7 +1112,7 @@ test("occupied hear after Need $N is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1180,7 +1180,7 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1194,7 +1194,7 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -1274,7 +1274,7 @@ test("occupied Need $N after Hear is re-concentrated is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1347,7 +1347,7 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1361,7 +1361,7 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -1455,7 +1455,7 @@ test("occupied hear after Need $N is re-concentrated is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1531,7 +1531,7 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1546,7 +1546,7 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -1653,7 +1653,7 @@ test("occupied Need $N after Hear is re-concentrated again is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1734,7 +1734,7 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1749,7 +1749,7 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -1870,7 +1870,7 @@ test("occupied hear after Need $N is re-concentrated again is certain", () => {
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -1954,7 +1954,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -1970,7 +1970,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -2104,7 +2104,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear i
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -2193,7 +2193,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -2209,7 +2209,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -2360,7 +2360,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need i
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -2452,7 +2452,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -2469,7 +2469,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -2631,7 +2631,7 @@ test("occupied Need $N after Hear is re-concentrated again after a louder Hear a
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -2728,7 +2728,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-after-raise="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/data-raise-after-hear="true"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
@@ -2745,7 +2745,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.match(hop, /href="#claim"/);
   assert.match(hop, /href="\/click\/lst_open"/);
   assert.match(hop, /data-listen-url="https:\/\/example.com\/cold-open"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
   assert.match(hop, /class="station-desk"/);
@@ -2927,7 +2927,7 @@ test("occupied hear after Need $N is re-concentrated again after a louder Need a
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /Not bidding\?/);
   assert.doesNotMatch(empty, /Need \$/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.match(empty, /Bid USD/);
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
@@ -2964,7 +2964,7 @@ test("occupied #1 track title reads first and larger than $bid and clicks", () =
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
   assert.match(empty, /No opening song/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
   assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
   assert.doesNotMatch(empty, FORBIDDEN);
@@ -3016,7 +3016,7 @@ test("occupied #1 track title reads first and larger than $bid and clicks", () =
   assert.match(hop, /\$12/);
   assert.match(hop, /4 clicks/);
   assert.match(hop, /data-hear-opening="hop"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
@@ -3114,7 +3114,7 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.doesNotMatch(empty, /data-first-read="hear"/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /href="#claim"/);
   assert.doesNotMatch(empty, /data-raise-after-hear/);
@@ -3170,7 +3170,7 @@ test("empty week stays Bid USD / $5 and does not invent Hear", () => {
   assert.doesNotMatch(hop, /Bid USD/);
   assert.doesNotMatch(hop, /\$5 claims this week/);
   assert.match(hop, /data-first-read="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /data-prize-before-price=""/);
   assert.match(hop, /data-prize=""/);
@@ -3267,7 +3267,7 @@ test("empty week stays Bid USD / $5 — song-prize / Hear cannot leak", () => {
   assert.doesNotMatch(empty, /data-first-read="hear"/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /href="#claim"/);
   assert.doesNotMatch(empty, /data-prize-before-price/);
@@ -3321,7 +3321,7 @@ test("empty week stays Bid USD / $5 — song-prize / Hear cannot leak", () => {
   assert.match(hop, /class="board station week-occupied"/);
   assert.match(hop, /data-week-occupied="true"/);
   assert.match(hop, /data-first-read="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /data-prize-before-price=""/);
   assert.match(hop, /data-prize=""/);
@@ -3396,7 +3396,7 @@ test("occupied #1 playback is real and does not invent play counts", () => {
   assert.match(empty, /Claim #1 for/);
   assert.match(empty, /No opening song/);
   assert.match(empty, /There is no player this week/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
   assert.doesNotMatch(empty, /data-playback=/);
   assert.doesNotMatch(empty, /<iframe/);
@@ -3451,7 +3451,7 @@ test("occupied #1 playback is real and does not invent play counts", () => {
   assert.ok(hopsNote < claim);
   assert.equal((hop.match(/data-real-playback=/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/href="\/click\/lst_open"/g) ?? []).length, 1);
   assert.match(hop, /data-real-playback="hop"/);
   assert.match(hop, /data-stored-listen=""/);
@@ -3583,7 +3583,7 @@ test("occupied #1 $bid stays a later fact and does not shout beside the song tit
   assert.match(empty, /\$5 claims this week/);
   assert.match(empty, /Claim #1 for/);
   assert.match(empty, /No opening song/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
@@ -3665,7 +3665,7 @@ test("occupied #1 $bid stays a later fact and does not shout beside the song tit
   assert.match(hop, /4 clicks/);
   assert.match(hop, /data-hear-opening="hop"/);
   assert.match(hop, /data-real-playback="hop"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Claim #1 for/);
   assert.match(hop, />Outbid</);
@@ -3777,7 +3777,7 @@ test("occupied Hear is the first click — Need $N is not a muted twin", () => {
   assert.match(empty, /No opening song/);
   assert.doesNotMatch(empty, /data-need-later-quiet/);
   assert.doesNotMatch(empty, /need-later-quiet/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
@@ -3806,7 +3806,7 @@ test("occupied Hear is the first click — Need $N is not a muted twin", () => {
   ]);
   const firstRead = hop.indexOf('data-first-read="hear"');
   const firstClick = hop.indexOf('data-first-click="hear"');
-  const hearCopy = hop.indexOf("Hear this week");
+  const hearCopy = hop.indexOf("Hear last 7 days");
   const hearHop = hop.indexOf('data-hear-opening="hop"');
   const prize = hop.indexOf('data-prize=""');
   const title = hop.indexOf(">Cold Open<", prize);
@@ -3843,7 +3843,7 @@ test("occupied Hear is the first click — Need $N is not a muted twin", () => {
   assert.equal((hop.match(/class="raise-after-hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
   assert.equal((hop.match(/data-hear-opening=/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((hop.match(/href="#claim"/g) ?? []).length, 1);
   assert.match(
     hop,
@@ -3854,7 +3854,7 @@ test("occupied Hear is the first click — Need $N is not a muted twin", () => {
     /class="listen opening-listen hear-after-need hear-after-need-two hear-after-need-three hear-after-need-four hear-after-need-five"/,
   );
   assert.match(hop, /data-first-click="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /Same listen URL pays only the difference/);
   assert.match(hop, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
@@ -3878,12 +3878,12 @@ test("occupied Hear is the first click — Need $N is not a muted twin", () => {
 
   const hearSlice = hop.slice(firstClick, rail);
   const needSlice = hop.slice(rail, claim);
-  assert.match(hearSlice, /Hear this week/);
+  assert.match(hearSlice, /Hear last 7 days/);
   assert.doesNotMatch(hearSlice, /Need \$13 to take #1/);
   assert.doesNotMatch(hearSlice, /class="raise-after-hear"/);
   assert.match(needSlice, /Need \$13 to take #1/);
   assert.match(needSlice, /class="raise-after-hear"/);
-  assert.doesNotMatch(needSlice, /Hear this week/);
+  assert.doesNotMatch(needSlice, /Hear last 7 days/);
 
   const embed = renderBoard([
     listing({
@@ -4035,7 +4035,7 @@ test("empty week has one first click — Claim #1, then the listen URL", () => {
   assert.match(empty, /class="amount-field"/);
   assert.match(empty, /class="step"/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
   assert.doesNotMatch(empty, /data-raise-after-hear/);
@@ -4089,7 +4089,7 @@ test("empty week has one first click — Claim #1, then the listen URL", () => {
   assert.ok(occupiedListen > occupiedTrack);
   assert.ok(occupiedOutbid > occupiedListen);
   assert.match(hop, /data-first-click="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
   assert.match(hop, /class="bid later-fact"/);
@@ -4243,8 +4243,8 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.doesNotMatch(empty, /data-later-rank/);
   assert.doesNotMatch(empty, /data-later-track/);
   assert.doesNotMatch(empty, /data-listen-later/);
-  assert.doesNotMatch(empty, /Also this week/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Also last 7 days/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /Need \$/);
   assert.doesNotMatch(empty, /data-prize=/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
@@ -4279,7 +4279,7 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   ]);
   const firstRead = hop.indexOf('data-first-read="hear"');
   const firstClick = hop.indexOf('data-first-click="hear"');
-  const hearCopy = hop.indexOf("Hear this week");
+  const hearCopy = hop.indexOf("Hear last 7 days");
   const prize = hop.indexOf('data-prize=""');
   const title = hop.indexOf(">Cold Open<", prize);
   const laterBid = hop.indexOf('class="bid later-fact"');
@@ -4331,11 +4331,11 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.equal((hop.match(/data-listen-later=""/g) ?? []).length, 2);
   assert.equal((hop.match(/data-prize=""/g) ?? []).length, 1);
   assert.equal((hop.match(/data-first-click="hear"/g) ?? []).length, 1);
-  assert.equal((hop.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((hop.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.match(hop, /class="queue later-stack"/);
   assert.match(hop, /class="card later-card"/);
   assert.match(hop, /class="leaderboard later-board"/);
-  assert.match(hop, /Also this week/);
+  assert.match(hop, /Also last 7 days/);
   assert.match(hop, /These tracks are not the opening song/);
   assert.match(
     hop,
@@ -4344,7 +4344,7 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.match(hop, /<p class="later-track" data-later-track="">Third Slot<\/p>/);
   assert.match(hop, /<h1 class="opening-track" data-prize="">Cold Open<\/h1>/);
   assert.match(hop, /data-first-click="hear"/);
-  assert.match(hop, /Hear this week/);
+  assert.match(hop, /Hear last 7 days/);
   assert.match(hop, /Need \$13 to take #1/);
   assert.match(hop, /class="raise-after-hear"/);
   assert.match(hop, /Claim #1 for/);
@@ -4365,7 +4365,7 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.doesNotMatch(hop, FORBIDDEN);
   assert.doesNotMatch(
     hop.slice(laterCard),
-    /data-prize=|data-prize-before-price|opening-track|data-first-click="hear"|Hear this week|Need \$|raise-after-hear/,
+    /data-prize=|data-prize-before-price|opening-track|data-first-click="hear"|Hear last 7 days|Need \$|raise-after-hear/,
   );
   assert.doesNotMatch(hop.slice(0, stack), /data-later-rank|later-track|data-listen-later/);
 
@@ -4377,7 +4377,7 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.doesNotMatch(laterSlice, /data-prize=/);
   assert.doesNotMatch(laterSlice, /opening-track/);
   assert.doesNotMatch(laterSlice, /data-first-click="hear"/);
-  assert.doesNotMatch(laterSlice, /Hear this week/);
+  assert.doesNotMatch(laterSlice, /Hear last 7 days/);
 
   const solo = renderBoard([
     listing({
@@ -4393,7 +4393,7 @@ test("occupied later tracks stay quieter than the opening song — prize stays f
   assert.doesNotMatch(solo, /data-later-rank/);
   assert.doesNotMatch(solo, /data-later-track/);
   assert.doesNotMatch(solo, /data-leaderboard/);
-  assert.doesNotMatch(solo, /Also this week/);
+  assert.doesNotMatch(solo, /Also last 7 days/);
   assert.doesNotMatch(solo, FORBIDDEN);
 
   const embed = renderBoard([
@@ -4488,7 +4488,7 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.doesNotMatch(formSource, /hear-after-need-six|need-after-hear-six/);
   assert.match(pageSource, /data-prize=/);
   assert.match(pageSource, /data-first-click="hear"/);
-  assert.match(pageSource, /Hear this week/);
+  assert.match(pageSource, /Hear last 7 days/);
   assert.match(formSource, /Claim #1 for/);
   assert.match(formSource, /empty-claim-first/);
   assert.match(formSource, /data-first-click="claim"/);
@@ -4563,7 +4563,7 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.doesNotMatch(leftover, /\$99/);
   assert.doesNotMatch(leftover, /data-prize=/);
   assert.doesNotMatch(leftover, /prize-before-price/);
-  assert.doesNotMatch(leftover, /Hear this week/);
+  assert.doesNotMatch(leftover, /Hear last 7 days/);
   assert.doesNotMatch(leftover, /data-first-click="hear"/);
   assert.doesNotMatch(leftover, /Need \$/);
   assert.doesNotMatch(leftover, /data-later-stack/);
@@ -4581,7 +4581,7 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.match(empty, /Then the listen URL/);
   assert.match(empty, /\$5 claims this week/);
   assert.doesNotMatch(empty, /data-unpaid-off=/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-prize=/);
   assert.doesNotMatch(empty, /data-later-stack/);
   assert.doesNotMatch(empty, FORBIDDEN);
@@ -4613,7 +4613,7 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.ok(occupiedUnpaid > occupiedClaim);
   assert.match(occupied, /class="board station week-occupied"/);
   assert.match(occupied, /data-prize=""/);
-  assert.match(occupied, /Hear this week/);
+  assert.match(occupied, /Hear last 7 days/);
   assert.match(occupied, /data-first-click="hear"/);
   assert.match(occupied, /Need \$13 to take #1/);
   assert.match(occupied, /class="raise-after-hear"/);
@@ -4657,7 +4657,7 @@ test("unpaid stays off the station desk — No #1 until Polar reports paid", () 
   assert.match(leaked, /data-id="lst_paid_only"/);
   assert.match(leaked, /data-rank="1"/);
   assert.match(leaked, /data-first-click="hear"/);
-  assert.match(leaked, /Hear this week/);
+  assert.match(leaked, /Hear last 7 days/);
   assert.equal((leaked.match(/data-listing-card/g) ?? []).length, 1);
   assert.doesNotMatch(leaked, /Ghost Track|Vapor|lst_ghost/);
   assert.doesNotMatch(leaked, /data-empty-week/);
@@ -4684,7 +4684,7 @@ test("occupied week window is rolling last-7-days — not Monday 00:00 UTC", () 
   assert.doesNotMatch(empty, /data-rolling-week/);
   assert.doesNotMatch(empty, /Rolling last 7 days/);
   assert.doesNotMatch(empty, /class="period-meta week-window"/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-prize=/);
   assert.doesNotMatch(empty, /24h lock/);
   assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
@@ -4729,7 +4729,7 @@ test("occupied week window is rolling last-7-days — not Monday 00:00 UTC", () 
   assert.match(occupied, /Rolling last 7 days\. Not Monday 00:00 UTC\./);
   assert.match(occupied, /class="period-meta week-window"/);
   assert.match(occupied, /data-prize=""/);
-  assert.match(occupied, /Hear this week/);
+  assert.match(occupied, /Hear last 7 days/);
   assert.match(occupied, /data-first-click="hear"/);
   assert.match(occupied, /Need \$13 to take #1/);
   assert.match(occupied, /class="queue later-stack"/);
@@ -4744,7 +4744,7 @@ test("occupied week window is rolling last-7-days — not Monday 00:00 UTC", () 
   assert.doesNotMatch(occupied, /class="station-desk hear-first"/);
   assert.doesNotMatch(occupied, FORBIDDEN);
   assert.equal((occupied.match(/data-first-click="hear"/g) ?? []).length, 1);
-  assert.equal((occupied.match(/Hear this week/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Hear last 7 days/g) ?? []).length, 1);
   assert.equal((occupied.match(/data-prize=""/g) ?? []).length, 1);
 
   assert.match(
@@ -4794,7 +4794,7 @@ test("empty station copy is a rolling last-7-days window — not Monday 00:00 UT
   assert.doesNotMatch(empty, /data-rolling-week/);
   assert.doesNotMatch(empty, /Rolling last 7 days/);
   assert.doesNotMatch(empty, /class="period-meta week-window"/);
-  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
   assert.doesNotMatch(empty, /data-hear-opening=/);
   assert.doesNotMatch(empty, /data-first-click="hear"/);
   assert.doesNotMatch(empty, /data-prize=/);
@@ -4840,7 +4840,7 @@ test("empty station copy is a rolling last-7-days window — not Monday 00:00 UT
   assert.match(occupied, /Rolling last 7 days\. Not Monday 00:00 UTC\./);
   assert.match(occupied, /class="period-meta week-window"/);
   assert.match(occupied, /data-prize=""/);
-  assert.match(occupied, /Hear this week/);
+  assert.match(occupied, /Hear last 7 days/);
   assert.match(occupied, /data-first-click="hear"/);
   assert.match(occupied, /Need \$13 to take #1/);
   assert.match(occupied, /Claim #1 for/);
@@ -4878,7 +4878,7 @@ test("empty station copy is a rolling last-7-days window — not Monday 00:00 UT
   assert.match(leftover, /Unpaid Polar checkout stays off this desk/);
   assert.match(leftover, /Claim #1 for/);
   assert.doesNotMatch(leftover, /data-rolling-week/);
-  assert.doesNotMatch(leftover, /Hear this week/);
+  assert.doesNotMatch(leftover, /Hear last 7 days/);
   assert.doesNotMatch(leftover, /Ghost Track|Vapor/);
   assert.doesNotMatch(leftover, FORBIDDEN);
 
@@ -4906,4 +4906,161 @@ test("empty station copy is a rolling last-7-days window — not Monday 00:00 UT
   assert.doesNotMatch(pageSource, /Until\s+then this week stays empty/);
   assert.doesNotMatch(pageSource, /Next reset \{nextResetAt\}/);
   assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+});
+
+test("occupied Hear / later tracks name last-7-days — not this week", () => {
+  const occupied = renderBoard([
+    listing({
+      id: "lst_open",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      bidUsd: 12,
+      firstPaidAt: "2026-08-16T12:00:00.000Z",
+    }),
+    listing({
+      id: "lst_two",
+      track: "Second Slot",
+      artist: "Bea",
+      listenUrl: "https://example.com/second-slot",
+      bidUsd: 5,
+      firstPaidAt: "2026-08-16T18:00:00.000Z",
+    }),
+  ]);
+  const firstReadAt = occupied.indexOf('data-first-read="hear"');
+  const windowAt = occupied.indexOf('data-occupied-window=""');
+  const hearAt = occupied.indexOf('data-hear-window=""');
+  const firstClickAt = occupied.indexOf('data-first-click="hear"');
+  const prizeAt = occupied.indexOf(
+    '<h1 class="opening-track" data-prize="">Cold Open</h1>',
+  );
+  const claimAt = occupied.indexOf('id="claim"');
+  const laterAt = occupied.indexOf('data-later-window=""');
+  const stackAt = occupied.indexOf('data-later-stack=""');
+  assert.notEqual(firstReadAt, -1);
+  assert.notEqual(windowAt, -1);
+  assert.notEqual(hearAt, -1);
+  assert.notEqual(firstClickAt, -1);
+  assert.notEqual(prizeAt, -1);
+  assert.notEqual(claimAt, -1);
+  assert.notEqual(laterAt, -1);
+  assert.notEqual(stackAt, -1);
+  assert.ok(firstReadAt < hearAt);
+  assert.ok(hearAt < prizeAt);
+  assert.ok(prizeAt < claimAt);
+  assert.ok(claimAt < stackAt);
+  assert.ok(stackAt < laterAt);
+  assert.match(occupied, /data-week-occupied="true"/);
+  assert.match(occupied, /data-occupied-window=""/);
+  assert.match(occupied, /data-hear-window=""/);
+  assert.match(occupied, /data-later-window=""/);
+  assert.match(occupied, /Last 7 days&#x27; opening song is on/);
+  assert.match(occupied, /Hear last 7 days&#x27; opening song/);
+  assert.match(occupied, /Also last 7 days/);
+  assert.match(occupied, /data-first-click="hear"/);
+  assert.match(occupied, /data-rolling-week=""/);
+  assert.match(occupied, /Rolling last 7 days\. Not Monday 00:00 UTC\./);
+  assert.match(occupied, /Same listen URL pays only the difference/);
+  assert.match(occupied, /Need \$13 to take #1/);
+  assert.match(occupied, /data-prize=""/);
+  assert.match(occupied, /Claim #1 for/);
+  assert.match(occupied, />Outbid</);
+  assert.doesNotMatch(occupied, /Hear this week/);
+  assert.doesNotMatch(occupied, /Also this week/);
+  assert.doesNotMatch(occupied, /This week&#x27;s opening song is on/);
+  assert.doesNotMatch(occupied, /data-empty-week/);
+  assert.doesNotMatch(occupied, /data-empty-window/);
+  assert.doesNotMatch(occupied, /Last 7 days from a paid open/);
+  assert.doesNotMatch(occupied, /data-first-click="claim"/);
+  assert.doesNotMatch(occupied, /24h lock/);
+  assert.doesNotMatch(occupied, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(occupied, /class="station-desk hear-first"/);
+  assert.doesNotMatch(occupied, FORBIDDEN);
+  assert.equal((occupied.match(/data-first-click="hear"/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Hear last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/Also last 7 days/g) ?? []).length, 1);
+  assert.equal((occupied.match(/data-hear-window=""/g) ?? []).length, 1);
+  assert.equal((occupied.match(/data-later-window=""/g) ?? []).length, 1);
+
+  const empty = renderBoard([]);
+  const bidAt = empty.indexOf("Bid USD");
+  const emptyWindowAt = empty.indexOf('data-empty-window=""');
+  const firstClaimAt = empty.indexOf('data-first-click="claim"');
+  assert.notEqual(bidAt, -1);
+  assert.notEqual(emptyWindowAt, -1);
+  assert.notEqual(firstClaimAt, -1);
+  assert.ok(bidAt < emptyWindowAt);
+  assert.ok(emptyWindowAt < firstClaimAt);
+  assert.match(empty, /data-empty-week="true"/);
+  assert.match(empty, /data-empty-bid-five=""/);
+  assert.match(empty, /Last 7 days from a paid open\. Not Monday midnight UTC\./);
+  assert.match(empty, /The open is last 7 days from that payment — not Monday midnight UTC\./);
+  assert.match(empty, /\$5 claims this week/);
+  assert.match(empty, /Claim #1 for/);
+  assert.match(empty, /data-first-click="claim"/);
+  assert.match(empty, /Then the listen URL/);
+  assert.match(empty, /Bid USD/);
+  assert.doesNotMatch(empty, /Hear last 7 days/);
+  assert.doesNotMatch(empty, /Hear this week/);
+  assert.doesNotMatch(empty, /Also last 7 days/);
+  assert.doesNotMatch(empty, /Also this week/);
+  assert.doesNotMatch(empty, /data-hear-window/);
+  assert.doesNotMatch(empty, /data-later-window/);
+  assert.doesNotMatch(empty, /data-occupied-window/);
+  assert.doesNotMatch(empty, /data-first-click="hear"/);
+  assert.doesNotMatch(empty, /data-rolling-week/);
+  assert.doesNotMatch(empty, /Need \$/);
+  assert.doesNotMatch(empty, /24h lock/);
+  assert.doesNotMatch(empty, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(empty, FORBIDDEN);
+  assert.equal((empty.match(/data-first-click="claim"/g) ?? []).length, 1);
+
+  assert.match(pageSource, /Hear last 7 days/);
+  assert.match(pageSource, /Also last 7 days/);
+  assert.match(pageSource, /Last 7 days&apos; opening song is on/);
+  assert.doesNotMatch(pageSource, /Hear this week/);
+  assert.doesNotMatch(pageSource, /Also this week/);
+  assert.doesNotMatch(pageSource, /This week&apos;s opening song is on/);
+  assert.match(
+    cssSource,
+    /Occupied Hear \/ later tracks name last 7 days/,
+  );
+  assert.match(
+    cssSource,
+    /\.week-occupied \.lede\[data-first-read="hear"\]\[data-occupied-window\]/,
+  );
+  assert.match(cssSource, /\.week-occupied \.opening-listen\[data-hear-window\]/);
+  assert.match(
+    cssSource,
+    /\.week-occupied \.queue\.later-stack\[data-later-stack\] \.queue-head h2\[data-later-window\]/,
+  );
+  assert.match(cssSource, /\.week-empty \[data-occupied-window\]/);
+  assert.match(cssSource, /\.week-empty \[data-hear-window\]/);
+  assert.match(cssSource, /\.week-empty \[data-later-window\]/);
+  const ledeRule =
+    cssSource.match(
+      /\.week-occupied \.lede\[data-first-read="hear"\]\[data-occupied-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(ledeRule, /font-weight:\s*600/);
+  assert.doesNotMatch(ledeRule, /background:/);
+  const hearWindowRule =
+    cssSource.match(
+      /\.week-occupied \.opening-listen\[data-hear-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(hearWindowRule, /font-weight:\s*700/);
+  assert.doesNotMatch(hearWindowRule, /background:/);
+  assert.doesNotMatch(hearWindowRule, /min-height:/);
+  const laterRule =
+    cssSource.match(
+      /\.week-occupied \.queue\.later-stack\[data-later-stack\] \.queue-head h2\[data-later-window\]\s*\{[^}]+\}/,
+    )?.[0] ?? "";
+  assert.match(laterRule, /font-size:\s*1\.05rem/);
+  assert.match(laterRule, /font-weight:\s*600/);
+  assert.doesNotMatch(laterRule, /background:/);
+  assert.doesNotMatch(formSource, /data-hear-window/);
+  assert.doesNotMatch(formSource, /data-later-window/);
+  assert.doesNotMatch(formSource, /data-occupied-window/);
+  assert.doesNotMatch(pageSource, /24h lock/);
+  assert.doesNotMatch(cssSource, /hear-after-need-six|need-after-hear-six/);
+  assert.doesNotMatch(cssSource, /raise-identity|raise-rolling/);
 });

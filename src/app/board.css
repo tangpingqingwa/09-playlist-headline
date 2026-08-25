@@ -870,6 +870,29 @@ a:hover {
   display: none;
 }
 
+/* Occupied Hear / later tracks name last 7 days. Not this calendar week. */
+.week-occupied .lede[data-first-read="hear"][data-occupied-window] {
+  font-weight: 600;
+}
+
+.week-occupied .opening-listen[data-hear-window] {
+  font-weight: 700;
+}
+
+.week-occupied .queue.later-stack[data-later-stack] .queue-head h2[data-later-window] {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.week-empty [data-occupied-window],
+.week-empty [data-hear-window],
+.week-empty [data-later-window],
+.board[data-empty-bid-five] [data-occupied-window],
+.board[data-empty-bid-five] [data-hear-window],
+.board[data-empty-bid-five] [data-later-window] {
+  display: none;
+}
+
 .stub-note,
 .raise-hint {
   margin: 0.65rem 0 0;
