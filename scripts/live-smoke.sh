@@ -382,7 +382,8 @@ if [[ "$about_code" == "200" && "$rules_code" == "200" ]] \
   && html_has "$rules_body" 'Raise pays difference' \
   && html_has "$rules_body" 'Monday 00:00:00.000 UTC' \
   && html_has "$rules_body" 'Rolling last 7 days. Not Monday 00:00 UTC' \
-  && html_has "$rules_body" '[Ww]eekly UTC reset' \
+  && html_has "$rules_body" '<h2>Rolling last 7 days</h2>' \
+  && ! html_has "$rules_body" '<h2>Weekly UTC reset</h2>' \
   && html_has "$rules_body" 'No fake streams' \
   && html_has "$rules_body" 'No invented play counts'; then
   record "about-rules" "PASS" "GET /about and /rules 200; min \$5 / older wins / raise difference / rolling last 7 days / no fake streams"

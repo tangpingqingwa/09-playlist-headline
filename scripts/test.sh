@@ -5491,6 +5491,11 @@ grep -Fq '<h2>Rolling last 7 days</h2>' src/app/rules/page.tsx \
 if grep -Fq '<h2>Weekly UTC reset</h2>' src/app/rules/page.tsx; then
   fail "rules weekly-reset heading must not name this calendar week"
 fi
+grep -Fq '<h2>Rolling last 7 days</h2>' scripts/live-smoke.sh \
+  || fail "live-smoke must require the rolling last-7-days rules heading"
+if grep -Fq '[Ww]eekly UTC reset' scripts/live-smoke.sh; then
+  fail "live-smoke must not require the calendar-week rules heading"
+fi
 grep -q 'Rules weekly-reset heading names last 7 days' SPEC.md \
   || fail "SPEC must say rules weekly-reset heading names last 7 days"
 grep -Fq 'An empty last 7 days is valid.' src/app/rules/page.tsx \
