@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -22,6 +24,7 @@ afterEach(() => {
 
 const WEEK = "2026-W34";
 const NEXT_RESET = "2026-08-24T00:00:00.000Z";
+const readmeSource = readFileSync(join(process.cwd(), "README.md"), "utf8");
 
 function listing(partial: Partial<Listing> & Pick<Listing, "id" | "listenUrl">): Listing {
   return {
@@ -177,6 +180,20 @@ test("about weekly names last-7-days — not this week", () => {
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
   assert.match(html, /rolling last 7 days/i);
+});
+
+test("README weekly names last-7-days — not this week", () => {
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.match(readmeSource, /rolling last-7-days window/);
+  assert.match(readmeSource, /Rank is the bid/);
+  assert.match(readmeSource, /Playback is real/);
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
+  assert.doesNotMatch(readmeSource, /Weekly public auction/);
+  assert.doesNotMatch(readmeSource, /Hear last 7 days/);
+  assert.doesNotMatch(readmeSource, /Hear this week/);
 });
 
 test("paid listing listen hop stays on the stored URL", () => {
