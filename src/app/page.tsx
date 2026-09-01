@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import React from "react";
 import { BidForm } from "./outbid-form";
 import { CategoryRail, PeriodTabs } from "./home-controls";
@@ -15,6 +16,7 @@ import { currentWeekUtc, nowUtc } from "../core/week";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 function formatUsd(amount: number): string {
   return `$${amount.toLocaleString("en-US")}`;

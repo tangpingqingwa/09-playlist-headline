@@ -4,6 +4,7 @@ export const metadata = {
   title: "Rules · Playlist Headline",
   description:
     "Min $5. Older wins ties. Raise pays the difference. Rolling last 7 days. No fake streams. No invented play counts.",
+  alternates: { canonical: "/rules" },
 };
 
 export default function RulesPage() {

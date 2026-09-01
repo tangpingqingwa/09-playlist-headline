@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Playlist Headline record</title>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#f6f1e2"/>
+  <circle cx="30" cy="33" r="21" fill="#b42318"/>
+  <circle cx="30" cy="33" r="11" fill="none" stroke="#f6f1e2" stroke-width="2" opacity=".8"/>
+  <circle cx="30" cy="33" r="4" fill="#1c1914"/>
+  <path d="M45 13v30c0 6-4 10-10 10" fill="none" stroke="#1c1914" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="35" cy="53" r="3" fill="#1c1914"/>
+</svg>

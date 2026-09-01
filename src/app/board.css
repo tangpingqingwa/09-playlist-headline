@@ -127,17 +127,22 @@ summary:focus-visible {
 
 .logo {
   display: inline-flex;
-  align-items: baseline;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
   flex: 0 0 auto;
   color: var(--ink);
 }
 
 .logo::before {
-  content: "PH09";
-  color: var(--oxblood);
-  font: 600 13px/1 var(--mono);
-  letter-spacing: 0.12em;
+  content: none;
+}
+
+.brand-mark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px;
 }
 
 .logo-name {

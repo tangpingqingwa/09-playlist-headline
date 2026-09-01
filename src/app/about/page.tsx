@@ -4,6 +4,7 @@ export const metadata = {
   title: "About · Playlist Headline",
   description:
     "Public auction last 7 days for the opening song. Rank is the bid. Playback is real. No invented play counts.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
