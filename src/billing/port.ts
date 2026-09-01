@@ -1,12 +1,8 @@
-import {
-  polarAccessToken,
-  polarLiveEnabled,
-  type PolarEnv,
-} from "../config";
+import { assertWaffoModeAllowed, waffoMode, type WaffoEnv } from "../config";
 import { MIN_BID_USD } from "../core/rank";
 import { canonicalizeListenUrl, isNsfwCopy, UrlError } from "../core/url";
 import { FixturePayment, getFixturePayment } from "./fixture";
-import { PolarPayment } from "./polar";
+import { WaffoPayment } from "./waffo";
 
 export type CheckoutKind = "create" | "raise";
 
@@ -21,11 +17,18 @@ export type CreateCheckoutInput = {
   listingDraft: ListingDraft;
   amountUsd: number;
   kind: CheckoutKind;
+  /** Local durable intent created before the provider call. */
+  intentId?: string;
+  amountCents?: number;
+  metadata?: Record<string, string>;
 };
 
 export type CheckoutStart = {
   checkoutUrl: string;
   sessionId: string;
+  providerCheckoutId?: string;
+  intentId?: string;
+  expiresAt?: string;
 };
 
 export type CheckoutStatus = "open" | "paid" | "abandoned";
@@ -38,17 +41,37 @@ export type CheckoutRecord = {
   amountUsd: number;
   kind: CheckoutKind;
   paidAt?: string;
+  intentId?: string;
 };
 
 export type PaidEvent = {
   sessionId: string;
+  intentId?: string;
   listingDraft: ListingDraft;
   amountUsd: number;
+  amountCents?: number;
   kind: CheckoutKind;
   paidAt: string;
+  currency?: string;
+  productId?: string;
+  metadata?: Record<string, string>;
+  metadataFingerprint?: string;
+  providerCheckoutId?: string;
+  providerDeliveryId?: string;
+  providerEventId?: string;
+  providerPaymentId?: string;
+  providerOrderId?: string;
+  providerEventType?: string;
+  rawBodyHash?: string;
+  eventFingerprint?: string;
 };
 
-export type WebhookResult = PaidEvent | { ignored: true };
+export type WebhookResult = PaidEvent | {
+  ignored: true;
+  reason?: string;
+  intentId?: string;
+  providerCheckoutId?: string;
+};
 
 export type PaymentPort = {
   readonly kind: "fixture" | "live";
@@ -161,31 +184,46 @@ function parseListenUrl(raw: unknown): string {
   }
 }
 
-export function createPaymentPort(env: PolarEnv = process.env): PaymentPort {
-  if (polarLiveEnabled(env)) {
-    const token = polarAccessToken(env);
-    if (!token) {
-      throw new Error("BLOCKED-SECRET: POLAR_ACCESS_TOKEN");
-    }
-    return new PolarPayment({ env });
-  }
-  return env === process.env ? getFixturePayment() : new FixturePayment();
+export function createPaymentPort(env: WaffoEnv = process.env): PaymentPort {
+  const mode = waffoMode(env);
+  assertWaffoModeAllowed(mode, env);
+  if (mode === "fixture") return env === process.env ? getFixturePayment() : new FixturePayment();
+  return new WaffoPayment({ env });
 }
 
 let defaultPort: PaymentPort | undefined;
+let defaultPortMode: string | undefined;
 
 /** Shared adapter so checkout, webhook, and /return see the same sessions. */
-export function getPaymentPort(env: PolarEnv = process.env): PaymentPort {
+export function getPaymentPort(env: WaffoEnv = process.env): PaymentPort {
   if (env !== process.env) {
     return createPaymentPort(env);
   }
-  if (!defaultPort) {
+  const mode = env.WAFFO_MODE ?? "";
+  const portKey = [
+    mode,
+    env.NODE_ENV ?? "",
+    env.DATABASE_PATH ?? "",
+    env.PUBLIC_BASE_URL ?? "",
+    env.WAFFO_API_BASE ?? "",
+    env.WAFFO_MERCHANT_ID ?? "",
+    env.WAFFO_STORE_ID ?? "",
+    env.WAFFO_PRODUCT_ID ?? "",
+    env.WAFFO_PRODUCT_NAME ?? "",
+    env.WAFFO_WEBHOOK_PUBLIC_KEY ?? "",
+    env.WAFFO_WEBHOOK_TEST_PUBLIC_KEY ?? "",
+    env.WAFFO_WEBHOOK_PROD_PUBLIC_KEY ?? "",
+    env.WAFFO_TIMEOUT_MS ?? "",
+  ].join("|");
+  if (!defaultPort || defaultPortMode !== portKey) {
     defaultPort = createPaymentPort(env);
+    defaultPortMode = portKey;
   }
   return defaultPort;
 }
 
 export function resetPaymentPort(): void {
   defaultPort = undefined;
+  defaultPortMode = undefined;
   getFixturePayment().reset();
 }

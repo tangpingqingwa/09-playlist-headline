@@ -3,13 +3,15 @@ import { afterEach, test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { GET as getClick } from "../src/app/click/[id]/route";
-import { Board } from "../src/app/page";
+import HomePage from "../src/app/page";
 import { listenClickPath } from "../src/core/playback";
 import { getBoardListings, rankListings } from "../src/core/rank";
 import { applyPaidEvent, getListingById, resetListings } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
 
 process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
+const { Board } = HomePage;
 
 afterEach(() => {
   resetListings();
@@ -35,7 +37,7 @@ test("GET /click/:id 302s to the stripped listen URL and increments clicks", asy
   assert.equal(listenClickPath(listing.id), `/click/${listing.id}`);
 
   const response = await getClick(new Request(`http://localhost/click/${listing.id}`), {
-    params: { id: listing.id },
+    params: Promise.resolve({ id: listing.id }),
   });
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("location"), "https://example.com/cold-open");
@@ -52,7 +54,7 @@ test("GET /click/:id 302s to the stripped listen URL and increments clicks", asy
 
 test("unknown listing click is 404 and does not invent a hop", async () => {
   const missing = await getClick(new Request("http://localhost/click/missing"), {
-    params: { id: "missing" },
+    params: Promise.resolve({ id: "missing" }),
   });
   assert.equal(missing.status, 404);
   assert.deepEqual(await missing.json(), { error: "listing_not_found" });

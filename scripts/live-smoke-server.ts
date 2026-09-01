@@ -3,7 +3,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import AboutPage from "../src/app/about/page";
 import { POST as postCheckout } from "../src/app/api/checkout/route";
-import { POST as postWebhook } from "../src/app/api/polar/webhook/route";
+import { POST as postWaffoWebhook } from "../src/app/api/waffo/webhook/route";
 import { GET as getClick } from "../src/app/click/[id]/route";
 import { GET as getHealthz } from "../src/app/healthz/route";
 import HomePage from "../src/app/page";
@@ -87,8 +87,23 @@ const server = createServer((req, res) => {
       const searchParams = {
         sessionId: url.searchParams.get("sessionId") ?? undefined,
         checkoutId: url.searchParams.get("checkoutId") ?? undefined,
+        intent: url.searchParams.get("intent") ?? undefined,
         status: url.searchParams.get("status") ?? undefined,
       };
+      sendHtml(res, await ReturnPage({ searchParams: Promise.resolve(searchParams) }));
+      return;
+    }
+    if (request.method === "GET" && path === "/checkout/complete") {
+      const searchParams = {
+        sessionId: url.searchParams.get("sessionId") ?? undefined,
+        checkoutId: url.searchParams.get("checkoutId") ?? undefined,
+        intent: url.searchParams.get("intent") ?? undefined,
+        status: url.searchParams.get("status") ?? undefined,
+      };
+      /* The disposable renderer cannot stream an async nested server
+         component. Resolve the same read-only return implementation directly
+         so `/checkout/complete` is exercised without any settlement side
+         effect. */
       sendHtml(res, await ReturnPage({ searchParams: Promise.resolve(searchParams) }));
       return;
     }
@@ -96,8 +111,15 @@ const server = createServer((req, res) => {
       await sendWeb(res, await postCheckout(request));
       return;
     }
+    if (request.method === "POST" && path === "/api/waffo/webhook") {
+      await sendWeb(res, await postWaffoWebhook(request));
+      return;
+    }
     if (request.method === "POST" && path === "/api/polar/webhook") {
-      await sendWeb(res, await postWebhook(request));
+      sendWeb(res, new Response(JSON.stringify({ error: "waffo_webhook_required" }), {
+        status: 410,
+        headers: { "content-type": "application/json" },
+      }));
       return;
     }
     const click = path.match(/^\/click\/([^/]+)$/);

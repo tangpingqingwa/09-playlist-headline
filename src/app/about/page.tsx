@@ -22,9 +22,9 @@ export default function AboutPage() {
         keeps the higher rank.
       </p>
       <p>
-        <strong>Playback is real.</strong> The listen URL is a real https
-        destination the bidder controls. We 302 to that stored URL or embed it
-        through a documented official player. There are{" "}
+        <strong>Playback is real.</strong> Every listing points to a secure
+        destination controlled by the artist or rights holder and plays through
+        an official destination or supported player. There are{" "}
         <strong>no fake streams</strong> and no generated audio.
       </p>
       <p>
@@ -34,21 +34,19 @@ export default function AboutPage() {
         are the only counter. Clicks are not plays.
       </p>
       <p>
-        No ads, no API keys, no revenue share with listed tracks. Copy is{" "}
-        <strong>English</strong>. Currency is <strong>USD</strong>. The market is{" "}
-        <strong>global</strong> — there is no China-city default. This is the{" "}
-        <strong>playlist-headline</strong> vertical, a clone of{" "}
-        <a href="https://outbid.lol">outbid.lol</a> pay-to-rank mechanics.
+        The board is in <strong>English</strong>, bids use{" "}
+        <strong>USD</strong>, and artists and listeners can participate from
+        anywhere.
       </p>
       <p>
-        Anyone can read the board without an account. Payment is the only write
-        path. Live money is Polar Checkout. Tests use a fixture so they never
-        call live Polar. Abandoned checkout does not invent an opening track.
+        Anyone can read the board without an account. A track appears only
+        after payment is confirmed. A canceled or abandoned checkout never
+        creates an opening track.
       </p>
       <p>
         <a href="/rules">Read the rules</a> for the $5 minimum, older-wins ties,
-        raise-pays-difference, weekly reset (rolling last 7 days, not Monday
-        00:00 UTC), and banned chat / NSFW URLs.
+        raise-pays-difference, the seven-day placement window, and banned chat
+        / NSFW URLs.
       </p>
     </main>
   );

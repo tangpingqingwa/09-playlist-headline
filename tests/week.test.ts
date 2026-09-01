@@ -87,36 +87,45 @@ test("Monday 00:00 UTC does not drop a bid still inside the rolling week", () =>
 });
 
 test("live board keeps a Sunday pay across Monday 00:00 UTC and drops it after 7 days", () => {
-  applyPaidEvent({
-    sessionId: "chk_sunday",
-    weekId: "2026-W33",
-    track: "Sunday Open",
-    artist: "Ada",
-    listenUrl: "https://example.com/sunday-open",
-    amountUsd: 12,
-    paidAt: "2026-08-16T12:00:00.000Z",
-    kind: "create",
-  });
-  applyPaidEvent({
-    sessionId: "chk_stale",
-    weekId: "2026-W32",
-    track: "Stale Open",
-    artist: "Bea",
-    listenUrl: "https://example.com/stale-open",
-    amountUsd: 50,
-    paidAt: "2026-08-09T12:00:00.000Z",
-    kind: "create",
-  });
+  const previousWeekNow = process.env.WEEK_NOW;
+  try {
+    /* Apply historical fixtures while they are still occupiable. A later
+       captured event outside the window is reconciled instead of listed. */
+    process.env.WEEK_NOW = "2026-08-16T12:00:00.000Z";
+    applyPaidEvent({
+      sessionId: "chk_sunday",
+      weekId: "2026-W33",
+      track: "Sunday Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/sunday-open",
+      amountUsd: 12,
+      paidAt: "2026-08-16T12:00:00.000Z",
+      kind: "create",
+    });
+    applyPaidEvent({
+      sessionId: "chk_stale",
+      weekId: "2026-W32",
+      track: "Stale Open",
+      artist: "Bea",
+      listenUrl: "https://example.com/stale-open",
+      amountUsd: 50,
+      paidAt: "2026-08-09T12:00:00.000Z",
+      kind: "create",
+    });
 
-  const monday = getBoardListings(new Date("2026-08-17T00:00:00.000Z"));
-  assert.equal(monday.length, 1);
-  assert.equal(monday[0]?.track, "Sunday Open");
-  assert.equal(monday[0]?.bidUsd, 12);
+    const monday = getBoardListings(new Date("2026-08-17T00:00:00.000Z"));
+    assert.equal(monday.length, 1);
+    assert.equal(monday[0]?.track, "Sunday Open");
+    assert.equal(monday[0]?.bidUsd, 12);
 
-  const stillLive = getBoardListings(new Date("2026-08-23T12:00:00.000Z"));
-  assert.equal(stillLive.length, 1);
-  assert.equal(stillLive[0]?.track, "Sunday Open");
+    const stillLive = getBoardListings(new Date("2026-08-23T12:00:00.000Z"));
+    assert.equal(stillLive.length, 1);
+    assert.equal(stillLive[0]?.track, "Sunday Open");
 
-  const aged = getBoardListings(new Date("2026-08-23T12:00:01.000Z"));
-  assert.equal(aged.length, 0);
+    const aged = getBoardListings(new Date("2026-08-23T12:00:01.000Z"));
+    assert.equal(aged.length, 0);
+  } finally {
+    if (previousWeekNow === undefined) delete process.env.WEEK_NOW;
+    else process.env.WEEK_NOW = previousWeekNow;
+  }
 });

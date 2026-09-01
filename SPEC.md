@@ -6,7 +6,7 @@
 **Market:** global English
 **Currency:** USD only
 **Clone of:** [outbid.lol](https://outbid.lol/) pay-to-rank mechanics
-**Forbidden:** invented play counts, fake streams, chat/invite links, NSFW, live Polar in CI
+**Forbidden:** invented play counts, fake streams, chat/invite links, NSFW, live Waffo in CI
 
 This document is the product contract. If README and SPEC disagree, SPEC wins until README is updated. If SPEC and code disagree, fix one of them in the same PR.
 
@@ -41,7 +41,7 @@ One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**
 - Strip tracking and affiliate query strings from the listen URL.
 - Reject chat / invite links and NSFW.
 - Public click counts on the listen URL (clicks, not plays).
-- Live payments via Polar (merchant of record). Tests use a Polar **fixture**.
+- Live payments via Waffo Pancake (merchant of record). Tests use an explicit Waffo **fixture**.
 - Pages: board, about, rules, checkout return.
 
 ### Non-goals
@@ -58,7 +58,7 @@ One-line pitch: **Bid USD. Open last 7 days. Listeners hear you first.**
 ### Kill / change rules
 
 - If after 90 days nobody will bid because the playlist/radio is not actually playing #1 first, freeze features. Do not invent a stream to “fix” an empty week.
-- Polar down → checkout fails closed. Do not invent a paid opening track.
+- Waffo down or misconfigured → checkout fails closed. Do not invent a paid opening track.
 
 ---
 
@@ -89,7 +89,7 @@ v1 is one public board. Do not fork ranking per station. A later station/playlis
 
 ## 5. Listing schema (normative)
 
-A listing is created only after Polar (or the fixture checkout) reports a completed payment.
+A listing is created only after a verified Waffo order (or the explicit fixture checkout) reports a completed payment.
 
 ```ts
 type Listing = {
@@ -107,7 +107,7 @@ type Listing = {
 
 **Required to place:** `track`, `artist`, `listenUrl`, `bidUsd`.
 
-**Identity for raise:** canonical `listenUrl` still inside the rolling last 7 days from first paid placement. Same key → raise. Different key → new listing that must pay the full bid. `weekId` stays a Polar/audit label — not raise identity. An artist who paid Sunday still raises on Monday if that listen URL is inside last 7 days. After the window ends, the same URL is a new listing (full bid), not a raise.
+**Identity for raise:** canonical `listenUrl` still inside the rolling last 7 days from first paid placement. Same key → raise. Different key → new listing that must pay the full bid. `weekId` stays an audit label — not raise identity. An artist who paid Sunday still raises on Monday if that listen URL is inside last 7 days. After the window ends, the same URL is a new listing (full bid), not a raise. Difference-only raises also require the secure opaque claimant cookie issued with the original checkout; a fresh client cannot take over the incumbent.
 
 **Forbidden on the card, in the player, and in the database:**
 
@@ -158,13 +158,13 @@ Worked examples, same week:
 |---|---|
 | Period | 7 days from first paid placement |
 | Boundary | Rolling last 7 days. **Not** Monday 00:00:00.000 UTC |
-| `weekId` | ISO week in UTC, `YYYY-Www` (e.g. `2026-W34`). Polar/audit label only |
+| `weekId` | ISO week in UTC, `YYYY-Www` (e.g. `2026-W34`). Audit label only |
 | What resets | Live rank after seven days from `firstPaidAt`. Clicks and bids do not carry once that window ends |
 | What does not carry | Previous window bid amounts. Want the next open? Pay again. |
 | History | Aged rows may stay readable as archive. They are not the live opening song. |
 | Empty week | Valid. No invented opening track. Empty copy names last 7 days, not Monday midnight UTC. |
 
-The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. SPEC persona copy names last 7 days, not this calendar week. SPEC empty-playback copy names last 7 days, not this calendar week. Rules empty-playback copy names last 7 days, not this calendar week. Rules empty-week copy names last 7 days, not this calendar week. Rules weekly-reset heading names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
+The occupied board names the rolling last-7-days window. Occupied Hear and later tracks name last 7 days, not this calendar week. Empty station copy names the same fair window without occupied rolling chrome. Empty Claim #1 and the empty deck kicker name last 7 days, not this calendar week. Empty lede names last 7 days, not this calendar week. Empty site metadata names last 7 days, not this calendar week. Empty product pitch names last 7 days, not this calendar week. Rules min-bid copy names last 7 days, not this calendar week. About copy names last 7 days, not this calendar week. README copy names last 7 days, not this calendar week. SPEC persona copy names last 7 days, not this calendar week. SPEC empty-playback copy names last 7 days, not this calendar week. Rules empty-playback copy names last 7 days, not this calendar week. Rules empty-week copy names last 7 days, not this calendar week. Rules weekly-reset heading names last 7 days, not this calendar week. About weekly-reset CTA names last 7 days, not this calendar week. Empty stays Claim #1 first, no Hear. Monday 00:00 UTC remains the ISO `weekId` label, not the public expiry. Not a 24h lock on #1.
 
 Do not carry bids after seven days. A listen URL that aged out of the window is a **new** listing and pays a full bid ≥ $5.
 
@@ -202,26 +202,55 @@ Store and display only the stripped URL. Public clicks count on that stored URL.
 
 ## 10. Payments
 
-`PaymentPort`:
+`PaymentPort` keeps the provider boundary server-side:
 
 ```ts
 createCheckout(input: {
   listingDraft: ListingDraft
   amountUsd: number          // full first bid, or raise difference
   kind: "create" | "raise"
-}): Promise<{ checkoutUrl: string; sessionId: string }>
+}): Promise<{ checkoutUrl: string; sessionId: string; intentId?: string }>
 
 handleWebhook(rawBody: string, headers: Record<string, string>): Promise<PaidEvent>
 ```
 
 | Mode | When | Behavior |
 |---|---|---|
-| Fixture | tests, `POLAR_FIXTURE_ONLY=1`, or Polar unset | In-memory / signed fixture session. No network |
-| Live Polar | `POLAR_LIVE=1` + Polar secrets | Polar checkout + webhook. Merchant of record |
+| `fixture` | offline tests and local smoke only | explicit in-process fixture; no network |
+| `waffo-test` | approved Waffo test credentials and isolated DB | signed Waffo test checkout/webhook |
+| `waffo-prod` | approved production credentials, public HTTPS, durable DB | signed Waffo production checkout/webhook |
 
-`POLAR_FIXTURE_ONLY=1` always wins. Unset / `0` / `true` stay fixture or fail-closed. CI must not set `POLAR_LIVE=1`.
+`WAFFO_MODE` is required. It is never inferred from missing credentials or CI.
+The official production API origin is pinned to `https://api.waffo.ai`.
+Production-like startup fails closed when required IDs, keys, public HTTPS URL,
+or `DATABASE_PATH` are missing. Test API overrides and provider checkout URLs
+must also be public HTTPS origins without credentials or private/reserved hosts.
 
-Rank updates **only** after a successful paid event. Abandoned checkout does not create or raise a listing. Do not invent a paid opening track.
+The adapter persists an immutable local intent before making a provider call.
+It sends the configured `productId`, `currency: "USD"`, decimal-string
+`priceSnapshot.amount`, `taxCategory: "digital_goods"`, success URL
+`/checkout/complete?intent=...`, `orderMerchantExternalId`, and full string
+metadata including the intent fingerprint and normalized listing facts. A
+timeout, 5xx, malformed response, or attach ambiguity remains recoverable as
+`unknown`; it is never deleted as if unpaid.
+
+The canonical `/api/waffo/webhook` reads the raw body and verifies it with the
+official SDK public key and explicit test/prod environment. Only signed
+`order.completed` events with matching mode/store/order/payment status,
+checkout/order/payment IDs, product, USD, exact decimal money, tax, metadata,
+and immutable local intent facts can settle. `subtotal` must equal the local
+charge and `amount`/`total` must agree with subtotal plus signed tax; tax never
+inflates the ranked bid. `event.id` (delivery), `event.eventId` (business
+event/payment), `data.orderId` (order), and `data.paymentId` (payment) remain
+distinct unique identities.
+
+One transaction records the accepted/rejected/reconciliation outcome and raw
+hash, applies the intent and listing transition, and preserves `firstPaidAt`.
+Exact retries are 2xx no-ops; changed identity/facts are rejected. Stale or
+future captures and a second stale `$5 → $12` capture become
+`needs_reconciliation` with no listing mutation. The browser return page is
+read-only and never settles a payment. `/api/polar/webhook` is an inert 410
+compatibility route.
 
 ---
 
@@ -231,7 +260,11 @@ Rank updates **only** after a successful paid event. Abandoned checkout does not
 GET  /                         public board for the rolling last 7 days + bid form
 POST /checkout                 { track, artist, listenUrl, amountUsd }
                                → PaymentPort.createCheckout (create or raise)
-GET  /return                   checkout return; show paid / pending, never trust query alone
+GET  /checkout/complete?intent=…
+                               read-only Waffo success surface; show paid/pending/restart state
+GET  /return                   read-only compatibility return; never trust query alone
+POST /api/waffo/webhook        canonical raw-body signed Waffo settlement
+POST /api/polar/webhook        410 inert compatibility response; never settles
 GET  /click/:id                302 listenUrl; increment public clicks
 GET  /about                    what this is; rank is money; real playback; no play counts
 GET  /rules                    min $5, ties, raise = difference, rolling last 7 days, no NSFW, no fake streams
@@ -259,7 +292,10 @@ Board UI (clone outbid.lol, not a redesign):
 | `week_closed` | 400 | bid outside the rolling last-7-days window |
 | `play_count_forbidden` | 400 | submit tried to attach a play/stream/listener count |
 | `payment_incomplete` | 402 | checkout abandoned; board unchanged |
-| `polar_unavailable` | 503 | live Polar down; fixture never invents a paid event |
+| `payment_unavailable` | 503 | Waffo is unavailable or required production configuration is missing |
+| `not_owner` | 409 | a fresh claimant attempted a difference-only raise |
+| `identity_facts_mismatch` | 409 | an incumbent raise changed immutable track facts |
+| `needs_reconciliation` | 409 | a captured event is stale, future, conflicting, or cannot safely mutate rank |
 
 Zero invented listings on any error. Zero invented play counts.
 
@@ -280,7 +316,9 @@ Zero invented listings on any error. Zero invented play counts.
 | 9 | Click listen CTA | 302 to stripped URL; public clicks +1; not labeled as plays |
 | 10 | Real playback | listen control / embed uses the stored listen URL; no fake stream |
 | 11 | After Monday 00:00 UTC | a bid still inside 7 days stays ranked; a bid paid 7 days ago is unranked |
-| 12 | `POLAR_LIVE` unset | fixture / fail-closed; no Polar network |
+| 12 | `WAFFO_MODE=fixture` | fixture-only offline run; no Waffo network and no live-provider fallback |
+| 13 | signed amount/product/metadata mismatch | reject or reconcile; no rank mutation |
+| 14 | stale/future capture or fresh claimant | durable reconciliation/not-owner result; no listing takeover |
 
 ---
 
@@ -288,17 +326,20 @@ Zero invented listings on any error. Zero invented play counts.
 
 Operator-only. `scripts/live-smoke.sh` is **not** called from `scripts/test.sh` or Actions.
 
-Local process, `POLAR_LIVE=1` if Polar secrets exist, else record `BLOCKED-SECRET` for checkout only. Board, rules, about, and click still run.
+Local process uses `WAFFO_MODE=fixture` and a temporary database. An approved
+operator may separately select `waffo-test` or `waffo-prod`; missing Waffo
+secrets/configuration is recorded as `BLOCKED-SECRET`/`BLOCKED-CONFIG` for
+checkout and settlement. Board, rules, about, and click still run.
 
 | Flow | Pass |
 |---|---|
 | Board | 200, rolling last 7 days, no invented play counts, no fake stream |
 | About / rules | 200, state min $5, older wins ties, raise pays difference, rolling last 7 days (not Monday 00:00 UTC), no fake streams |
-| Create checkout | Polar session for a real https listen URL **or** `BLOCKED-SECRET` (`POLAR_ACCESS_TOKEN`) |
+| Create checkout | Fixture session offline, or approved Waffo checkout for a real public HTTPS listen URL; missing config is `BLOCKED-SECRET`/`BLOCKED-CONFIG` |
 | Click | 302, click count increments (fixture listing allowed if live pay is blocked) |
 | Playback | listen control hits the stored URL; not a generated file |
 
-Missing Polar secret is not a license to invent a paid opening track.
+Missing Waffo secret is not a license to invent a paid opening track.
 
 ---
 
@@ -334,4 +375,4 @@ Development is GitHub trunk-based. **`main` is always cloneable, buildable, and 
 
 Full process: [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-Until there is an application binary, `scripts/test.sh` still has to pass: contract files exist, SPEC/CONTRIBUTING agree, no tracked secrets. Adding a server means **extending** that script with unit/contract tests. Live Polar calls are optional and must not be required for `main` to stay green.
+Until there is an application binary, `scripts/test.sh` still has to pass: contract files exist, SPEC/CONTRIBUTING agree, no tracked secrets. The application now extends that script with typecheck, offline unit/contract tests, a build gate, and dependency audit. Live Waffo calls are optional and must not be required for `main` to stay green.

@@ -15,6 +15,7 @@ import { getBoardListings } from "../src/core/rank";
 import { resetListings } from "../src/core/store";
 import {
   canonicalizeListenUrl,
+  isPrivateOrReservedHost,
   isTrackingQueryKey,
   UrlError,
 } from "../src/core/url";
@@ -215,6 +216,43 @@ test("http, javascript, data, shortener, and localhost are rejected", () => {
       return true;
     });
   }
+});
+
+test("complete private and reserved IPv4/IPv6 destinations are rejected before storage", () => {
+  for (const host of [
+    "0.0.0.0",
+    "10.0.0.1",
+    "100.64.0.1",
+    "127.0.0.1",
+    "169.254.1.1",
+    "172.16.0.1",
+    "192.0.0.1",
+    "192.0.2.1",
+    "192.168.1.1",
+    "198.18.0.1",
+    "198.51.100.1",
+    "203.0.113.1",
+    "224.0.0.1",
+    "[::]",
+    "[::1]",
+    "[::ffff:10.0.0.1]",
+    "[fc00::1]",
+    "[fd12:3456::1]",
+    "[fe80::1]",
+    "[ff02::1]",
+    "[2001:db8::1]",
+  ]) {
+    assert.equal(isPrivateOrReservedHost(host), true, host);
+    assert.throws(
+      () => canonicalizeListenUrl(`https://${host}/track`),
+      (err: unknown) => {
+        assert.ok(err instanceof UrlError);
+        assert.equal(err.code, "url_forbidden");
+        return true;
+      },
+    );
+  }
+  assert.equal(isPrivateOrReservedHost("example.com"), false);
 });
 
 test("checkout rejects chat, NSFW, and invented play counts without listing", async () => {

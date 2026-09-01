@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Board } from "../src/app/page";
+import HomePage from "../src/app/page";
 import {
   getBoardListings,
   listingsForWeek,
@@ -15,6 +15,8 @@ import { resetListings } from "../src/core/store";
 import { currentWeekUtc, isoWeekId, nextMondayUtc } from "../src/core/week";
 
 process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
+const { Board } = HomePage;
 
 const WEEK = "2026-W34";
 const NEXT_RESET = "2026-08-24T00:00:00.000Z";
@@ -182,7 +184,7 @@ test("live board loader invents no tracks", () => {
   assert.deepEqual(getBoardListings(new Date("2026-08-10T00:00:00.000Z")), []);
 });
 
-test("unpaid Polar checkout never ranks as #1", () => {
+test("unpaid Waffo checkout never ranks as #1", () => {
   const unpaid = listing({
     id: "lst_unpaid",
     track: "Ghost Track",

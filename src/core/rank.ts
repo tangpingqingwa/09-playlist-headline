@@ -2,8 +2,9 @@
 
 import { listPaidInRollingWeek } from "./store";
 import { bidInRollingWeek, nowUtc } from "./week";
+import { MIN_BID_USD } from "./money";
 
-export const MIN_BID_USD = 5;
+export { MIN_BID_USD };
 
 export type Listing = {
   id: string;
@@ -20,10 +21,10 @@ export type Listing = {
 export type RankedListing = Listing & { rank: number };
 
 /**
- * Polar has reported a completed payment. Unpaid / abandoned checkout
+ * A verified provider has reported a completed payment. Unpaid / abandoned checkout
  * is not a listing and must not paint #1 opening-song chrome.
  */
-export function isPolarPaidListing(
+export function isPaidListing(
   listing: Pick<Listing, "firstPaidAt">,
 ): boolean {
   const paidAt = listing.firstPaidAt;
@@ -33,13 +34,13 @@ export function isPolarPaidListing(
 }
 
 /**
- * Live board is Polar-paid rows whose firstPaidAt is in the rolling last 7 days.
+ * Live board is provider-paid rows whose firstPaidAt is in the rolling last 7 days.
  * `weekId` is an audit label. Never invent a #1 track.
  * Same listen URL still inside last 7 days raises. A new URL always pays a full bid.
  * weekId is not the raise key.
  */
 export function getBoardListings(now: Date = nowUtc()): Listing[] {
-  return listPaidInRollingWeek(now).filter(isPolarPaidListing);
+  return listPaidInRollingWeek(now).filter(isPaidListing);
 }
 
 /** Live board rows: paid firstPaidAt in the rolling last 7 days. Not weekId. */
@@ -49,16 +50,16 @@ export function listingsForWeek(
 ): Listing[] {
   return listings.filter(
     (listing) =>
-      isPolarPaidListing(listing) && bidInRollingWeek(listing.firstPaidAt, now),
+      isPaidListing(listing) && bidInRollingWeek(listing.firstPaidAt, now),
   );
 }
 
 /**
- * Display order among Polar-paid rows only: bidUsd DESC, firstPaidAt ASC
+ * Display order among paid rows only: bidUsd DESC, firstPaidAt ASC
  * (older wins ties), id ASC. Unpaid drafts never rank.
  */
 export function rankListings(listings: readonly Listing[]): RankedListing[] {
-  const ordered = listings.filter(isPolarPaidListing).slice().sort((a, b) => {
+  const ordered = listings.filter(isPaidListing).slice().sort((a, b) => {
     if (a.bidUsd !== b.bidUsd) {
       return b.bidUsd - a.bidUsd;
     }

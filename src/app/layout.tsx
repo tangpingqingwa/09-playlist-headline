@@ -1,34 +1,47 @@
 import React, { type ReactNode } from "react";
+import { SearchToggle, ThemeToggle } from "./home-controls";
 import "./board.css";
 
 export const metadata = {
   title: "Playlist Headline",
   description:
-    "Bid USD. Open last 7 days. Listeners hear you first. Rank is the bid. Playback is real.",
+    "A rolling seven-day public auction for the first track on a real playlist or radio.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Newsreader:opsz,wght@6..72,500;6..72,650&family=Source+Sans+3:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+      <head />
       <body>
-        <header className="site-header">
-          <div className="site-header-inner">
-            <a className="logo" href="/">
-              PH<span>09</span>
+        <header className="site-header" data-slot="site-header">
+          <div className="site-header-inner" data-slot="shell">
+            <a className="logo" href="/" aria-label="Playlist Headline home" data-slot="brand">
               <span className="logo-name">playlist.headline</span>
             </a>
-            <nav className="site-nav" aria-label="Main">
+            <p className="header-station-call" aria-label="Station PH09">PH09 / ON AIR DESK</p>
+            <nav className="site-nav" aria-label="Main" data-slot="primary-nav">
               <ul>
-                <li>
+                <li className="nav-leaderboard">
                   <a href="/">Leaderboard</a>
+                </li>
+                <li>
+                  <a
+                    className="nav-button"
+                    href="/?period=today"
+                    data-period-nav="today"
+                    aria-label="View today's paid placements"
+                  >
+                    Daily
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="nav-button"
+                    href="#categories"
+                    data-category-nav-link=""
+                  >
+                    Categories
+                  </a>
                 </li>
                 <li>
                   <a href="/about">About</a>
@@ -38,9 +51,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </li>
               </ul>
             </nav>
+            <div className="header-actions">
+              <SearchToggle />
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         {children}
+        <footer className="maker-footer" data-maker-contact="">
+          <p>Built by <a href="mailto:tangpingqingwa@gmail.com">tangpingqingwa@gmail.com</a></p>
+        </footer>
       </body>
     </html>
   );

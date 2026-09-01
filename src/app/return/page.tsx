@@ -1,69 +1,15 @@
 import React from "react";
-import { getPaymentPort } from "../../billing/port";
 import { getBoardListings, rankListings } from "../../core/rank";
-import { applyPaidEvent, forgetUnpaidCheckout, listingForSession } from "../../core/store";
+import { resolveReturn, type ReturnQuery } from "./return-state";
 
 
 export const dynamic = "force-dynamic";
 
-type ReturnPageProps = {
-  searchParams?: Promise<{
-    sessionId?: string | string[];
-    checkoutId?: string | string[];
-    status?: string | string[];
-  }>;
-};
+type ReturnPageProps = { searchParams?: Promise<ReturnQuery> };
 
-function firstQuery(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export async function resolveReturn(params: {
-  sessionId?: string | string[];
-  checkoutId?: string | string[];
-  status?: string | string[];
-}): Promise<{ status: "paid" | "pending"; listingId?: string }> {
-  const sessionId = firstQuery(params.sessionId) ?? firstQuery(params.checkoutId);
-  const rawStatus = firstQuery(params.status);
-  const canceled = rawStatus === "cancel" || rawStatus === "canceled" || rawStatus === "abandoned";
-  const port = getPaymentPort();
-
-  if (!sessionId) {
-    return { status: "pending" };
-  }
-
-  if (canceled) {
-    await port.abandonCheckout(sessionId);
-    forgetUnpaidCheckout(sessionId);
-    return { status: "pending" };
-  }
-
-  const already = listingForSession(sessionId);
-  if (already) {
-    return { status: "paid", listingId: already.id };
-  }
-
-  try {
-    const paid = await port.completeCheckout(sessionId);
-    const listing = applyPaidEvent({
-      sessionId: paid.sessionId,
-      weekId: paid.listingDraft.weekId,
-      track: paid.listingDraft.track,
-      artist: paid.listingDraft.artist,
-      listenUrl: paid.listingDraft.listenUrl,
-      amountUsd: paid.amountUsd,
-      paidAt: paid.paidAt,
-      kind: paid.kind,
-    });
-    return { status: "paid", listingId: listing.id };
-  } catch {
-    return { status: "pending" };
-  }
-}
-
-export default async function ReturnPage({ searchParams }: ReturnPageProps) {
+async function ReturnPage({ searchParams }: ReturnPageProps) {
   const params = (await searchParams) ?? {};
-  const result = await resolveReturn(params);
+  const result = resolveReturn(params);
   const listings = rankListings(getBoardListings());
   const listing = listings.find((row) => row.id === result.listingId);
 
@@ -72,7 +18,8 @@ export default async function ReturnPage({ searchParams }: ReturnPageProps) {
       <main className="return-page" data-return="pending">
         <h1>Payment pending</h1>
         <p>
-          Checkout abandoned or not yet paid. Rank updates only after Polar reports paid. An unpaid or abandoned track stays off the station desk. We do not invent an opening track. This page does not trust the query string alone.
+          Payment has not been confirmed. No rank changes until confirmation,
+          and an incomplete or abandoned track stays off the station desk.
         </p>
         <p>
           <a href="/">Back to the board</a>
@@ -95,3 +42,5 @@ export default async function ReturnPage({ searchParams }: ReturnPageProps) {
     </main>
   );
 }
+
+export default ReturnPage;

@@ -11,8 +11,8 @@ export default function RulesPage() {
     <main className="doc-page" data-page="rules">
       <h1>Rules</h1>
       <p>
-        These rules are the product. A bidder can predict rank from this page
-        alone. Rank is the bid. Playback must be real.
+        The board follows the published rules below. There are no hidden
+        ranking factors: rank is the bid, and playback must be real.
       </p>
 
       <h2>Ranking</h2>
@@ -21,8 +21,8 @@ export default function RulesPage() {
           <tr>
             <th>Rank is the bid</th>
             <td>
-              Sort by <code>bidUsd</code> descending. Nothing else — no recency
-              boost, no editorial pick, no play-count score.
+              Tracks are ordered by bid from highest to lowest. Recency,
+              editorial preference, and play counts do not affect rank.
             </td>
           </tr>
           <tr>
@@ -44,19 +44,15 @@ export default function RulesPage() {
           </tr>
           <tr>
             <th>Equal bids</th>
-            <td>
-              <strong>Older wins ties.</strong> Compare{" "}
-              <code>firstPaidAt</code> ascending, then listing id.
-            </td>
+            <td>The track placed first keeps the higher rank.</td>
           </tr>
           <tr>
             <th>Raise</th>
             <td>
-              Same canonical listen URL still inside last 7 days raises.{" "}
-              <code>weekId</code> stays an audit label — not raise identity.{" "}
-              <strong>Raise pays difference</strong> only (
-              <code>new − current</code>). New amount must be a whole dollar ≥
-              current + $1.
+              The same cleaned listen link may raise while its placement is
+              active. The original payer is charged only the{" "}
+              <strong>difference</strong>, and the new total must be at least
+              $1 higher.
             </td>
           </tr>
           <tr>
@@ -70,8 +66,8 @@ export default function RulesPage() {
           <tr>
             <th>Payment claims rank</th>
             <td>
-              A completed payment claims the rank. Unpaid checkout does not.
-              We do not invent a paid opening track.
+              Rank changes only after payment is confirmed. An incomplete or
+              abandoned checkout never appears on the board.
             </td>
           </tr>
         </tbody>
@@ -90,20 +86,9 @@ export default function RulesPage() {
           <tr>
             <th>Boundary</th>
             <td>
-              <strong>Rolling last 7 days. Not Monday 00:00 UTC.</strong> A
-              listener outside civil midnight does not lose the opening song on
-              a timezone tax. Not a 24h lock on #1.{" "}
-              <code>weekId</code> stays an ISO week label (
-              <code>YYYY-Www</code>, Monday 00:00:00.000 UTC) for Polar/audit.
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <code>weekId</code>
-            </th>
-            <td>
-              ISO week in UTC, <code>YYYY-Www</code> (e.g. <code>2026-W34</code>
-              ). Label only — not the live expiry.
+              Each placement keeps its own seven-day window. The board does not
+              reset for everyone at Monday midnight and #1 is never locked for
+              a fixed 24 hours.
             </td>
           </tr>
           <tr>
@@ -122,21 +107,19 @@ export default function RulesPage() {
         </tbody>
       </table>
       <p>
-        An empty last 7 days is valid. There is no opening song until someone
-        pays. The empty open is last 7 days from a paid claim, not Monday
-        00:00 UTC. Do not invent a track.
+        If nobody has paid for an active placement, there is no opening song.
       </p>
 
       <h2>Real playback</h2>
       <ul>
         <li>
-          The listen URL is a real <code>https</code> page or stream (Spotify,
+          The listen link is a real, secure page or stream (Spotify,
           Apple Music, YouTube / YouTube Music, SoundCloud, Bandcamp, Mixcloud,
           an official radio stream, or the artist’s own site).
         </li>
         <li>
-          Listen 302s to the stored URL or embeds it through a documented
-          official player for that host. Both are real playback.
+          Listen opens the cleaned destination or a supported official player.
+          Both are real playback.
         </li>
         <li>
           <strong>No fake streams.</strong> A silent custom player that does not
@@ -151,25 +134,14 @@ export default function RulesPage() {
       <h2>No invented play counts</h2>
       <p>
         We never display a play count, stream count, monthly listeners, or view
-        count from any platform. Submitting those fields is{" "}
-        <code>play_count_forbidden</code>. Public <strong>clicks</strong> on{" "}
-        <code>GET /click/:id</code> are the only counter. Clicks are not plays.
+        count from any platform. Public <strong>clicks</strong> on the listen
+        link are the only counter. Clicks are not plays.
       </p>
 
       <h2>Listen URL hygiene</h2>
       <ol>
-        <li>
-          Require <code>https:</code>. <code>http:</code> is{" "}
-          <code>url_insecure</code>.
-        </li>
-        <li>
-          Strip tracking and affiliate query keys: <code>utm_*</code>,{" "}
-          <code>fbclid</code>, <code>gclid</code>, <code>gbraid</code>,{" "}
-          <code>wbraid</code>, <code>msclkid</code>, <code>ref</code>,{" "}
-          <code>ref_</code>, <code>affiliate</code>, <code>aff</code>,{" "}
-          <code>irclickid</code>, <code>mc_cid</code>, <code>mc_eid</code>,{" "}
-          <code>icid</code>, <code>si</code>, <code>igshid</code>.
-        </li>
+        <li>Use a secure, public listen or stream link.</li>
+        <li>Tracking, referral, and affiliate parameters are removed.</li>
         <li>Strip fragments. Store and click only the stripped URL.</li>
         <li>
           Reject chat / invite hosts: Telegram, <code>t.me</code>,{" "}
@@ -177,9 +149,8 @@ export default function RulesPage() {
           invite, <code>m.me</code>, <code>signal.me</code>.
         </li>
         <li>
-          Reject <strong>NSFW</strong> path tokens and adult hosts. Reject{" "}
-          <code>javascript:</code>, <code>data:</code>, credentials-in-URL, and
-          localhost / link-local hosts.
+          Adult content and private, local-only, credentialed, or otherwise
+          unsafe destinations are rejected.
         </li>
         <li>
           Known shorteners (<code>bit.ly</code>, <code>t.co</code>,{" "}
@@ -187,8 +158,7 @@ export default function RulesPage() {
         </li>
       </ol>
       <p>
-        Chat / invite and NSFW fail as <code>url_forbidden</code>. No listing.
-        No charge.
+        Rejected links never create a listing or start a charge.
       </p>
     </main>
   );

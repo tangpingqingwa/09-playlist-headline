@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 /** Canonical listen URL: https only, tracking stripped, chat/NSFW/shorteners rejected. */
 
 export class UrlError extends Error {
@@ -141,25 +143,126 @@ export function isShortenerHost(host: string): boolean {
   return SHORTENER_HOSTS.some((listed) => hostMatches(host.toLowerCase(), listed));
 }
 
-function isUnusableHost(host: string): boolean {
-  if (
-    host === "localhost" ||
-    host.endsWith(".localhost") ||
-    host.endsWith(".local") ||
-    host === "::1" ||
-    host === "[::1]" ||
-    host.startsWith("fe80:")
-  ) {
+function parseIpv4(host: string): [number, number, number, number] | undefined {
+  if (!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return undefined;
+  const octets = host.split(".").map(Number);
+  if (octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+    return undefined;
+  }
+  return octets as [number, number, number, number];
+}
+
+/** RFC 6890, RFC 5737, RFC 6598, and other non-public IPv4 allocations. */
+function isPrivateOrReservedIpv4(octets: [number, number, number, number]): boolean {
+  const [a, b, c] = octets;
+  if (a === 0 || a === 10 || a === 127 || a >= 224 || a >= 240) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // shared address space
+  if (a === 169 && b === 254) return true; // link-local
+  if (a === 172 && b >= 16 && b <= 31) return true; // RFC 1918
+  if (a === 192 && b === 168) return true; // RFC 1918
+  if (a === 192 && b === 0) return true; // IETF protocol assignments
+  if (a === 192 && b === 2) return true; // TEST-NET-1
+  if (a === 192 && b === 31 && c === 196) return true; // 6to4 relay anycast
+  if (a === 192 && b === 52 && c === 193) return true; // 6to4 relay anycast
+  if (a === 192 && b === 88 && c === 99) return true; // deprecated 6to4 anycast
+  if (a === 198 && b >= 18 && b <= 19) return true; // benchmarking
+  if (a === 198 && b === 51 && c === 100) return true; // TEST-NET-2
+  if (a === 203 && b === 0 && c === 113) return true; // TEST-NET-3
+  return false;
+}
+
+function parseIpv6(host: string): number[] | undefined {
+  const unbracketed = host.replace(/^\[/, "").replace(/\]$/, "").toLowerCase();
+  if (unbracketed.includes("%") || isIP(unbracketed) !== 6) return undefined;
+  const halves = unbracketed.split("::");
+  if (halves.length > 2) return undefined;
+
+  const parseHalf = (half: string): number[] | undefined => {
+    if (!half) return [];
+    const pieces = half.split(":");
+    const result: number[] = [];
+    for (let index = 0; index < pieces.length; index += 1) {
+      const piece = pieces[index];
+      if (!piece) return undefined;
+      if (piece.includes(".")) {
+        if (index !== pieces.length - 1) return undefined;
+        const ipv4 = parseIpv4(piece);
+        if (!ipv4) return undefined;
+        result.push((ipv4[0] << 8) | ipv4[1], (ipv4[2] << 8) | ipv4[3]);
+      } else {
+        if (!/^[0-9a-f]{1,4}$/.test(piece)) return undefined;
+        result.push(Number.parseInt(piece, 16));
+      }
+    }
+    return result;
+  };
+
+  const left = parseHalf(halves[0] ?? "");
+  const right = parseHalf(halves.length === 2 ? halves[1] ?? "" : "");
+  if (!left || !right) return undefined;
+  if (halves.length === 1) return left.length === 8 ? left : undefined;
+  if (left.length + right.length >= 8) return undefined;
+  return [...left, ...Array.from({ length: 8 - left.length - right.length }, () => 0), ...right];
+}
+
+function isPrivateOrReservedIpv6(words: number[]): boolean {
+  if (words.length !== 8) return false;
+  const [a, b, c, d, e, f, g, h] = words;
+  const mappedIpv4: [number, number, number, number] | undefined =
+    a === 0 && b === 0 && c === 0 && d === 0 && e === 0 && f === 0xffff
+      ? [g >> 8, g & 0xff, h >> 8, h & 0xff]
+      : undefined;
+  if (mappedIpv4 && isPrivateOrReservedIpv4(mappedIpv4)) return true;
+
+  // Unspecified, loopback, IPv4-compatible, and IPv4-translated ranges.
+  if (words.every((word) => word === 0) ||
+      (words.slice(0, 7).every((word) => word === 0) && h === 1) ||
+      (a === 0 && b === 0 && c === 0 && d === 0 && e === 0) ||
+      (a === 0x0064 && b === 0xff9b) || // 64:ff9b::/96 NAT64
+      (a === 0x0064 && b === 0xff9b && c === 1)) {
     return true;
   }
-  const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-  if (!ipv4) return false;
-  const octets = ipv4.slice(1).map(Number);
-  if (octets.some((part) => part > 255)) return false;
-  const [a, b] = octets as [number, number, number, number];
-  if (a === 0 || a === 127) return true;
-  if (a === 169 && b === 254) return true;
+  if ((a & 0xfe00) === 0xfc00) return true; // fc00::/7 ULA
+  if ((a & 0xffc0) === 0xfe80) return true; // fe80::/10 link-local
+  if ((a & 0xff00) === 0xff00) return true; // ff00::/8 multicast
+  if (a === 0xfec0 || (a & 0xffc0) === 0xfec0) return true; // deprecated site-local
+  if (a === 0x0100 && b === 0 && c === 0 && d === 0) return true; // 100::/64 discard
+  if (a === 0x2001 && b === 0) return true; // Teredo / protocol assignments
+  if (a === 0x2001 && b === 2 && c === 0) return true; // benchmarking
+  if (a === 0x2001 && (b & 0xfff0) === 0x0010) return true; // ORCHID
+  if (a === 0x2001 && b === 0xdb8) return true; // documentation
+  if (a === 0x2002) return true; // 6to4 transition space
   return false;
+}
+
+/** True for host literals and local names that must never be embedded/redirected to. */
+export function isPrivateOrReservedHost(rawHost: string): boolean {
+  const host = rawHost.toLowerCase().replace(/^\[/, "").replace(/\]$/, "").replace(/\.$/, "");
+  if (!host || host === "localhost" || host.endsWith(".localhost") ||
+      host.endsWith(".local") || host.endsWith(".internal") || host === "home.arpa") {
+    return true;
+  }
+  const ipv4 = parseIpv4(host);
+  if (ipv4) return isPrivateOrReservedIpv4(ipv4);
+  const ipv6 = parseIpv6(host);
+  return ipv6 ? isPrivateOrReservedIpv6(ipv6) : false;
+}
+
+/** Validate an externally supplied redirect/origin URL without following DNS. */
+export function isSafePublicHttpsUrl(raw: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return false;
+  }
+  const host = hostnameOf(parsed);
+  return parsed.protocol === "https:" && parsed.username === "" && parsed.password === "" &&
+    host !== "" && !isPrivateOrReservedHost(host);
+}
+
+function isUnusableHost(host: string): boolean {
+  return isPrivateOrReservedHost(host);
 }
 
 function stripTracking(parsed: URL): void {

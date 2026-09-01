@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
-import { createHmac } from "node:crypto";
 import { afterEach, test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { POST as postCheckout } from "../src/app/api/checkout/route";
-import { POST as postWebhook } from "../src/app/api/polar/webhook/route";
-import ReturnPage, { resolveReturn } from "../src/app/return/page";
+import { POST as postWebhook } from "../src/app/api/waffo/webhook/route";
+import ReturnPage from "../src/app/return/page";
+import { resolveReturn } from "../src/app/return/return-state";
 import { FixturePayment } from "../src/billing/fixture";
-import { PolarPayment, POLAR_API_BASE, polarApiBase } from "../src/billing/polar";
 import {
   CheckoutError,
   createPaymentPort,
@@ -14,7 +13,8 @@ import {
   parseAmountUsd,
   resetPaymentPort,
 } from "../src/billing/port";
-import { polarLiveEnabled } from "../src/config";
+import { isSafePublicHttpsUrl } from "../src/core/url";
+import { waffoApiBase, WAFFO_OFFICIAL_API_BASE } from "../src/config";
 import {
   ListingError,
   listingListenKey,
@@ -22,18 +22,24 @@ import {
   quoteBid,
 } from "../src/core/listing";
 import { createElement } from "react";
-import { Board } from "../src/app/page";
+import HomePage from "../src/app/page";
 import { getBoardListings, MIN_BID_USD, rankListings } from "../src/core/rank";
 import {
   applyPaidEvent,
   findPaidByListenUrl,
   listPaidForWeek,
   listUnpaid,
+  getStore,
   resetListings,
 } from "../src/core/store";
 import { currentWeekUtc, isoWeekId, nowUtc } from "../src/core/week";
+import { claimantTokenHash } from "../src/core/claimant";
 
 process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
+const { Board } = HomePage;
+const LEGACY_CLAIMANT_TOKEN = "a".repeat(43);
+const LEGACY_CLAIMANT_HASH = claimantTokenHash(LEGACY_CLAIMANT_TOKEN) as string;
 
 afterEach(() => {
   resetListings();
@@ -59,6 +65,19 @@ function draft(overrides: Partial<{
   };
 }
 
+function intentFromLocation(response: Response): string {
+  const value = new URL(response.headers.get("location") ?? "", "http://localhost")
+    .searchParams.get("intent");
+  assert.ok(value);
+  return value;
+}
+
+function fixtureSessionForIntent(intentId: string): string {
+  const intent = getStore().getCheckoutIntent(intentId);
+  assert.ok(intent?.providerCheckoutId);
+  return intent.providerCheckoutId;
+}
+
 async function postForm(fields: Record<string, string>, path = "/checkout"): Promise<Response> {
   const body = new URLSearchParams(fields);
   return postCheckout(
@@ -70,52 +89,45 @@ async function postForm(fields: Record<string, string>, path = "/checkout"): Pro
   );
 }
 
-async function postJson(payload: Record<string, unknown>): Promise<Response> {
+async function postJson(
+  payload: Record<string, unknown>,
+  headers: Record<string, string> = {},
+): Promise<Response> {
   return postCheckout(
     new Request("http://localhost/api/checkout", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...headers },
       body: JSON.stringify(payload),
     }),
   );
 }
 
-test("createPaymentPort stays fixture unless POLAR_LIVE=1", () => {
-  assert.equal(polarLiveEnabled({}), false);
-  assert.equal(polarLiveEnabled({ POLAR_LIVE: "0" }), false);
-  assert.equal(polarLiveEnabled({ POLAR_LIVE: "true" }), false);
-  assert.equal(polarLiveEnabled({ POLAR_LIVE: "1", POLAR_FIXTURE_ONLY: "1" }), false);
-  assert.equal(createPaymentPort({}).kind, "fixture");
-  assert.equal(createPaymentPort({ POLAR_LIVE: "0" }).kind, "fixture");
-  assert.equal(createPaymentPort({ POLAR_LIVE: "true" }).kind, "fixture");
+test("createPaymentPort requires an explicit Waffo mode and keeps fixture opt-in", () => {
+  assert.throws(() => createPaymentPort({}), /BLOCKED-CONFIG: WAFFO_MODE/);
+  assert.throws(() => createPaymentPort({ LEGACY_PROVIDER_LIVE: "1" }), /BLOCKED-CONFIG: WAFFO_MODE/);
+  assert.equal(createPaymentPort({ WAFFO_MODE: "fixture" }).kind, "fixture");
   assert.throws(
-    () => createPaymentPort({ POLAR_LIVE: "1" }),
-    /BLOCKED-SECRET: POLAR_ACCESS_TOKEN/,
+    () => createPaymentPort({ WAFFO_MODE: "waffo-test" }),
+    /BLOCKED-CONFIG: WAFFO_MERCHANT_ID/,
   );
-  const live = createPaymentPort({
-    POLAR_LIVE: "1",
-    POLAR_ACCESS_TOKEN: "polar_tok_test",
-  });
-  assert.equal(live.kind, "live");
 });
 
-test("POLAR_FIXTURE_ONLY=1 wins over POLAR_LIVE=1", () => {
-  const previousLive = process.env.POLAR_LIVE;
-  const previousFixture = process.env.POLAR_FIXTURE_ONLY;
-  process.env.POLAR_LIVE = "1";
-  process.env.POLAR_FIXTURE_ONLY = "1";
-  try {
-    resetPaymentPort();
-    assert.equal(polarLiveEnabled(), false);
-    assert.equal(getPaymentPort().kind, "fixture");
-    assert.throws(() => new PolarPayment({ env: process.env }), /POLAR_LIVE=1/);
-  } finally {
-    if (previousLive === undefined) delete process.env.POLAR_LIVE;
-    else process.env.POLAR_LIVE = previousLive;
-    if (previousFixture === undefined) delete process.env.POLAR_FIXTURE_ONLY;
-    else process.env.POLAR_FIXTURE_ONLY = previousFixture;
-    resetPaymentPort();
-  }
+test("Waffo modes are explicit and production pins the official API", () => {
+  assert.equal(waffoApiBase({ WAFFO_MODE: "fixture" }), WAFFO_OFFICIAL_API_BASE);
+  assert.equal(waffoApiBase({ WAFFO_MODE: "waffo-test", WAFFO_API_BASE: "https://test.example" }), "https://test.example");
+  assert.equal(waffoApiBase({ WAFFO_MODE: "waffo-test", WAFFO_API_BASE: "https://attacker.example" }), "https://attacker.example");
+  assert.throws(
+    () => waffoApiBase({ WAFFO_MODE: "waffo-prod", WAFFO_API_BASE: "https://attacker.example" }),
+    /official Waffo origin/,
+  );
+  assert.throws(
+    () => waffoApiBase({ WAFFO_MODE: "waffo-test", WAFFO_API_BASE: "http://127.0.0.1:3000" }),
+    /public HTTPS/,
+  );
+  assert.equal(isSafePublicHttpsUrl("https://example.com/checkout/id"), true);
+  assert.equal(isSafePublicHttpsUrl("http://checkout.example.com/id"), false);
+  assert.equal(isSafePublicHttpsUrl("https://127.0.0.1/id"), false);
+  assert.equal(isSafePublicHttpsUrl("https://user:pass@example.com/id"), false);
 });
 
 test("$5 fixture create lists at #1", async () => {
@@ -169,7 +181,7 @@ test("abandoned checkout does not list", async () => {
   assert.equal(getBoardListings().length, 0);
 });
 
-test("unpaid Polar checkout stays off the station desk until Polar reports paid", async () => {
+test("unpaid Waffo checkout stays off the station desk until Waffo reports paid", async () => {
   const started = await postForm({
     track: "Ghost Track",
     artist: "Vapor",
@@ -193,7 +205,7 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
   );
   assert.match(html, /No opening song/);
   assert.match(html, /data-unpaid-off=""/);
-  assert.match(html, /until Polar reports paid/);
+  assert.match(html, /An incomplete checkout stays off this desk/);
   assert.match(html, /Claim #1 for/);
   assert.match(html, /Bid USD/);
   assert.doesNotMatch(html, /Ghost Track/);
@@ -202,11 +214,10 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
   assert.doesNotMatch(html, /data-prize=/);
   assert.doesNotMatch(html, /Hear last 7 days/);
 
-  const sessionId = new URL(started.headers.get("location") ?? "", "http://localhost")
-    .searchParams.get("sessionId");
-  assert.ok(sessionId);
+  const intentId = intentFromLocation(started);
+  const sessionId = fixtureSessionForIntent(intentId);
   const expired = await postWebhook(
-    new Request("http://localhost/api/polar/webhook", {
+    new Request("http://localhost/api/waffo/webhook", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -216,7 +227,11 @@ test("unpaid Polar checkout stays off the station desk until Polar reports paid"
     }),
   );
   assert.equal(expired.status, 200);
-  assert.deepEqual(await expired.json(), { received: true, applied: false });
+  assert.deepEqual(await expired.json(), {
+    received: true,
+    applied: false,
+    reason: "checkout_not_paid",
+  });
   assert.equal(getBoardListings().length, 0);
   assert.equal(listUnpaid(weekId()).length, 0);
 });
@@ -270,7 +285,7 @@ test("underbid still lists below #1", async () => {
   assert.equal(ranked[1]?.bidUsd, 5);
 });
 
-test("POST /checkout $5 then return lists at #1", async () => {
+test("POST /checkout $5 then Waffo return stays pending until a paid event", async () => {
   const started = await postForm({
     track: "Cold Open",
     artist: "Ada",
@@ -279,18 +294,14 @@ test("POST /checkout $5 then return lists at #1", async () => {
   });
   assert.equal(started.status, 303);
   const location = started.headers.get("location") ?? "";
-  assert.match(location, /\/return\?sessionId=/);
+  assert.match(location, /\/checkout\/complete\?intent=/);
   assert.equal(getBoardListings().length, 0);
 
-  const sessionId = new URL(location).searchParams.get("sessionId");
-  assert.ok(sessionId);
-  const result = await resolveReturn({ sessionId });
-  assert.equal(result.status, "paid");
+  const intentId = intentFromLocation(started);
+  const result = resolveReturn({ intent: intentId });
+  assert.equal(result.status, "pending");
   const ranked = rankListings(getBoardListings());
-  assert.equal(ranked.length, 1);
-  assert.equal(ranked[0]?.rank, 1);
-  assert.equal(ranked[0]?.bidUsd, 5);
-  assert.equal(ranked[0]?.clicks, 0);
+  assert.equal(ranked.length, 0);
 });
 
 test("bids below $5 and cents are rejected and never charged", async () => {
@@ -339,24 +350,27 @@ test("http listen URL is rejected", async () => {
 });
 
 test("fixture webhook paid event lists; expired does not", async () => {
+  const started = await postForm({
+    track: "Webhook Open",
+    artist: "Ada",
+    listenUrl: "https://example.com/webhook-open",
+    amountUsd: "5",
+  });
+  const intentId = intentFromLocation(started);
+  const sessionId = fixtureSessionForIntent(intentId);
   const paidBody = JSON.stringify({
-    type: "checkout.updated",
+    type: "order.completed",
     data: {
-      id: "chk_recorded_paid",
+      checkoutId: sessionId,
       status: "succeeded",
-      amount: 500,
-      metadata: {
-        track: "Webhook Open",
-        artist: "Ada",
-        listenUrl: "https://example.com/webhook-open",
-        weekId: weekId(),
-        amountUsd: "5",
-        kind: "create",
-      },
+      eventId: "event_fixture_paid",
+      paymentId: "payment_fixture_paid",
+      orderId: "order_fixture_paid",
+      timestamp: "2026-08-20T12:00:00.000Z",
     },
   });
   const paid = await postWebhook(
-    new Request("http://localhost/api/polar/webhook", {
+    new Request("http://localhost/api/waffo/webhook", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: paidBody,
@@ -371,7 +385,7 @@ test("fixture webhook paid event lists; expired does not", async () => {
   assert.equal(ranked[0]?.track, "Webhook Open");
 
   const again = await postWebhook(
-    new Request("http://localhost/api/polar/webhook", {
+    new Request("http://localhost/api/waffo/webhook", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: paidBody,
@@ -381,11 +395,11 @@ test("fixture webhook paid event lists; expired does not", async () => {
   assert.equal(getBoardListings().length, 1);
 
   const expired = await postWebhook(
-    new Request("http://localhost/api/polar/webhook", {
+    new Request("http://localhost/api/waffo/webhook", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        type: "checkout.updated",
+        type: "order.completed",
         data: {
           id: "chk_recorded_expired",
           status: "expired",
@@ -402,162 +416,31 @@ test("fixture webhook paid event lists; expired does not", async () => {
     }),
   );
   assert.equal(expired.status, 200);
-  assert.deepEqual(await expired.json(), { received: true, applied: false });
+  assert.deepEqual(await expired.json(), {
+    received: true,
+    applied: false,
+    reason: "unknown_checkout",
+  });
   assert.equal(getBoardListings().length, 1);
 });
 
-test("polarApiBase defaults to production and honors POLAR_API_BASE", () => {
-  assert.equal(polarApiBase({}), POLAR_API_BASE);
-  assert.equal(polarApiBase({ POLAR_API_BASE: "" }), POLAR_API_BASE);
-  assert.equal(polarApiBase({ POLAR_API_BASE: POLAR_API_BASE }), POLAR_API_BASE);
-  const sandboxApi = `https://${["sandbox-api", "polar", "sh"].join(".")}`;
-  assert.equal(polarApiBase({ POLAR_API_BASE: `${sandboxApi}/` }), sandboxApi);
-});
-
-test("live PolarCheckout never fetches unless POLAR_LIVE=1", async () => {
-  assert.throws(
-    () => new PolarPayment({ env: {} }),
-    /PolarPayment requires POLAR_LIVE=1/,
-  );
-  assert.throws(
-    () => new PolarPayment({ env: { POLAR_LIVE: "1" } }),
-    /BLOCKED-SECRET: POLAR_ACCESS_TOKEN/,
-  );
-
-  let fetches = 0;
-  const polar = new PolarPayment({
-    env: {
-      POLAR_LIVE: "1",
-      POLAR_ACCESS_TOKEN: "polar_tok_test",
-      PUBLIC_BASE_URL: "http://localhost:3000",
-    },
-    fetch: async (input) => {
-      fetches += 1;
-      assert.equal(String(input), `${polarApiBase()}/v1/checkouts/`);
-      assert.equal(String(input), `${POLAR_API_BASE}/v1/checkouts/`);
-      return new Response(
-        JSON.stringify({
-          id: "chk_recorded_open",
-          status: "open",
-          url: "https://example.test/checkout/chk_recorded_open",
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      );
-    },
-  });
-
-  const session = await polar.createCheckout({
-    listingDraft: draft(),
-    amountUsd: 5,
-    kind: "create",
-  });
-  assert.equal(fetches, 1);
-  assert.equal(session.sessionId, "chk_recorded_open");
-  assert.equal(session.checkoutUrl, "https://example.test/checkout/chk_recorded_open");
-  await assert.rejects(
-    polar.completeCheckout(session.sessionId),
-    /completes via webhook only/,
-  );
+test("retired provider webhook is an inert compatibility tombstone", async () => {
+  const { POST: postPolarWebhook } = await import("../src/app/api/polar/webhook/route");
+  const response = await postPolarWebhook();
+  assert.equal(response.status, 410);
+  assert.deepEqual(await response.json(), { error: "waffo_webhook_required" });
   assert.equal(getBoardListings().length, 0);
 });
 
-test("live Polar checkout uses POLAR_API_BASE override and optional product_id", async () => {
-  const sandboxApi = `https://${["sandbox-api", "polar", "sh"].join(".")}`;
-  const sandboxCheckout = `https://${["sandbox", "polar", "sh"].join(".")}/checkout/chk_sandbox_open`;
-  let fetches = 0;
-  const polar = new PolarPayment({
-    env: {
-      POLAR_LIVE: "1",
-      POLAR_ACCESS_TOKEN: "polar_tok_test",
-      POLAR_API_BASE: `${sandboxApi}/`,
-      POLAR_PRODUCT_ID: "prod_sandbox_test",
-      PUBLIC_BASE_URL: "http://localhost:3000",
-    },
-    fetch: async (input, init) => {
-      fetches += 1;
-      assert.equal(String(input), `${sandboxApi}/v1/checkouts/`);
-      assert.notEqual(String(input), `${POLAR_API_BASE}/v1/checkouts/`);
-      const raw = typeof init?.body === "string" ? init.body : "";
-      const body = JSON.parse(raw) as Record<string, unknown>;
-      assert.equal(body.product_id, "prod_sandbox_test");
-      assert.equal(body.amount, 500);
-      assert.equal(body.currency, "usd");
-      return new Response(
-        JSON.stringify({
-          id: "chk_sandbox_open",
-          status: "open",
-          url: sandboxCheckout,
-        }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      );
-    },
-  });
-  const session = await polar.createCheckout({
-    listingDraft: draft(),
-    amountUsd: 5,
-    kind: "create",
-  });
-  assert.equal(fetches, 1);
-  assert.equal(session.sessionId, "chk_sandbox_open");
-  assert.equal(session.checkoutUrl, sandboxCheckout);
-  assert.equal(getBoardListings().length, 0);
-});
-
-test("live Polar webhook signed paid event lists", async () => {
-  const secret = "whsec_test";
-  const polar = new PolarPayment({
-    env: {
-      POLAR_LIVE: "1",
-      POLAR_ACCESS_TOKEN: "polar_tok_test",
-      POLAR_WEBHOOK_SECRET: secret,
-    },
-    fetch: async () => {
-      throw new Error("live Polar must not fetch from webhook tests");
-    },
-  });
-  const raw = JSON.stringify({
-    type: "checkout.updated",
-    data: {
-      id: "chk_underbid",
-      status: "succeeded",
-      amount: 800,
-      metadata: {
-        track: "Underbid",
-        artist: "Bea",
-        listenUrl: "https://example.com/underbid",
-        weekId: weekId(),
-        amountUsd: "8",
-        kind: "create",
-      },
-    },
-  });
-  await assert.rejects(polar.handleWebhook(raw, {}), /signature/);
-
-  const webhookId = "msg_1";
-  const timestamp = "1710000000";
-  const signature = createHmac("sha256", secret)
-    .update(`${webhookId}.${timestamp}.${raw}`)
-    .digest("base64");
-  const result = await polar.handleWebhook(raw, {
-    "webhook-id": webhookId,
-    "webhook-timestamp": timestamp,
-    "webhook-signature": `v1,${signature}`,
-  });
-  assert.ok(!("ignored" in result));
-  if ("ignored" in result) return;
-  applyPaidEvent({
-    sessionId: result.sessionId,
-    weekId: result.listingDraft.weekId,
-    track: result.listingDraft.track,
-    artist: result.listingDraft.artist,
-    listenUrl: result.listingDraft.listenUrl,
-    amountUsd: result.amountUsd,
-    paidAt: result.paidAt,
-  });
-  const ranked = rankListings(getBoardListings());
-  assert.equal(ranked.length, 1);
-  assert.equal(ranked[0]?.bidUsd, 8);
-  assert.equal(ranked[0]?.track, "Underbid");
+test("Waffo production configuration fails closed before any provider call", () => {
+  assert.throws(
+    () => createPaymentPort({ WAFFO_MODE: "waffo-prod", DATABASE_PATH: "/tmp/playlist.sqlite" }),
+    /BLOCKED-CONFIG: WAFFO_MERCHANT_ID/,
+  );
+  assert.throws(
+    () => waffoApiBase({ WAFFO_MODE: "waffo-prod", WAFFO_API_BASE: "https://attacker.example" }),
+    /official Waffo origin/,
+  );
 });
 
 test("/return markup shows paid or pending and never trusts query alone", async () => {
@@ -576,6 +459,21 @@ test("/return markup shows paid or pending and never trusts query alone", async 
     amountUsd: 5,
     kind: "create",
   });
+  const providerPaid = await getPaymentPort().completeCheckout(started.sessionId);
+  applyPaidEvent({
+    sessionId: providerPaid.sessionId,
+    intentId: providerPaid.intentId,
+    weekId: providerPaid.listingDraft.weekId,
+    track: providerPaid.listingDraft.track,
+    artist: providerPaid.listingDraft.artist,
+    listenUrl: providerPaid.listingDraft.listenUrl,
+    amountUsd: providerPaid.amountUsd,
+    amountCents: providerPaid.amountCents,
+    paidAt: providerPaid.paidAt,
+    kind: providerPaid.kind,
+    providerCheckoutId: providerPaid.providerCheckoutId,
+    currency: providerPaid.currency,
+  });
   const paidHtml = renderToStaticMarkup(
     await ReturnPage({
       searchParams: Promise.resolve({ sessionId: started.sessionId }),
@@ -584,6 +482,104 @@ test("/return markup shows paid or pending and never trusts query alone", async 
   assert.match(paidHtml, /data-return="paid"/);
   assert.match(paidHtml, /on the board/i);
   assert.equal(rankListings(getBoardListings())[0]?.rank, 1);
+});
+
+test("fresh claimant cannot purchase an incumbent difference or replace its facts", async () => {
+  const payload = {
+    track: "Owned Opener",
+    artist: "Ada",
+    listenUrl: "https://example.com/owned-opener",
+    amountUsd: 5,
+  };
+  const initial = await postJson(payload);
+  assert.equal(initial.status, 200);
+  const claimantCookie = initial.headers.get("set-cookie") ?? "";
+  assert.match(claimantCookie, /^playlist_headline_claimant=[A-Za-z0-9_-]{43};/);
+  const initialBody = (await initial.json()) as { sessionId: string };
+  const providerPaid = await getPaymentPort().completeCheckout(initialBody.sessionId);
+  applyPaidEvent({
+    sessionId: providerPaid.sessionId,
+    intentId: providerPaid.intentId,
+    weekId: providerPaid.listingDraft.weekId,
+    track: providerPaid.listingDraft.track,
+    artist: providerPaid.listingDraft.artist,
+    listenUrl: providerPaid.listingDraft.listenUrl,
+    amountUsd: providerPaid.amountUsd,
+    amountCents: providerPaid.amountCents,
+    paidAt: providerPaid.paidAt,
+    kind: providerPaid.kind,
+    currency: providerPaid.currency,
+    productId: providerPaid.productId,
+    metadata: providerPaid.metadata,
+    providerCheckoutId: providerPaid.providerCheckoutId,
+  });
+  assert.equal(getBoardListings()[0]?.track, "Owned Opener");
+
+  const fresh = await postJson({ ...payload, track: "Attacker Replaced", amountUsd: 12 });
+  assert.equal(fresh.status, 409);
+  assert.deepEqual(await fresh.json(), { error: "not_owner" });
+  assert.equal(getBoardListings()[0]?.track, "Owned Opener");
+  assert.equal(getBoardListings()[0]?.bidUsd, 5);
+
+  const owner = await postJson(
+    { ...payload, amountUsd: 12 },
+    { cookie: claimantCookie.split(";", 1)[0] ?? "" },
+  );
+  assert.equal(owner.status, 200);
+  const ownerBody = (await owner.json()) as { sessionId: string };
+  assert.equal(getPaymentPort().getCheckout(ownerBody.sessionId)?.amountUsd, 7);
+  assert.equal(getBoardListings()[0]?.bidUsd, 5);
+});
+
+test("returning claimant cookie can create a different fresh listing", async () => {
+  const initial = await postJson({
+    track: "First Opener",
+    artist: "Ada",
+    listenUrl: "https://example.com/first-opener",
+    amountUsd: 5,
+  });
+  assert.equal(initial.status, 200);
+  const claimantCookie = initial.headers.get("set-cookie") ?? "";
+  assert.match(claimantCookie, /^playlist_headline_claimant=[A-Za-z0-9_-]{43};/);
+
+  const second = await postJson(
+    {
+      track: "Second Opener",
+      artist: "Grace",
+      listenUrl: "https://example.com/second-opener",
+      amountUsd: 5,
+    },
+    { cookie: claimantCookie.split(";", 1)[0] ?? "" },
+  );
+
+  assert.equal(second.status, 200);
+  const body = (await second.json()) as { sessionId?: string };
+  assert.ok(body.sessionId);
+  assert.equal(listUnpaid(weekId()).length, 2);
+});
+
+test("legacy unowned incumbent fails closed before a fresh difference checkout", async () => {
+  applyPaidEvent({
+    sessionId: "legacy-unowned",
+    weekId: weekId(),
+    track: "Legacy Opener",
+    artist: "Ada",
+    listenUrl: "https://example.com/legacy-opener",
+    amountUsd: 5,
+    paidAt: "2026-08-20T10:00:00.000Z",
+    kind: "create",
+  });
+
+  const response = await postJson({
+    track: "Legacy Opener",
+    artist: "Ada",
+    listenUrl: "https://example.com/legacy-opener",
+    amountUsd: 12,
+  });
+  assert.equal(response.status, 409);
+  assert.deepEqual(await response.json(), { error: "not_owner" });
+  assert.equal(getBoardListings()[0]?.bidUsd, 5);
+  assert.equal(listUnpaid(weekId()).length, 0);
 });
 
 test("quoteBid charges the full first bid and only the raise difference", () => {
@@ -619,8 +615,9 @@ test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", a
     artist: "Bea",
     listenUrl: "https://example.com/twelve",
     amountUsd: 12,
-    paidAt: "2026-08-17T10:00:00.000Z",
-    kind: "create",
+      paidAt: "2026-08-17T10:00:00.000Z",
+      kind: "create",
+      claimantTokenHash: LEGACY_CLAIMANT_HASH,
   });
   const opener = applyPaidEvent({
     sessionId: "chk_opener_5",
@@ -629,20 +626,24 @@ test("SPEC acceptance 5: #2 raises $5 → $12 pays $7; firstPaidAt unchanged", a
     artist: "Ada",
     listenUrl: "https://example.com/cold-open",
     amountUsd: 5,
-    paidAt: firstPaidAt,
-    kind: "create",
+      paidAt: firstPaidAt,
+      kind: "create",
+      claimantTokenHash: LEGACY_CLAIMANT_HASH,
   });
   const before = rankListings(getBoardListings());
   assert.equal(before[0]?.id, incumbent.id);
   assert.equal(before[1]?.id, opener.id);
   assert.equal(before[1]?.bidUsd, 5);
 
-  const raiseJson = await postJson({
-    track: "Cold Open",
-    artist: "Ada",
-    listenUrl: "https://example.com/cold-open",
-    amountUsd: 12,
-  });
+  const raiseJson = await postJson(
+    {
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      amountUsd: 12,
+    },
+    { cookie: `playlist_headline_claimant=${LEGACY_CLAIMANT_TOKEN}` },
+  );
   assert.equal(raiseJson.status, 200);
   const raiseBody = (await raiseJson.json()) as {
     checkoutUrl: string;
@@ -738,23 +739,31 @@ test("bid_not_higher when raise is not above the current bid", async () => {
     amountUsd: 8,
     paidAt: "2026-08-17T09:00:00.000Z",
     kind: "create",
+    claimantTokenHash: LEGACY_CLAIMANT_HASH,
   });
 
-  const same = await postJson({
-    track: "Stay",
-    artist: "Ada",
-    listenUrl: "https://example.com/stay",
-    amountUsd: 8,
-  });
+  const ownerHeaders = { cookie: `playlist_headline_claimant=${LEGACY_CLAIMANT_TOKEN}` };
+  const same = await postJson(
+    {
+      track: "Stay",
+      artist: "Ada",
+      listenUrl: "https://example.com/stay",
+      amountUsd: 8,
+    },
+    ownerHeaders,
+  );
   assert.equal(same.status, 400);
   assert.deepEqual(await same.json(), { error: "bid_not_higher" });
 
-  const lower = await postJson({
-    track: "Stay",
-    artist: "Ada",
-    listenUrl: "https://example.com/stay",
-    amountUsd: 5,
-  });
+  const lower = await postJson(
+    {
+      track: "Stay",
+      artist: "Ada",
+      listenUrl: "https://example.com/stay",
+      amountUsd: 5,
+    },
+    ownerHeaders,
+  );
   assert.equal(lower.status, 400);
   assert.deepEqual(await lower.json(), { error: "bid_not_higher" });
 
@@ -778,6 +787,7 @@ test("same listen URL still inside last-7-days raises after the UTC week label r
       amountUsd: 5,
       paidAt: "2026-08-16T12:00:00.000Z",
       kind: "create",
+      claimantTokenHash: LEGACY_CLAIMANT_HASH,
     });
     assert.equal(placed.weekId, "2026-W33");
     assert.equal(placed.firstPaidAt, "2026-08-16T12:00:00.000Z");
@@ -796,12 +806,15 @@ test("same listen URL still inside last-7-days raises after the UTC week label r
       chargeUsd: 2,
     });
 
-    const raiseJson = await postJson({
-      track: "Sunday Raised",
-      artist: "Ada",
-      listenUrl: url,
-      amountUsd: 7,
-    });
+    const raiseJson = await postJson(
+      {
+        track: "Sunday Open",
+        artist: "Ada",
+        listenUrl: url,
+        amountUsd: 7,
+      },
+      { cookie: `playlist_headline_claimant=${LEGACY_CLAIMANT_TOKEN}` },
+    );
     assert.equal(raiseJson.status, 200);
     const raiseBody = (await raiseJson.json()) as { sessionId: string };
     const raiseSession = getPaymentPort().getCheckout(raiseBody.sessionId);
@@ -824,7 +837,7 @@ test("same listen URL still inside last-7-days raises after the UTC week label r
     assert.equal(raised.weekId, "2026-W33");
     assert.equal(raised.bidUsd, 7);
     assert.equal(raised.firstPaidAt, placed.firstPaidAt);
-    assert.equal(raised.track, "Sunday Raised");
+    assert.equal(raised.track, "Sunday Open");
 
     process.env.WEEK_NOW = "2026-08-23T12:00:01.000Z";
     assert.equal(findPaidByListenUrl(url), undefined);
@@ -854,31 +867,39 @@ test("same listen URL still inside last-7-days raises after the UTC week label r
 });
 
 test("same listen URL after the rolling window is a new full-bid listing", () => {
-  applyPaidEvent({
-    sessionId: "chk_last_week",
-    weekId: "2026-W33",
-    track: "Cold Open",
-    artist: "Ada",
-    listenUrl: "https://example.com/cold-open",
-    amountUsd: 20,
-    paidAt: "2026-08-10T09:00:00.000Z",
-    kind: "create",
-  });
-  const quote = quoteBid(undefined, 5);
-  assert.equal(quote.kind, "create");
-  assert.equal(quote.chargeUsd, 5);
-  const next = applyPaidEvent({
-    sessionId: "chk_this_week",
-    weekId: weekId(),
-    track: "Cold Open",
-    artist: "Ada",
-    listenUrl: "https://example.com/cold-open",
-    amountUsd: 5,
-    paidAt: "2026-08-17T09:00:00.000Z",
-    kind: "create",
-  });
-  assert.equal(next.bidUsd, 5);
-  assert.equal(next.weekId, weekId());
-  assert.equal(getBoardListings().length, 1);
-  assert.equal(listPaidForWeek("2026-W33")[0]?.bidUsd, 20);
+  const previousWeekNow = process.env.WEEK_NOW;
+  try {
+    process.env.WEEK_NOW = "2026-08-16T12:00:00.000Z";
+    applyPaidEvent({
+      sessionId: "chk_last_week",
+      weekId: "2026-W33",
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      amountUsd: 20,
+      paidAt: "2026-08-10T09:00:00.000Z",
+      kind: "create",
+    });
+    const quote = quoteBid(undefined, 5);
+    assert.equal(quote.kind, "create");
+    assert.equal(quote.chargeUsd, 5);
+    process.env.WEEK_NOW = "2026-08-20T12:00:00.000Z";
+    const next = applyPaidEvent({
+      sessionId: "chk_this_week",
+      weekId: weekId(),
+      track: "Cold Open",
+      artist: "Ada",
+      listenUrl: "https://example.com/cold-open",
+      amountUsd: 5,
+      paidAt: "2026-08-20T09:00:00.000Z",
+      kind: "create",
+    });
+    assert.equal(next.bidUsd, 5);
+    assert.equal(next.weekId, weekId());
+    assert.equal(getBoardListings().length, 1);
+    assert.equal(listPaidForWeek("2026-W33")[0]?.bidUsd, 20);
+  } finally {
+    if (previousWeekNow === undefined) delete process.env.WEEK_NOW;
+    else process.env.WEEK_NOW = previousWeekNow;
+  }
 });

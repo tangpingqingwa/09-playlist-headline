@@ -5,7 +5,7 @@ import { afterEach, test } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import AboutPage from "../src/app/about/page";
-import { Board } from "../src/app/page";
+import HomePage from "../src/app/page";
 import RulesPage from "../src/app/rules/page";
 import {
   assertRealPlayback,
@@ -17,6 +17,8 @@ import { applyPaidEvent, resetListings } from "../src/core/store";
 import { currentWeekUtc } from "../src/core/week";
 
 process.env.WEEK_NOW ??= "2026-08-20T12:00:00.000Z";
+
+const { Board } = HomePage;
 
 afterEach(() => {
   resetListings();
@@ -114,48 +116,49 @@ test("about and rules state real playback, no fake streams, no invented play cou
   assert.match(about, /Playback is real/);
   assert.match(about, /no fake streams/i);
   assert.match(about, /no invented play counts/i);
-  assert.match(about, /playlist-headline/);
-  assert.match(about, /outbid\.lol/);
+  assert.match(about, /Playlist Headline is a public auction/);
   assert.match(about, /English/);
   assert.match(about, /USD/);
-  assert.match(about, /global/i);
+  assert.match(about, /participate from anywhere/);
+  assert.doesNotMatch(
+    about,
+    /outbid\.lol|playlist-headline|\bclone\b|\bv1\b|\bfixture\b|weekId|firstPaidAt|paidAt|Waffo/i,
+  );
 
   assert.match(rules, /data-page="rules"/);
   assert.match(rules, /\$5/);
   assert.match(rules, /First bid for a listing last 7 days must be/);
   assert.doesNotMatch(rules, /First bid for a listing this week/);
-  assert.match(rules, /Older wins ties/);
-  assert.match(rules, /Raise pays difference/);
-  assert.match(rules, /Same canonical listen URL still inside last 7 days raises/);
-  assert.match(rules, /weekId<\/code> stays an audit label — not raise identity/);
-  assert.doesNotMatch(rules, /same UTC week raises/i);
-  assert.match(rules, /Monday 00:00:00.000 UTC/);
-  assert.match(rules, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(rules, /track placed first keeps the higher rank/);
+  assert.match(rules, /same cleaned listen link may raise while its placement is active/i);
+  assert.match(rules, /charged only the <strong>difference/);
+  assert.match(rules, /Each placement keeps its own seven-day window/);
   assert.match(rules, /<h2>Rolling last 7 days<\/h2>/);
   assert.doesNotMatch(rules, /<h2>Weekly UTC reset<\/h2>/);
-  assert.match(rules, /empty open is last 7 days from a paid claim/);
   assert.match(rules, /If last 7 days has no paid #1, there is no player and no opening song/);
   assert.doesNotMatch(rules, /If the week has no paid #1/);
-  assert.match(about, /rolling last 7 days/i);
+  assert.match(about, /the seven-day placement window/i);
   assert.match(rules, /No fake streams/);
   assert.match(rules, /No invented play counts/);
-  assert.match(rules, /utm_\*/);
-  assert.match(rules, /url_forbidden/);
-  assert.match(rules, /GET \/click\/:id/);
+  assert.match(rules, /Tracking, referral, and affiliate parameters are removed/);
+  assert.match(rules, /unsafe destinations are rejected/);
+  assert.match(rules, /Public <strong>clicks<\/strong>/);
   assert.match(rules, /Clicks are not plays/);
+  assert.doesNotMatch(
+    rules,
+    /outbid\.lol|playlist-headline|\bclone\b|\bv1\b|\bfixture\b|weekId|firstPaidAt|paidAt|Waffo/i,
+  );
 
   assert.doesNotMatch(about, /1\.2M streams/);
   assert.doesNotMatch(rules, /1\.2M streams/);
 });
 
-test("occupied /rules raise identity is last-7-days, not the UTC week label", () => {
+test("occupied /rules explains active-placement raises in public language", () => {
   const html = renderToStaticMarkup(createElement(RulesPage));
-  assert.match(html, /Same canonical listen URL still inside last 7 days raises/);
-  assert.match(html, /weekId<\/code> stays an audit label — not raise identity/);
-  assert.doesNotMatch(html, /same UTC week raises/i);
-  assert.doesNotMatch(html, /same weekId/i);
-  assert.match(html, /Raise pays difference/);
-  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(html, /same cleaned listen link may raise while its placement is active/i);
+  assert.match(html, /original payer is charged only the <strong>difference/);
+  assert.match(html, /Each placement keeps its own seven-day window/);
+  assert.doesNotMatch(html, /weekId|firstPaidAt|paidAt|Waffo|outbid\.lol|\bclone\b|\bfixture\b/i);
 });
 
 test("rules min-bid names last-7-days — not this week", () => {
@@ -166,11 +169,9 @@ test("rules min-bid names last-7-days — not this week", () => {
   assert.doesNotMatch(html, /First bid for a listing this week/);
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
-  assert.match(html, /Older wins ties/);
-  assert.match(html, /Raise pays difference/);
-  assert.match(html, /Same canonical listen URL still inside last 7 days raises/);
-  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
-  assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(html, /track placed first keeps the higher rank/);
+  assert.match(html, /same cleaned listen link may raise while its placement is active/i);
+  assert.match(html, /Each placement keeps its own seven-day window/);
 });
 
 test("about weekly names last-7-days — not this week", () => {
@@ -183,7 +184,7 @@ test("about weekly names last-7-days — not this week", () => {
   assert.doesNotMatch(html, /Weekly public auction/);
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
-  assert.match(html, /rolling last 7 days/i);
+  assert.match(html, /the seven-day placement window/i);
 });
 
 test("README weekly names last-7-days — not this week", () => {
@@ -255,10 +256,10 @@ test("rules empty-playback names last-7-days — not this week", () => {
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
   assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
-  assert.match(html, /Older wins ties/);
-  assert.match(html, /Raise pays difference/);
+  assert.match(html, /track placed first keeps the higher rank/);
+  assert.match(html, /same cleaned listen link may raise while its placement is active/i);
   assert.match(html, /No fake streams/);
-  assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(html, /If last 7 days has no paid #1, there is no player and no opening song/);
   assert.match(
     specSource,
     /If last 7 days has no paid #1, there is no player and no opening song/,
@@ -285,7 +286,7 @@ test("rules empty-playback names last-7-days — not this week", () => {
 test("rules empty-week names last-7-days — not this week", () => {
   const html = renderToStaticMarkup(createElement(RulesPage));
   assert.match(html, /data-page="rules"/);
-  assert.match(html, /An empty last 7 days is valid/);
+  assert.match(html, /If nobody has paid for an active placement, there is no opening song/);
   assert.doesNotMatch(html, /An empty week is valid/);
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
@@ -295,10 +296,10 @@ test("rules empty-week names last-7-days — not this week", () => {
   );
   assert.doesNotMatch(html, /If the week has no paid #1/);
   assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
-  assert.match(html, /Older wins ties/);
-  assert.match(html, /Raise pays difference/);
+  assert.match(html, /track placed first keeps the higher rank/);
+  assert.match(html, /same cleaned listen link may raise while its placement is active/i);
   assert.match(html, /No fake streams/);
-  assert.match(html, /empty open is last 7 days from a paid claim/);
+  assert.match(html, /If last 7 days has no paid #1, there is no player and no opening song/);
   assert.match(
     specSource,
     /Rules empty-week copy names last 7 days, not this calendar week/,
@@ -329,7 +330,7 @@ test("rules weekly-reset heading names last-7-days — not this week", () => {
   assert.doesNotMatch(html, /<h2>Weekly UTC reset<\/h2>/);
   assert.doesNotMatch(html, /Hear last 7 days/);
   assert.doesNotMatch(html, /Hear this week/);
-  assert.match(html, /An empty last 7 days is valid/);
+  assert.match(html, /If nobody has paid for an active placement, there is no opening song/);
   assert.doesNotMatch(html, /An empty week is valid/);
   assert.match(
     html,
@@ -337,11 +338,11 @@ test("rules weekly-reset heading names last-7-days — not this week", () => {
   );
   assert.doesNotMatch(html, /If the week has no paid #1/);
   assert.match(html, /First bid for a listing last 7 days must be <strong>\$5<\/strong>/);
-  assert.match(html, /Older wins ties/);
-  assert.match(html, /Raise pays difference/);
+  assert.match(html, /track placed first keeps the higher rank/);
+  assert.match(html, /same cleaned listen link may raise while its placement is active/i);
   assert.match(html, /No fake streams/);
-  assert.match(html, /empty open is last 7 days from a paid claim/);
-  assert.match(html, /Rolling last 7 days\. Not Monday 00:00 UTC/);
+  assert.match(html, /If last 7 days has no paid #1, there is no player and no opening song/);
+  assert.match(html, /Each placement keeps its own seven-day window/);
   assert.match(
     specSource,
     /Rules weekly-reset heading names last 7 days, not this calendar week/,
@@ -360,6 +361,46 @@ test("rules weekly-reset heading names last-7-days — not this week", () => {
   );
   assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
   assert.doesNotMatch(specSource, /If the week has no paid #1/);
+  assert.doesNotMatch(specSource, /Hear last 7 days/);
+  assert.doesNotMatch(specSource, /Hear this week/);
+  assert.match(
+    readmeSource,
+    /Public auction last 7 days for the first track \/ opening song/,
+  );
+  assert.doesNotMatch(readmeSource, /weekly public auction/i);
+});
+
+test("about weekly-reset CTA names last-7-days — not this week", () => {
+  const html = renderToStaticMarkup(createElement(AboutPage));
+  assert.match(html, /data-page="about"/);
+  assert.match(html, /href="\/rules">Read the rules/);
+  assert.match(html, /the seven-day placement window/);
+  assert.doesNotMatch(html, /weekly reset/i);
+  assert.doesNotMatch(html, /Hear last 7 days/);
+  assert.doesNotMatch(html, /Hear this week/);
+  assert.match(html, /public auction last 7 days/);
+  assert.match(html, /Rank is the bid/);
+  assert.match(html, /Playback is real/);
+  assert.match(html, /\$5 minimum/);
+  assert.match(html, /older-wins ties/);
+  assert.match(html, /raise-pays-difference/);
+  assert.match(
+    specSource,
+    /About weekly-reset CTA names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules weekly-reset heading names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules empty-week copy names last 7 days, not this calendar week/,
+  );
+  assert.match(
+    specSource,
+    /Rules empty-playback copy names last 7 days, not this calendar week/,
+  );
+  assert.match(specSource, /Empty stays Claim #1 first, no Hear/);
   assert.doesNotMatch(specSource, /Hear last 7 days/);
   assert.doesNotMatch(specSource, /Hear this week/);
   assert.match(

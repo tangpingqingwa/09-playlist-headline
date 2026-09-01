@@ -1,6 +1,6 @@
 /**
  * Public board window is rolling last 7 days from first paid placement.
- * ISO `weekId` (`YYYY-Www`) remains a Monday 00:00 UTC Polar/audit label.
+ * ISO `weekId` (`YYYY-Www`) remains a Monday 00:00 UTC audit label.
  * Rank does not expire at civil Monday midnight.
  * Raise identity: same canonical listen URL still inside last 7 days. Not weekId.
  */
