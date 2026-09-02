@@ -273,7 +273,7 @@ GET  /healthz                  { ok: true }
 
 Board UI (clone outbid.lol, not a redesign):
 
-- Fields: track, artist, listen URL, whole-dollar amount, one **Outbid** button.
+- Fields: track, artist, listen URL, whole-dollar amount, one **Claim rank** button.
 - Ranked cards: rank, track, artist, **$amount**, public **clicks**, listen control.
 - #1 may expose a real player / embed for that listing’s listen URL.
 - No play-count widgets. No star ratings. No fake waveform.

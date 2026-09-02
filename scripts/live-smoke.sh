@@ -340,7 +340,7 @@ elif ! html_has "$board0" 'data-week="'"${WEEK_ID}"'"' \
   || ! html_has "$board0" 'name="artist"' \
   || ! html_has "$board0" 'name="listenUrl"' \
   || ! html_has "$board0" 'name="amountUsd"' \
-  || ! html_has "$board0" 'Outbid'; then
+  || ! html_has "$board0" 'Claim rank'; then
   record "board" "FAIL" "GET / missing current UTC week label or bid form"
 elif fake_stream_or_play_count "$board0"; then
   record "board" "FAIL" "GET / invented play counts or fake stream"

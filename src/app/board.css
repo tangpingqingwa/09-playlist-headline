@@ -622,18 +622,20 @@ summary:focus-visible {
 
 .claim-heading {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   margin: 0;
   color: var(--ink);
   font: 500 1.7rem/1 var(--serif);
   letter-spacing: -0.05em;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .amount-stepper {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 5px;
   color: var(--oxblood);
@@ -642,8 +644,10 @@ summary:focus-visible {
 
 .step {
   display: inline-grid;
+  flex: 0 0 25px;
   width: 25px;
   height: 25px;
+  box-sizing: border-box;
   place-items: center;
   border: 1px solid var(--oxblood);
   padding: 0;
@@ -659,7 +663,8 @@ summary:focus-visible {
 
 .amount-field {
   display: inline-flex;
-  align-items: baseline;
+  flex: 0 0 auto;
+  align-items: center;
   border-bottom: 0;
   color: var(--oxblood);
   font: inherit;
@@ -667,14 +672,19 @@ summary:focus-visible {
 }
 
 .amount-field input {
-  width: 5ch;
-  border: 0;
-  padding: 0;
+  width: auto;
+  min-width: 2ch;
+  max-width: 6ch;
+  height: 25px;
+  border: 1px solid var(--oxblood);
+  border-radius: 0;
+  padding: 0 4px;
   outline: 0;
   background: transparent;
   color: inherit;
   font: inherit;
   font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .outbid-form {
@@ -724,7 +734,7 @@ summary:focus-visible {
   box-shadow: 3px 3px 0 var(--oxblood-wash);
 }
 
-.outbid {
+.claim-submit {
   width: 100%;
   min-height: 46px;
   margin-top: 18px;
@@ -738,7 +748,7 @@ summary:focus-visible {
   text-transform: uppercase;
 }
 
-.outbid:hover {
+.claim-submit:hover {
   border-color: var(--oxblood-dark);
   background: var(--oxblood-dark);
 }
@@ -1147,11 +1157,12 @@ summary:focus-visible {
   }
 
   .claim-heading {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 6px;
+    justify-content: center;
     font-size: 1.7rem;
     line-height: 1;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .amount-stepper { gap: 5px; }
@@ -1166,7 +1177,7 @@ summary:focus-visible {
   }
 
   .listing-fields input,
-  .outbid {
+  .claim-submit {
     min-height: 44px;
     height: 44px;
   }

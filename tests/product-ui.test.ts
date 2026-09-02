@@ -127,7 +127,8 @@ test("empty board is honest, paid-only, and keeps the native claim contract", ()
   assert.match(empty, /name="listenUrl"/);
   assert.match(empty, /name="track"/);
   assert.match(empty, /name="artist"/);
-  assert.match(empty, />Outbid</);
+  assert.match(empty, />Claim rank</);
+  assert.match(empty, /aria-label="Claim rank"/);
   assert.match(empty, /data-amount-decrease/);
   assert.match(empty, /data-amount-increase/);
   assert.match(empty, /data-claim-submit/);
@@ -429,9 +430,17 @@ test("focus, hover, disabled, and dark tokens are present in the visual skin", (
   assert.match(cssSource, /a:focus-visible,[\s\S]*?outline:\s*2px solid var\(--oxblood\)/);
   assert.match(cssSource, /outline-offset:\s*3px/);
   assert.match(cssSource, /\.listing-fields input:focus\s*\{[^}]*border-color:\s*var\(--oxblood\)/s);
-  assert.match(cssSource, /\.outbid:hover\s*\{[^}]*background:\s*var\(--oxblood-dark\)/s);
+  assert.match(cssSource, /\.claim-submit:hover\s*\{[^}]*background:\s*var\(--oxblood-dark\)/s);
   assert.match(cssSource, /html\.dark,[\s\S]*?body\.dark\s*\{/);
   assert.match(controlsSource, /classList\.toggle\("dark"/);
+});
+
+test("claim rail keeps the amount controls compact, centered, and bare-URL friendly", () => {
+  assert.match(formSource, /style=\{\{ width: `\$\{Math\.max\(2, String\(amount\)\.length\)\}ch` \}\}/);
+  assert.match(formSource, /name="listenUrl"[\s\S]*?type="text"[\s\S]*?inputMode="url"/);
+  assert.match(cssSource, /\.claim-heading\s*\{[^}]*justify-content:\s*center/s);
+  assert.match(cssSource, /\.amount-stepper\s*\{[^}]*flex:\s*0 0 auto/s);
+  assert.match(cssSource, /\.amount-field input\s*\{[^}]*width:\s*auto;[^}]*min-width:\s*2ch;[^}]*max-width:\s*6ch/s);
 });
 
 test("homepage source has no obsolete hop copy or invented media facts", () => {

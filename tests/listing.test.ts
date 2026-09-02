@@ -91,6 +91,30 @@ test("listing requires track, artist, and listen URL", () => {
   assert.equal(draft.listenUrl, "https://example.com/cold-open");
 });
 
+test("bare listen hosts default to https at the checkout boundary", () => {
+  assert.equal(
+    canonicalizeListenUrl("Open.Spotify.com/track/abc?utm_source=launch#fragment"),
+    "https://open.spotify.com/track/abc",
+  );
+  const draft = parseListingDraft(
+    {
+      track: "Blue Hour",
+      artist: "Ada",
+      listenUrl: "music.apple.com/us/album/blue-hour",
+    },
+    weekId(),
+  );
+  assert.equal(draft.listenUrl, "https://music.apple.com/us/album/blue-hour");
+  assert.equal(
+    canonicalizeListenUrl("//open.spotify.com/track/abc"),
+    "https://open.spotify.com/track/abc",
+  );
+  assert.equal(
+    canonicalizeListenUrl("music.example:8443/track/abc"),
+    "https://music.example:8443/track/abc",
+  );
+});
+
 test("play-count field is play_count_forbidden", () => {
   for (const extra of [
     { playCount: 1200000 },

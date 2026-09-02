@@ -101,6 +101,24 @@ function hostnameOf(parsed: URL): string {
   return parsed.hostname.toLowerCase().replace(/\.$/, "");
 }
 
+function hasUrlScheme(raw: string): boolean {
+  if (!/^[a-z][a-z\d+.-]*:/i.test(raw)) return false;
+
+  // A port on a scheme-less host is part of its authority, not a custom URI
+  // scheme (`music.example:8443` → `https://music.example:8443`).
+  return !/^(?:(?:[a-z\d-]+\.)+[a-z]{2,}|localhost|(?:\d{1,3}\.){3}\d{1,3}|\[[^\]]+\]):\d+(?:[/?#]|$)/i.test(
+    raw,
+  );
+}
+
+function withHttpsScheme(raw: string): string {
+  return raw.startsWith("//")
+    ? `https:${raw}`
+    : hasUrlScheme(raw)
+      ? raw
+      : `https://${raw}`;
+}
+
 export function isTrackingQueryKey(key: string): boolean {
   const lowered = key.toLowerCase();
   if (lowered.startsWith("utm_")) return true;
@@ -274,8 +292,9 @@ function stripTracking(parsed: URL): void {
 }
 
 /**
- * Require https, drop fragment, strip tracking keys, reject chat / NSFW /
- * shorteners / credentials / localhost. Store and click this URL only.
+ * Require https (defaulting bare host/path input to it), drop fragment, strip
+ * tracking keys, reject chat / NSFW / shorteners / credentials / localhost.
+ * Store and click this URL only.
  */
 export function canonicalizeListenUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -285,7 +304,10 @@ export function canonicalizeListenUrl(raw: string): string {
 
   let parsed: URL;
   try {
-    parsed = new URL(trimmed);
+    // The form accepts a listen host/path without a scheme. Preserve an
+    // explicitly supplied scheme so `http:` and other unsafe protocols still
+    // fail below rather than being silently upgraded.
+    parsed = new URL(withHttpsScheme(trimmed));
   } catch {
     throw new UrlError("url_insecure");
   }

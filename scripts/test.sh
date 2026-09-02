@@ -122,7 +122,7 @@ must_have 'name="track"' src/app/outbid-form.tsx
 must_have 'name="artist"' src/app/outbid-form.tsx
 must_have 'name="listenUrl"' src/app/outbid-form.tsx
 must_have 'name="amountUsd"' src/app/outbid-form.tsx
-must_have "Outbid" src/app/outbid-form.tsx
+must_have "Claim rank" src/app/outbid-form.tsx
 must_not_have "OutbidReferenceFixturePage" src/app/page.tsx
 must_not_have "OUTBID_REFERENCE_FIXTURE_ROWS" src/app/page.tsx
 must_not_have "DTC Picks Daily" src/app/page.tsx

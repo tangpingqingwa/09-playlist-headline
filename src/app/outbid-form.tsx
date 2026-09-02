@@ -64,6 +64,7 @@ export function BidForm({
               inputMode="numeric"
               pattern="[0-9]*"
               value={formatHeadingUsd(amount)}
+              style={{ width: `${Math.max(2, String(amount).length)}ch` }}
               aria-label="Bid amount in whole US dollars"
               data-amount-input=""
               form="claim-form"
@@ -123,9 +124,10 @@ export function BidForm({
             <input
               id="identity"
               name="listenUrl"
-              type="url"
+              type="text"
+              inputMode="url"
               required
-              placeholder="https://"
+              placeholder="open.spotify.com/track/..."
               autoComplete="url"
               spellCheck={false}
               data-slot="url-input"
@@ -135,12 +137,13 @@ export function BidForm({
         </div>
         <button
           type="submit"
-          className="outbid"
+          className="claim-submit"
+          aria-label="Claim rank"
           data-slot="claim-button"
           data-claim-submit=""
           data-first-click={!occupied ? "claim" : undefined}
         >
-          Outbid
+          Claim rank
         </button>
         <p
           className="claim-note"

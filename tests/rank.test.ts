@@ -223,13 +223,13 @@ test("empty week renders the form and no opening song", () => {
   assert.match(html, /data-empty-week="true"/);
   assert.match(html, /data-opening-song="false"/);
   assert.match(html, /No opening song/);
-  assert.match(html, /Outbid/);
+  assert.match(html, /Claim rank/);
   assert.match(html, /2026-W34/);
   assert.match(formSource, /name="track"/);
   assert.match(formSource, /name="artist"/);
   assert.match(formSource, /name="listenUrl"/);
   assert.match(formSource, /name="amountUsd"/);
-  assert.match(formSource, /Outbid/);
+  assert.match(formSource, /Claim rank/);
   assert.doesNotMatch(html, /data-listing-card/);
   assert.doesNotMatch(html, /data-listen-url/);
   assert.doesNotMatch(html, FORBIDDEN);
