@@ -260,6 +260,28 @@ test("control-obfuscated and numeric custom schemes are rejected before HTTPS fa
   }
 });
 
+test("malformed authorities and backslashes are rejected before HTTPS fallback", () => {
+  for (const listenUrl of [
+    "/path",
+    "///example.com",
+    "////example.com/path",
+    "\\\\example.com/path",
+    "example.com\\path",
+    "javascript\\:123",
+    "https://example.com\\path",
+  ]) {
+    assert.throws(() => canonicalizeListenUrl(listenUrl), (err: unknown) => {
+      assert.ok(err instanceof UrlError);
+      assert.equal(err.code, "url_insecure");
+      return true;
+    }, listenUrl);
+  }
+  assert.equal(
+    canonicalizeListenUrl("//open.spotify.com/track/abc"),
+    "https://open.spotify.com/track/abc",
+  );
+});
+
 test("complete private and reserved IPv4/IPv6 destinations are rejected before storage", () => {
   for (const host of [
     "0.0.0.0",

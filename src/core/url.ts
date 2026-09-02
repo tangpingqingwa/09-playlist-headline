@@ -111,12 +111,51 @@ function hasUrlScheme(raw: string): boolean {
   );
 }
 
+function isPlausibleBareAuthority(raw: string): boolean {
+  if (raw.includes("\\")) return false;
+
+  const authorityStart = raw.startsWith("//") ? 2 : 0;
+  const authorityEnd = raw.slice(authorityStart).search(/[/?#]/);
+  const authority = raw.slice(
+    authorityStart,
+    authorityEnd < 0 ? raw.length : authorityStart + authorityEnd,
+  );
+  if (!authority) return false;
+
+  const userInfoEnd = authority.lastIndexOf("@");
+  if (userInfoEnd === 0 || userInfoEnd === authority.length - 1) return false;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw.startsWith("//") ? `https:${raw}` : `https://${raw}`);
+  } catch {
+    return false;
+  }
+
+  const host = hostnameOf(parsed);
+  const unbracketed = host.replace(/^\[/, "").replace(/\]$/, "");
+  if (unbracketed === "localhost" || parseIpv4(unbracketed) || parseIpv6(unbracketed)) {
+    return true;
+  }
+  const labels = unbracketed.split(".");
+  const topLevel = labels.at(-1) ?? "";
+  return labels.length >= 2 && topLevel.length >= 2 && labels.every((label) =>
+    /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label),
+  );
+}
+
 function withHttpsScheme(raw: string): string {
-  return raw.startsWith("//")
-    ? `https:${raw}`
-    : hasUrlScheme(raw)
-      ? raw
-      : `https://${raw}`;
+  if (raw.startsWith("//")) {
+    // Only the exact protocol-relative form is eligible; WHATWG parsing would
+    // otherwise reinterpret `///host` as a valid-looking absolute URL.
+    if (raw.startsWith("///") || !isPlausibleBareAuthority(raw)) {
+      throw new UrlError("url_insecure");
+    }
+    return `https:${raw}`;
+  }
+  if (hasUrlScheme(raw)) return raw;
+  if (!isPlausibleBareAuthority(raw)) throw new UrlError("url_insecure");
+  return `https://${raw}`;
 }
 
 export function isTrackingQueryKey(key: string): boolean {
@@ -301,10 +340,11 @@ export function canonicalizeListenUrl(raw: string): string {
   if (trimmed.length < 1) {
     throw new UrlError("url_insecure");
   }
-  // WHATWG URL parsing removes ASCII controls such as tabs and newlines
-  // before interpreting a scheme. Reject them first so an obfuscated unsafe
-  // scheme cannot fall through to the bare-host HTTPS default.
-  if (/[\u0000-\u001f\u007f]/.test(trimmed)) {
+  // WHATWG URL parsing removes ASCII controls such as tabs and newlines and
+  // normalizes backslashes before interpreting a scheme/authority. Reject
+  // them first so obfuscated or malformed input cannot fall through to the
+  // bare-host HTTPS default.
+  if (/[\u0000-\u001f\u007f]/.test(trimmed) || trimmed.includes("\\")) {
     throw new UrlError("url_insecure");
   }
 
