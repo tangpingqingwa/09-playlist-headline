@@ -242,6 +242,24 @@ test("http, javascript, data, shortener, and localhost are rejected", () => {
   }
 });
 
+test("control-obfuscated and numeric custom schemes are rejected before HTTPS fallback", () => {
+  for (const listenUrl of [
+    "javascript\n://example.com/path",
+    "data\t://example.com/path",
+    "ftp\r://example.com/path",
+    "http\n://example.com/path",
+    "javascript:123",
+    "data:123",
+    "ftp:123",
+  ]) {
+    assert.throws(() => canonicalizeListenUrl(listenUrl), (err: unknown) => {
+      assert.ok(err instanceof UrlError);
+      assert.equal(err.code, "url_insecure");
+      return true;
+    }, listenUrl);
+  }
+});
+
 test("complete private and reserved IPv4/IPv6 destinations are rejected before storage", () => {
   for (const host of [
     "0.0.0.0",

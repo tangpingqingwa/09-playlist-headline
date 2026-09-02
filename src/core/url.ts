@@ -301,6 +301,12 @@ export function canonicalizeListenUrl(raw: string): string {
   if (trimmed.length < 1) {
     throw new UrlError("url_insecure");
   }
+  // WHATWG URL parsing removes ASCII controls such as tabs and newlines
+  // before interpreting a scheme. Reject them first so an obfuscated unsafe
+  // scheme cannot fall through to the bare-host HTTPS default.
+  if (/[\u0000-\u001f\u007f]/.test(trimmed)) {
+    throw new UrlError("url_insecure");
+  }
 
   let parsed: URL;
   try {
