@@ -1167,6 +1167,14 @@ summary:focus-visible {
 
   .amount-stepper { gap: 5px; }
 
+  .step {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
   .listing-fields {
     grid-template-columns: 1fr;
     gap: 12px;
